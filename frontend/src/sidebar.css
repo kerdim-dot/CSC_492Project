@@ -1,0 +1,144 @@
+*{
+  margin: 0;
+  padding: 0;
+}
+::-webkit-scrollbar{
+  display: none;
+}
+
+body{
+  min-height: 100vh;
+  min-width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+.highlight{
+  background-color: yellow;
+}
+
+.hoverPointer:hover{
+  cursor: pointer;
+}
+
+.year_title{
+  font-size: xx-large;
+}
+
+.test_div{
+  display: flex;
+  flex-direction: column;
+}
+
+.class_div{
+  display: flex;
+}
+
+
+.desktop_container{
+  min-height: 100%;
+  min-width:100%;
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+#desktop_sidebar{
+    box-sizing: border-box;
+    height: 100vh;
+    width: 250px;
+    padding: 5px 1em;
+    background-color: rgb(119, 48, 151);
+    border-right: 2px solid rgb(182, 187, 242);
+    position: sticky;
+    top: 0;
+    align-self: start;
+    transition: 300ms ease-in-out;
+    overflow: hidden;
+    text-wrap: nowrap;
+}
+
+#desktop_sidebar.close{
+  padding: 5px;
+  width: 60px;
+  overflow: hidden;
+}
+
+#desktop_sidebar ul{
+  list-style: none;
+}
+
+#desktop_sidebar > ul > li:first-child{
+  display: flex;
+  margin-bottom: 16px;
+  justify-content: flex-end;
+}
+
+#desktop_sidebar .dropdown_btn, #desktop_sidebar .logo, #desktop_sidebar a{
+  border-radius: .5em;
+  padding: .85em;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  color: white;
+}
+
+.dropdown_btn{
+  width: 100%;
+  text-align: left;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  border: 0px;
+}
+
+.transition_up{
+  transform: rotate(180deg);
+}
+
+.transition_right{
+  transform: rotate(180deg);
+}
+
+
+#desktop_sidebar img{
+  flex-shrink: 0;
+  fill: #2563eb;
+}
+
+#desktop_sidebar a span, #desktop_sidebar .dropdown_btn span{
+  flex-grow: 1;
+}
+
+#desktop_sidebar a:hover, #desktop_sidebar .dropdown_btn:hover{
+  background-color: rgb(206, 87, 230);
+  cursor: pointer;
+}
+
+#desktop_sidebar .sub_menu{
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: 300ms ease-in-out;
+  > div{
+    overflow: hidden;
+  }
+}
+
+#desktop_sidebar .sub_menu.show{
+  grid-template-rows: 1fr;
+}
+
+#toggle_btn{
+  margin-left: auto;
+  padding: 1em;
+  border: none;
+  border-radius: .5em;
+  background: none;
+  cursor: pointer;
+}
+
+
+#toggle_btn:hover{
+  background-color: rgb(58, 58, 199);
+}
+
