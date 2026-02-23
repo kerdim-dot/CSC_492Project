@@ -33,12 +33,15 @@ function Testing(){
             children : [
                 {
                     value: "CSC-220",
-                    children : []
-                }
+                    children : [{
+                         value:"CSC-270",
+                         children: [{value:"CSC-310"}, {value:"CSC-320"}]
+                        }]
+                        
+                },
             ]
         }
 
-        
 
 
 

@@ -1,12 +1,12 @@
+import Classes from "../Components/Classes";
 import SideBar from "../Components/SideBar"
 import TestPage from "./TestPage"
-function Students(){
+function ClassesPage (){
     return(
         <div className="desktop_container">
             <SideBar/>
-            <TestPage/>
+            <Classes/>
         </div>
     )
 }
-
-export default Students;
+export default ClassesPage;

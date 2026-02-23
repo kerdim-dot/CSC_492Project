@@ -1,0 +1,79 @@
+
+
+
+.student-container{
+  display: flex;
+  flex-direction: column;
+}
+.search{
+  width: max-content;
+  display: flex;
+  align-items: center;
+  padding: 14px;
+  border-radius: 28px;
+  background: #f6f6f6;
+  margin-left: auto;
+  margin-right: 10px;
+}
+
+.search-input{
+  font-size: 16px;
+  font-family: 'lexend', sans-serif;
+  color: #333333;
+  margin-left: 14px;
+  outline: none;
+  border: none;
+  background: transparent;
+  max-width: 300px;
+  height: 30px;
+}
+
+.search-input::placeholder{
+  color: rgba(0, 0, 0, .25);
+}
+
+.filter{
+  cursor: pointer;
+}
+
+
+.entry-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px; 
+  padding: 10px;
+}
+
+.entry {
+  display: flex;
+  justify-content: space-between; 
+  align-items: center;
+  padding: 14px 18px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.entry:hover {
+  background-color: #e6e6e6;
+}
+
+.entry p {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.entry p:last-child {
+  color: #666;
+  font-size: 14px;
+}
+
+
+
+.classes-container{
+  display: flex;
+  flex-direction: column;
+}
