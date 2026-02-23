@@ -5,7 +5,6 @@ function Dashboard(){
     return(
         <div className="desktop_container">
             <SideBar/>
-            <TestPage/>
         </div>
     )
 }

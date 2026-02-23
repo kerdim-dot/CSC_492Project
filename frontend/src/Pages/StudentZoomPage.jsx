@@ -1,12 +1,12 @@
 import SideBar from "../Components/SideBar"
-import TestPage from "./TestPage"
-function AdminManager(){
+import StudentZoom from "../Components/StudentZoom";
+function StudentZoomPage(){
     return(
         <div className="desktop_container">
             <SideBar/>
-            <TestPage/>
+            <StudentZoom/>
         </div>
     )
 }
 
-export default AdminManager;
+export default StudentZoomPage;
