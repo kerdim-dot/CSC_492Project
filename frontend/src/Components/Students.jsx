@@ -1,6 +1,7 @@
 import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
 import "../searchers.css"
+import { useNavigate } from "react-router-dom";
 function Students(){
     return(
         <div className="students-container">
@@ -28,7 +29,7 @@ function SearchBar(){
 }
 
 function StudentList(){
-
+    const navigate = useNavigate();
     // function which allows the user to click on a student and nav to individual 
 
     // replace this with a fetch students method
@@ -44,7 +45,7 @@ function StudentList(){
         <div className="entry-list">
             {students.map((item,index)=>{
                 return(
-                <div className="entry">
+                <div className="entry" onClick={()=>{navigate(`/students/${item.firstName}/${item.lastName}`)}}>
                     <p>{item.firstName} {item.lastName}</p>
                     <p>{item.graduation}</p>
                 </div>
