@@ -13,9 +13,11 @@ import ClassesPage from './Pages/ClassesPage.jsx'
 import StudentZoomPage from './Pages/StudentZoomPage.jsx'
 import ClassZoomPage from './Pages/ClassZoomPage.jsx'
 import AdminManagerPage from './Pages/AdminManagerPage.jsx'
+import LandingPage from './Pages/LandingPage.jsx'
 
 
 const router = createBrowserRouter([
+    {path:"/", element:<LandingPage/>},
     {path:"/dashboard", element:<Dashboard/>},
     {path:"/classes", element:<ClassesPage/>},
     {path:"/students", element:<StudentsPage/>},
