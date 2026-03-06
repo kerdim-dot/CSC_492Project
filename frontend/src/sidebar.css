@@ -100,7 +100,6 @@ body{
   transform: rotate(180deg);
 }
 
-
 #desktop_sidebar img{
   flex-shrink: 0;
   fill: #2563eb;
@@ -141,10 +140,6 @@ body{
 #toggle_btn:hover{
   background-color: rgb(58, 58, 199);
 }
-
-
-
-
 
 
 .tab-pane-container {

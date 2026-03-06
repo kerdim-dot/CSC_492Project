@@ -1,4 +1,4 @@
-import arrow_left from './../assets/left_arrow.svg'
+import right_arrow from './../assets/right_arrow.svg'
 import arrow_down from './../assets/down_arrow.svg'
 import dashboard from './../assets/dashboard.svg'
 import admin from "./../assets/admin.svg"
@@ -69,7 +69,7 @@ function SideBar(){
             <ul>
                 <li>
                     <span className='logo'>Computer Science </span>
-                    <button id = "toggle_btn" onClick={changeExpandedDesktop}><img src={arrow_left} className={expandedDesktop?'transition_right':""}></img></button>
+                    <button id = "toggle_btn" onClick={changeExpandedDesktop}><img src={right_arrow} className={expandedDesktop?'transition_right':""}></img></button>
                 </li>
                 
 
