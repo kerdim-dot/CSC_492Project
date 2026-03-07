@@ -1,9 +1,9 @@
-import SideBar from "../Components/SideBar"
-import StudentZoom from "../Components/StudentZoom";
+import AdminSideBar from "../../Components/Admin_SideBar"
+import StudentZoom from "../../Components/StudentZoom";
 function StudentZoomPage(){
     return(
         <div className="desktop_container">
-            <SideBar/>
+            <AdminSideBar/>
             <StudentZoom/>
         </div>
     )

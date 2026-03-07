@@ -1,6 +1,6 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom';
 import React, { useState } from "react";
-import '../login_page.css'
+import '../login_page.css';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -12,18 +12,29 @@ export default function LoginPage() {
   const handleLogin = (e) => {
     e.preventDefault();
 
-    const validAccounts = [
-      { username: "admin", password: "admin123" },
-      { username: "user", password: "user123" },
+    const user_account = [
+      { username: "user", password: "user123" }
     ];
-
-    const matched = validAccounts.some(
-      (account) =>
-        account.username === username && account.password === password
+    const admin_account = [
+        { username: "admin", password: "admin123" },
+    ];
+          
+    const user_matched = user_account.some(
+      (user_account) =>
+        user_account.username === username && user_account.password === password
     );
 
-    if (matched) {
-      navigate("../dashboard");
+    const admin_matched = admin_account.some(
+      (admin_account) =>
+        admin_account.username === username && admin_account.password === password
+    );
+
+    if (user_matched) {
+        localStorage.setItem("role", "user");
+        navigate("../user_dashboard");
+    } else if (admin_matched) {
+        localStorage.setItem("role", "admin");
+        navigate("../admin_dashboard")
     } else {
       setError("Invalid username or password.");
     }

@@ -1,13 +1,26 @@
 import ClassZoom from "../Components/ClassZoom";
-import SideBar from "../Components/SideBar";
+import UserSideBar from "../Components/User_SideBar";
+import AdminSideBar from "../Components/Admin_SideBar";
+import user_matched from "./LandingPage";
+import admin_matched from "./LandingPage";
 
 function ClassZoomPage(){
-    return(
-        <div className="desktop_container">
-            <SideBar/>
-            <ClassZoom/>
-        </div>
-    )
+    if (user_matched) {
+        return(
+            <div className="desktop_container">
+                <UserSideBar/>
+                <ClassZoomPage/>
+            </div>
+        )
+    }
+    else if (admin_matched) {
+        return(
+            <div className="desktop_container">
+                <AdminSideBar/>
+                <ClassZoomPage/>
+            </div>
+        )
+    }
 }
 
 export default ClassZoomPage;

@@ -1,17 +1,15 @@
-import Classes from "../Components/Classes";
+import Schedule from "../Components/Schedule";
 import UserSideBar from "../Components/User_SideBar";
 import AdminSideBar from "../Components/Admin_SideBar";
 import TestPage from "./TestPage";
 
-
-function ClassesPage (){
+function SchedulePage(){
     const role = localStorage.getItem("role");
     return (
         <div className="desktop_container">
             {role === "admin" ? <AdminSideBar /> : <UserSideBar/>}
-            <Classes/>
+            <Schedule/>
         </div>
     );
-
 }
-export default ClassesPage;
+export default SchedulePage;

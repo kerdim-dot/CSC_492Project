@@ -4,21 +4,21 @@ import './sidebar.css'
 
 import { createBrowserRouter,RouterProvider } from 'react-router-dom'
 import TestPage from './Pages/TestPage.jsx'
-import Dashboard from './Pages/Dashboard.jsx'
-import Classes from './Pages/ClassesPage.jsx'
-import Schedule from './Pages/Schedule.jsx'
-import AdminManager from './Pages/AdminManagerPage.jsx'
-import StudentsPage from './Pages/StudentsPage.jsx'
+import UserDashboard from './Pages/User_Pages/User_Dashboard.jsx'
+import AdminDashboard from './Pages/Admin_Pages/Admin_Dashboard.jsx'
+import Schedule from './Pages/SchedulePage.jsx'
+import StudentsPage from './Pages/Admin_Pages/StudentsPage.jsx'
 import ClassesPage from './Pages/ClassesPage.jsx'
-import StudentZoomPage from './Pages/StudentZoomPage.jsx'
+import StudentZoomPage from './Pages/Admin_Pages/StudentZoomPage.jsx'
 import ClassZoomPage from './Pages/ClassZoomPage.jsx'
-import AdminManagerPage from './Pages/AdminManagerPage.jsx'
+import AdminManagerPage from './Pages/Admin_Pages/AdminManagerPage.jsx'
 import LandingPage from './Pages/LandingPage.jsx'
 
 
 const router = createBrowserRouter([
     {path:"/", element:<LandingPage/>},
-    {path:"/dashboard", element:<Dashboard/>},
+    {path:"/user_dashboard", element:<UserDashboard/>},
+    {path:"/admin_dashboard", element:<AdminDashboard/>},
     {path:"/classes", element:<ClassesPage/>},
     {path:"/students", element:<StudentsPage/>},
     {path:"/schedule", element:<Schedule/>},
@@ -26,6 +26,7 @@ const router = createBrowserRouter([
     {path:"/test", element:<TestPage/>},
     {path:"/students/:firstName/:lastName", element:<StudentZoomPage/>},
     {path:"/classes/:header", element:<ClassZoomPage/>}
+
     
 ])
 

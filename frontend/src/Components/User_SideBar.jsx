@@ -1,12 +1,9 @@
 import right_arrow from './../assets/right_arrow.svg'
-import arrow_down from './../assets/down_arrow.svg'
 import dashboard from './../assets/dashboard.svg'
-import admin from "./../assets/admin.svg"
-import student from "./../assets/person.svg"
 import classes from "./../assets/classes.svg"
 import schedule from "./../assets/schedule.svg"
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 function SideBar(){
 
     const [expandedDesktop, setExpandedDesktop] = useState(true);
@@ -68,48 +65,40 @@ function SideBar(){
         <nav id="desktop_sidebar" className={expandedDesktop?"":"close"}>
             <ul>
                 <li>
-                    <span className='logo'>Computer Science </span>
+                    <span className='logo'>Computer Science</span>
                     <button id = "toggle_btn" onClick={changeExpandedDesktop}><img src={right_arrow} className={expandedDesktop?'transition_right':""}></img></button>
                 </li>
                 
 
                 <li>
-                    <Link to ="/dashboard">
-                        <img src={dashboard}></img>
+                    <NavLink
+                        to="/user_dashboard"
+                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
+                    >
+                        <img src={dashboard} alt="Dashboard" />
                         <span>Dashboard</span>
-                    </Link>
+                    </NavLink>
                 </li>
 
                 <li>
-                    <Link to ="/classes">
-                        <img src={classes}></img>
+                    <NavLink
+                        to="/classes"
+                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
+                    >
+                        <img src={classes} alt="Classes" />
                         <span>Classes</span>
-                    </Link>
+                    </NavLink>
                 </li>
 
                 <li>
-                    <Link to ="/students">
-                        <img src={student}></img>
-                        <span>Students</span>
-                    </Link>
-                </li>
-
-                <li>
-                    <Link to ="/schedule">
-                        <img src={schedule}></img>
+                    <NavLink
+                        to="/schedule"
+                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
+                    >
+                        <img src={schedule} alt="Schedule" />
                         <span>Schedule</span>
-                    </Link>
+                    </NavLink>
                 </li>
-
-                  <li>
-                    <Link to ="/admin/manager">
-                        <img src={admin}></img>
-                        <span>Admin Manager</span>
-                    </Link>
-                </li>
-            
-            
-                
 
             </ul>
         </nav>
