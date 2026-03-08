@@ -6,6 +6,7 @@ import classes from "./../assets/classes.svg"
 import schedule from "./../assets/schedule.svg"
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
+
 function SideBar(){
 
     const [expandedDesktop, setExpandedDesktop] = useState(true);
@@ -62,65 +63,88 @@ function SideBar(){
         setSignoutScreen(true);
     }
 
-    return(
-        <nav id="desktop_sidebar" className={expandedDesktop?"":"close"}>
-            <ul>
-                <li>
-                    <span className='logo'>Computer Science</span>
-                    <button id = "toggle_btn" onClick={changeExpandedDesktop}><img src={right_arrow} className={expandedDesktop?'transition_right':""}></img></button>
-                </li>
-                
+    return (
+        <nav id="desktop_sidebar" className={expandedDesktop ? "" : "close"}>
+            <div className="sidebar_header">
 
-                <li>
-                    <NavLink
-                        to="/admin_dashboard"
-                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
-                    >
-                        <img src={dashboard} alt="Dashboard" />
-                        <span>Dashboard</span>
-                    </NavLink>
-                </li>
+            <div className="sidebar_brand_row">
+                <span className="sidebar_title">Computer Science</span>
+                <button id="toggle_btn" onClick={changeExpandedDesktop}>
+                <img
+                    src={right_arrow}
+                    className={expandedDesktop ? "transition_right" : ""}
+                    alt="Toggle sidebar"
+                />
+                </button>
+            </div>
 
-                <li>
-                    <NavLink
-                        to="/classes"
-                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
-                    >
-                        <img src={classes} alt="Classes" />
-                        <span>Classes</span>
-                    </NavLink>
-                </li>
+            <p className="sidebar_role">Admin</p>
+            </div>
 
-                <li>
-                    <NavLink
-                        to="/students"
-                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
-                    >
-                        <img src={student} alt="Students" />
-                        <span>Students</span>
-                    </NavLink>
-                </li>
+            <hr style={{ color: 'rgb(78, 32, 100)', backgroundColor: 'rgb(78, 32, 100)', height: 5, borderColor: 'rgb(78, 32, 100)' }} />
+            <ul className="sidebar_nav">
+            <li>
+                <NavLink
+                to="/admin_dashboard"
+                className={({ isActive }) =>
+                    isActive ? "sidebar_link active" : "sidebar_link"
+                }
+                >
+                <img src={dashboard} alt="Dashboard" />
+                <span>Dashboard</span>
+                </NavLink>
+            </li>
 
-                <li>
-                    <NavLink
-                        to="/schedule"
-                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
-                    >
-                        <img src={schedule} alt="Schedule" />
-                        <span>Schedule</span>
-                    </NavLink>
-                </li>
+            <li>
+                <NavLink
+                to="/classes"
+                className={({ isActive }) =>
+                    isActive ? "sidebar_link active" : "sidebar_link"
+                }
+                >
+                <img src={classes} alt="Classes" />
+                <span>Classes</span>
+                </NavLink>
+            </li>
 
-                  <li>
-                    <NavLink to ="/AdminManager">
-                        <img src={admin}></img>
-                        <span>Admin Manager</span>
-                    </NavLink>
-                </li>
-            
+            <li>
+                <NavLink
+                to="/students"
+                className={({ isActive }) =>
+                    isActive ? "sidebar_link active" : "sidebar_link"
+                }
+                >
+                <img src={student} alt="Students" />
+                <span>Students</span>
+                </NavLink>
+            </li>
+
+            <li>
+                <NavLink
+                to="/schedule"
+                className={({ isActive }) =>
+                    isActive ? "sidebar_link active" : "sidebar_link"
+                }
+                >
+                <img src={schedule} alt="Schedule" />
+                <span>Schedule</span>
+                </NavLink>
+            </li>
+
+            <li>
+                <NavLink
+                to="/AdminManager"
+                className={({ isActive }) =>
+                    isActive ? "sidebar_link active" : "sidebar_link"
+                }
+                >
+                <img src={admin} alt="Admin Manager" />
+                <span>Admin Manager</span>
+                </NavLink>
+            </li>
             </ul>
         </nav>
-    )
+        );
 }
 
 export default SideBar

@@ -59,51 +59,64 @@ function SideBar(){
     const showSignOutScreen = ()=>{
         setSignoutScreen(true);
     }
-
-    return(
-        <>
-        <nav id="desktop_sidebar" className={expandedDesktop?"":"close"}>
-            <ul>
-                <li>
-                    <span className='logo'>Computer Science</span>
-                    <button id = "toggle_btn" onClick={changeExpandedDesktop}><img src={right_arrow} className={expandedDesktop?'transition_right':""}></img></button>
-                </li>
-                
-
-                <li>
-                    <NavLink
+    return (
+        <nav id="desktop_sidebar" className={expandedDesktop ? "" : "close"}>
+                    <div className="sidebar_header">
+        
+                    <div className="sidebar_brand_row">
+                        <span className="sidebar_title">Computer Science</span>
+                        <button id="toggle_btn" onClick={changeExpandedDesktop}>
+                        <img
+                            src={right_arrow}
+                            className={expandedDesktop ? "transition_right" : ""}
+                            alt="Toggle sidebar"
+                        />
+                        </button>
+                    </div>
+        
+                    <p className="sidebar_role">User</p>
+                    </div>
+        
+                    <hr style={{ color: 'rgb(78, 32, 100)', backgroundColor: 'rgb(78, 32, 100)', height: 5, borderColor: 'rgb(78, 32, 100)' }} />
+                    <ul className="sidebar_nav">
+                    <li>
+                        <NavLink
                         to="/user_dashboard"
-                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
-                    >
+                        className={({ isActive }) =>
+                            isActive ? "sidebar_link active" : "sidebar_link"
+                        }
+                        >
                         <img src={dashboard} alt="Dashboard" />
                         <span>Dashboard</span>
-                    </NavLink>
-                </li>
-
-                <li>
-                    <NavLink
+                        </NavLink>
+                    </li>
+        
+                    <li>
+                        <NavLink
                         to="/classes"
-                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
-                    >
+                        className={({ isActive }) =>
+                            isActive ? "sidebar_link active" : "sidebar_link"
+                        }
+                        >
                         <img src={classes} alt="Classes" />
                         <span>Classes</span>
-                    </NavLink>
-                </li>
-
-                <li>
-                    <NavLink
+                        </NavLink>
+                    </li>
+        
+                    <li>
+                        <NavLink
                         to="/schedule"
-                        className={({ isActive }) => isActive ? "sidebar_link active" : "sidebar_link"}
-                    >
+                        className={({ isActive }) =>
+                            isActive ? "sidebar_link active" : "sidebar_link"
+                        }
+                        >
                         <img src={schedule} alt="Schedule" />
                         <span>Schedule</span>
-                    </NavLink>
-                </li>
-
-            </ul>
-        </nav>
-        </>
-    )
+                        </NavLink>
+                    </li>
+                    </ul>
+                </nav>
+    );
 }
 
 export default SideBar
