@@ -106,6 +106,16 @@ body {
   overflow: hidden;
 }
 
+#desktop_sidebar .dropdown_btn, #desktop_sidebar .logo, #desktop_sidebar a{
+  border-radius: .5em;
+  padding: .85em;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 1em;
+  color: white;
+}
+
 #toggle_btn {
   margin-left: auto;
   padding: 0.8em;
@@ -130,4 +140,64 @@ body {
 #desktop_sidebar.close .sidebar_role,
 #desktop_sidebar.close .sidebar_link span {
   display: none;
+}
+
+
+.dropdown_btn{
+  width: 100%;
+  text-align: left;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+  border: 0px;
+}
+
+.transition_up{
+  transform: rotate(180deg);
+}
+
+.transition_right{
+  transform: rotate(180deg);
+}
+
+
+#desktop_sidebar img{
+  flex-shrink: 0;
+  fill: #2563eb;
+}
+
+#desktop_sidebar a span, #desktop_sidebar .dropdown_btn span{
+  flex-grow: 1;
+}
+
+#desktop_sidebar a:hover, #desktop_sidebar .dropdown_btn:hover{
+  background-color: rgb(58, 58, 199);
+  cursor: pointer;
+}
+
+#desktop_sidebar .sub_menu{
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: 300ms ease-in-out;
+  > div{
+    overflow: hidden;
+  }
+}
+
+#desktop_sidebar .sub_menu.show{
+  grid-template-rows: 1fr;
+}
+
+#toggle_btn{
+  margin-left: auto;
+  padding: 1em;
+  border: none;
+  border-radius: .5em;
+  background: none;
+  cursor: pointer;
+}
+
+
+#toggle_btn:hover{
+  background-color: rgb(58, 58, 199);
 }

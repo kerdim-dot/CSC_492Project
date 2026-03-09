@@ -13,6 +13,7 @@ import StudentZoomPage from './Pages/Admin_Pages/StudentZoomPage.jsx'
 import ClassZoomPage from './Pages/ClassZoomPage.jsx'
 import AdminManagerPage from './Pages/Admin_Pages/AdminManagerPage.jsx'
 import LandingPage from './Pages/LandingPage.jsx'
+import ClassManagerPage from './Pages/Admin_Pages/ClassManagerPage.jsx'
 
 
 const router = createBrowserRouter([
@@ -22,7 +23,8 @@ const router = createBrowserRouter([
     {path:"/classes", element:<ClassesPage/>},
     {path:"/students", element:<StudentsPage/>},
     {path:"/schedule", element:<Schedule/>},
-    {path:"/admin/manager", element:<AdminManagerPage/>},
+    {path:"/student/manager", element:<AdminManagerPage/>},
+    {path:"/class/manager", element:<ClassManagerPage/>},
     {path:"/test", element:<TestPage/>},
     {path:"/students/:firstName/:lastName", element:<StudentZoomPage/>},
     {path:"/classes/:header", element:<ClassZoomPage/>}

@@ -2,7 +2,7 @@ import { useState } from "react";
 import '../adminPanel.css'
 import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
-function AdminManager(){
+function StudentManager(){
   const [activeTab, setActiveTab] = useState("update");
   const students = [
             {studentId:1,firstName:"Bill" , lastName:"Hart", graduation: "1/2029", classes:null, credits:0},
@@ -23,7 +23,7 @@ function AdminManager(){
   );
 }
 
-export default AdminManager;
+export default StudentManager;
 
 function HeaderPanel({activeTab, setActiveTab}){
     return(
@@ -65,6 +65,15 @@ function BodyPanel({activeTab, students}){
 
     const makeSelectedEntry = (index) =>{
         setSelectedEntry(index);
+    }
+
+    const deleteEntry = () =>{
+        if(!selectedEntry){
+            setWarning("No Entry Selected")
+            setTimeout(()=>{
+                setWarning("");
+            },2000)
+        }
     }
 
     return(
@@ -115,7 +124,7 @@ function BodyPanel({activeTab, students}){
                         })}
                     </div>
                     <p>{warning}</p>
-                    <button className="btn-delete-student">Delete Student</button>
+                    <button onClick={deleteEntry} className="btn-delete-student">Delete Student</button>
                 </div>}
         </div>
     )

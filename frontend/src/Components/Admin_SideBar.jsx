@@ -6,7 +6,7 @@ import classes from "./../assets/classes.svg"
 import schedule from "./../assets/schedule.svg"
 import { useState } from 'react'
 import { NavLink } from 'react-router-dom'
-
+import down_arrow from './../assets/down_arrow.svg'
 function SideBar(){
 
     const [expandedDesktop, setExpandedDesktop] = useState(true);
@@ -131,17 +131,21 @@ function SideBar(){
                 </NavLink>
             </li>
 
+
             <li>
-                <NavLink
-                to="/admin/manager"
-                className={({ isActive }) =>
-                    isActive ? "sidebar_link active" : "sidebar_link"
-                }
-                >
-                <img src={admin} alt="Admin Manager" />
-                <span>Admin Manager</span>
-                </NavLink>
-            </li>
+                    <button className="dropdown_btn" onClick={changeSubbar2}>
+                        <img src={admin}></img>
+                        <span>Admin Manager</span>
+                        <img src={down_arrow} className={subbar2?'transition_up':""}></img>
+                    </button>
+                    <ul className={subbar2?"sub_menu show":"sub_menu"}>
+                        <div>
+                            <li><NavLink to="/student/manager"><img src={admin}></img><span>Manage Students</span></NavLink></li>
+                            <li><NavLink to="/class/manager"><img src={admin}></img><span>Manage Classes</span></NavLink></li>
+            
+                        </div>
+                    </ul>
+                </li>
             </ul>
         </nav>
         );
