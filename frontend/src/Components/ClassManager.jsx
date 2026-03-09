@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import '../adminPanel.css'
 import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
-
+import { ReactFlow, Background, Controls, Position } from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import { data } from "react-router-dom";
 
 function ClassManager(){
       const [activeTab, setActiveTab] = useState("update");
@@ -74,6 +76,7 @@ function ClassManager(){
     function BodyPanel({activeTab, requiredClasses}){
         const [selectedEntry, setSelectedEntry] = useState(null);
         const [warning, setWarning] = useState(null);
+        const [nodes,setNodes] = useState(null);
     
         const makeSelectedEntry = (index) =>{
             setSelectedEntry(index);
@@ -87,13 +90,33 @@ function ClassManager(){
                 },2000)
             }
         }
+        
 
-        const nodes = [
-            { id: "1", position: { x: 250, y: 0 }, data: { label: "CSC120" } },
-            { id: "2", position: { x: 250, y: 100 }, data: { label: "CSC220" } },
-            { id: "3", position: { x: 150, y: 200 }, data: { label: "CSC320" } },
-            { id: "4", position: { x: 350, y: 200 }, data: { label: "CSC310" } }
-        ];
+        useEffect(()=>{
+            if(requiredClasses){
+                const nodes = [];
+                let count = 1;
+                let y = 0
+                requiredClasses.forEach((item,index)=>{
+                    nodes.push({
+                        id: String(count),
+                        data: {label:item.header},
+                        position: {x:50,y:y}
+                    })
+                    count +=1;
+                    y+=50;
+                })
+                console.log(nodes)
+                setNodes(nodes);
+                
+            }
+        },[requiredClasses])
+        // const nodes = [
+        //     { id: "1", position: { x: 250, y: 0 }, data: { label: "CSC120" } },
+        //     { id: "2", position: { x: 250, y: 100 }, data: { label: "CSC220" } },
+        //     { id: "3", position: { x: 150, y: 200 }, data: { label: "CSC320" } },
+        //     { id: "4", position: { x: 350, y: 200 }, data: { label: "CSC310" } }
+        // ];
 
         const edges = [
             { id: "e1-2", source: "1", target: "2" },
@@ -152,8 +175,14 @@ function ClassManager(){
                         <button onClick={deleteEntry} className="btn-delete-student">Delete Student</button>
                     </div>}
                 {activeTab === "tree" && 
-                    <div className="placeholder">
-                        <p>Tree</p>
+                    <div className="graph-container">
+                        <div style={{ height: '80vh', width: '50vw' }}>
+                            {(nodes && edges) && <ReactFlow nodes={nodes}  fitView nodesDraggable={false}
+                            nodesConnectable={false}
+                            elementsSelectable={false}
+                            zoomOnScroll={false}
+                            panOnDrag={false}/>}
+                        </div>
                     </div>}
             </div>
         )

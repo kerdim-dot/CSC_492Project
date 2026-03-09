@@ -56,7 +56,9 @@
 }
 
 
-
+.graph-container{
+  display: flex;
+}
 
 .search{
   width: max-content;
