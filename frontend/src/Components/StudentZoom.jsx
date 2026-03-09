@@ -10,3 +10,18 @@ function StudentZoom(){
 }
 
 export default StudentZoom;
+
+function schedule(){
+    
+}
+function inProgress(){
+    
+}
+
+function Completed(){
+    
+}
+
+function incomplete(){
+
+}

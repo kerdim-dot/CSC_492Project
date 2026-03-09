@@ -5,4 +5,17 @@ function ClassZoom(){
         </div>
     )
 }
+
+function inProgress(){
+    
+}
+
+function Completed(){
+    
+}
+
+function incomplete(){
+    
+}
+
 export default ClassZoom;

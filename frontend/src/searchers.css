@@ -83,3 +83,7 @@
 .highlighted{
   background-color: yellow;
 }
+
+.behind{
+  background-color: rgba(235, 15, 15, 0.25);
+}
