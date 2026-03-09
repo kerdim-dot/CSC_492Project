@@ -133,7 +133,7 @@ function SideBar(){
 
             <li>
                 <NavLink
-                to="/AdminManager"
+                to="/admin/manager"
                 className={({ isActive }) =>
                     isActive ? "sidebar_link active" : "sidebar_link"
                 }

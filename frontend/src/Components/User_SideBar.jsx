@@ -4,6 +4,7 @@ import classes from "./../assets/classes.svg"
 import schedule from "./../assets/schedule.svg"
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom'
+
 function SideBar(){
 
     const [expandedDesktop, setExpandedDesktop] = useState(true);

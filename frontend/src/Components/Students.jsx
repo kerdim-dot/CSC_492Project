@@ -2,6 +2,7 @@ import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
 import "../searchers.css"
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 function Students(){
     return(
         <div className="students-container">
@@ -33,6 +34,19 @@ function StudentList(){
     // function which allows the user to click on a student and nav to individual 
 
     // replace this with a fetch students method
+
+    useEffect(()=>{
+        const retrieveStudents = async() =>{
+            const studentRes = await fetch('http://localhost:8080/student/all',{
+                method: "GET",
+                headers: { "Content-Type": "application/json" }
+            })
+            const studentData = await studentRes.json();
+            console.log(studentData);
+        }   
+        retrieveStudents();
+    },[])
+
     const students = [
             {studentId:1,firstName:"Bill" , lastName:"Hart", graduation: "1/2029", classes:null, credits:0},
             {studentId:1,firstName:"John" , lastName:"Doe", graduation: "2/2028", classes:null, credits:0}
