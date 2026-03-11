@@ -142,7 +142,7 @@ function SideBar(){
                         <div>
                             <li><NavLink to="/student/manager"><img src={admin}></img><span>Manage Students</span></NavLink></li>
                             <li><NavLink to="/class/manager"><img src={admin}></img><span>Manage Classes</span></NavLink></li>
-            
+                            <li><NavLink to="/enrollment/manager"><img src={admin}></img><span>Manage Enrollment</span></NavLink></li>
                         </div>
                     </ul>
                 </li>

@@ -1,0 +1,50 @@
+.schedule-container {
+    padding: 20px;
+    font-family: sans-serif;
+}
+
+.schedule-grid {
+    display: grid;
+    grid-template-columns: 80px repeat(3, 1fr); /* 5 days */
+    border: 1px solid #ccc;
+    height: 50vh;
+}
+
+.schedule-grid-2 {
+    display: grid;
+    grid-template-columns: 80px repeat(2, 1fr); /* 5 days */
+    border: 1px solid #ccc;
+    height: 50vh;
+}
+
+.cell {
+    border: 1px solid #ccc;
+
+}
+
+.header-cell {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.header-cell-vertical {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.schedule-grids{
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+}
+
+
+
+
