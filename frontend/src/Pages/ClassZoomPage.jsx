@@ -9,7 +9,7 @@ function ClassZoomPage(){
         return(
             <div className="desktop_container">
                 <UserSideBar/>
-                <ClassZoomPage/>
+                <ClassZoom/>
             </div>
         )
     }
@@ -17,7 +17,7 @@ function ClassZoomPage(){
         return(
             <div className="desktop_container">
                 <AdminSideBar/>
-                <ClassZoomPage/>
+                <ClassZoom/>
             </div>
         )
     }

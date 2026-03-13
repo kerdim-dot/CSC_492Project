@@ -1,10 +1,16 @@
+import Schedule from "./Schedule";
+
 function StudentZoom(){
 
     // fetch data reguarding the singular student
 
     return(
         <div>
-            hello student
+            <Schedule/>
+            <InProgress/>
+            <Completed/>
+            <Incomplete/>
+
         </div>
     )
 }
@@ -12,16 +18,37 @@ function StudentZoom(){
 export default StudentZoom;
 
 function schedule(){
-    
+    <></>
 }
-function inProgress(){
-    
+function InProgress(){
+    return(
+        <div>
+            <p>Classes in Progress by Student</p>
+            <div>
+                <p>Header</p>
+            </div>
+        </div>
+    )
 }
 
 function Completed(){
-    
+    return(
+        <div>
+            <p>Classes Completed by Student</p>
+            <div>
+                <p>Header</p>
+            </div>
+        </div>
+    )
 }
 
-function incomplete(){
-
+function Incomplete(){
+    return(
+        <div>
+            <p>Classes Incomplete by Student</p>
+            <div>
+                <p>Header</p>
+            </div>
+        </div>
+    )
 }

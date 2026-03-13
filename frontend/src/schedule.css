@@ -47,4 +47,87 @@
 
 
 
+.schedule-class{
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+}
 
+.schedule-class-individual{
+    padding: 10px;
+    border: 1px solid;
+    border-radius: 5px;
+    background-color: rgba(184, 184, 184, 0.7);
+    cursor: pointer;
+}
+
+
+.schedule-class-creator {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.section-title {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+
+.schedule-class-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.schedule-class-item {
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: #f2f2f2;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.schedule-class-item:hover {
+  background: #e5e5e5;
+}
+
+
+.days-radio-group {
+  display: flex;
+  gap: 20px;
+}
+
+.days-segment-radio-block {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.days-checklist-group {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.days-checkbox-block {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+.schedule-add-class-btn {
+  width: fit-content;
+  padding: 10px 20px;
+  border-radius: 6px;
+  border: none;
+  background-color: #ac30e6;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.schedule-add-class-btn:hover {
+   background-color: #c461f1;
+}

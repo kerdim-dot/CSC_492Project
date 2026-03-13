@@ -1,25 +1,34 @@
 package com.example.backend.Entities;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class MountClass {
 @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long class_id;
-
     private String title;
     private String header;
     private Integer credits;
 
-    @ManyToMany
-    private List <Student> students;
+    @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List <Enrollment> enrollments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List <ScheduleEntry> scheduleEntries = new ArrayList<>();
+
+
+    // @ManyToMany
+    // private List <Student> students;
 
     public MountClass() {
     }
