@@ -8,6 +8,10 @@ function ClassZoom(){
     )
 }
 
+function ScheduleHistory(){
+    
+}
+
 function InProgress(){
     return(
         <div>

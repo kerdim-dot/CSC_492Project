@@ -1,4 +1,4 @@
-import Schedule from "./Schedule";
+
 
 function StudentZoom(){
 
@@ -17,7 +17,7 @@ function StudentZoom(){
 
 export default StudentZoom;
 
-function schedule(){
+function Schedule(){
     <></>
 }
 function InProgress(){

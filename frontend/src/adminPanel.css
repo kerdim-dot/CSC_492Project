@@ -51,6 +51,27 @@
   width: 95%;
 }
 
+.mass-add{
+  width: 100%;
+}
+
+.mass-add-textarea{
+  width: 100%;
+  min-height: 400px;
+  overflow-y: scroll;
+}
+
+.mass-add-textarea::-webkit-scrollbar {
+  display: block;
+}
+
+.mass-add-textarea::-webkit-scrollbar-thumb {
+  background: gray;
+  border-radius: 4px;
+  cursor: auto;
+}
+
+
 .top-container{
     display: flex;
 }

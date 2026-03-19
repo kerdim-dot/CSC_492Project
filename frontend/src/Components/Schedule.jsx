@@ -81,48 +81,55 @@ function AddClass(){
         setSelectedClass(header)
     }
 
+    // This allows the user to make the new class a M/W/F, automatically adds all these days to the checklist, user can change that later
     const makeSelectedFirstBlock = () =>{
         if(!selectedFirstBlock){
             setSelectedSecondBlock(false);
             setSelectedFirstBlock(true);
             setSelectedDays(["Monday","Wednesday", "Friday"]);
             setSelectedCheck(prev =>{
-                const temp = [...prev]
-                temp[0] = true;
-                temp[2] = true;
-                temp[4] = true;
-                temp[1] = false;
-                temp[3] = false;
-                return temp;
+                const monday_wednesday_friday = [...prev]
+                monday_wednesday_friday[0] = true;
+                monday_wednesday_friday[2] = true;
+                monday_wednesday_friday[4] = true;
+                monday_wednesday_friday[1] = false;
+                monday_wednesday_friday[3] = false;
+                return monday_wednesday_friday;
             })
         }
 
     }
-
+    // This allows the user to make the new class a T/Th, automatically adds all these days to the checklist, user can change that later
     const makeSelectedSecondBlock = () =>{
         if(!selectedSecondBlock){
             setSelectedFirstBlock(false);
             setSelectedSecondBlock(true);
             setSelectedDays(["Tuesday","Thursday"]);
             setSelectedCheck(prev =>{
-                const temp = [...prev]
-                temp[0] = false;
-                temp[2] = false;
-                temp[4] = false;
-                temp[1] = true;
-                temp[3] = true;
-                return temp;
+                const tuesday_thursday = [...prev]
+                tuesday_thursday[0] = false;
+                tuesday_thursday[2] = false;
+                tuesday_thursday[4] = false;
+                tuesday_thursday[1] = true;
+                tuesday_thursday[3] = true;
+                return tuesday_thursday;
             })
         }
     }
-    // this can probably be optimized using a hashmap and a single case, rather than 5 cases
+    
+    // this allows the user to change what they have in their checklist for days. For example if the class is only a monday class,
+    // they would deselect the wednesay and friday class. But then they realize it is a monday and wednesday class, they can reselect wednesday
+
+    /* 
+        this can probably be optimized using a hashmap and a single case, rather than 5 cases  
+    */
     const changeCheckBox = (day) =>{
         setSelectedCheck(prev =>{
-                const temp = [...prev]
+                const currentList= [...prev]
                 switch(day){
                     case "Monday":
-                        if(temp[0]==true){
-                            temp[0] = false;
+                        if(currentList[0]==true){
+                            currentList[0] = false;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 const removeElementIndex = tempDays.indexOf("Monday");
@@ -133,7 +140,7 @@ function AddClass(){
                             })
                         }
                         else{
-                            temp[0] = true;
+                            currentList[0] = true;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 tempDays.splice(0,0,"Monday")
@@ -142,8 +149,8 @@ function AddClass(){
                         }
                         break;
                     case "Tuesday":
-                        if(temp[1]==true){
-                            temp[1] = false;
+                        if(currentList[1]==true){
+                            currentList[1] = false;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 const removeElementIndex = tempDays.indexOf("Tuesday");
@@ -154,7 +161,7 @@ function AddClass(){
                             })
                         }
                         else{
-                            temp[1] = true;
+                            currentList[1] = true;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 tempDays.splice(0,0,"Tuesday")
@@ -163,8 +170,8 @@ function AddClass(){
                         }
                         break;
                     case "Wednesday":
-                        if(temp[2]==true){
-                            temp[2] = false;
+                        if(currentList[2]==true){
+                            currentList[2] = false;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 const removeElementIndex = tempDays.indexOf("Wednesday");
@@ -175,10 +182,11 @@ function AddClass(){
                             })
                         }
                         else{
-                            temp[2] = true;
+                            currentList[2] = true;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
-                                if(temp[0]){
+                                // preserves the order of the list to always be [monday,wednesday,friday]
+                                if(currentList[0]){
                                     tempDays.splice(0,1,"Wednesday");
                                 }else{
                                     tempDays.splice(0,0,"Wednesday");
@@ -188,8 +196,8 @@ function AddClass(){
                         }
                         break;
                     case "Thursday":
-                        if(temp[3]==true){
-                            temp[3] = false;
+                        if(currentList[3]==true){
+                            currentList[3] = false;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 const removeElementIndex = tempDays.indexOf("Thursday");
@@ -201,7 +209,7 @@ function AddClass(){
                             })
                         }
                         else{
-                            temp[3] = true;
+                            currentList[3] = true;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 tempDays.push("Thursday");
@@ -210,8 +218,8 @@ function AddClass(){
                         }
                         break;
                     case "Friday":
-                        if(temp[4]==true){
-                            temp[4] = false;
+                        if(currentList[4]==true){
+                            currentList[4] = false;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 const removeElementIndex = tempDays.indexOf("Friday");
@@ -222,7 +230,7 @@ function AddClass(){
                             })
                         }
                         else{
-                            temp[4] = true;
+                            currentList[4] = true;
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 tempDays.push("Friday");
@@ -233,7 +241,7 @@ function AddClass(){
                 }
                 
                         
-                return temp;
+                return currentList;
             })
     }
 
@@ -248,6 +256,7 @@ function AddClass(){
         {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false,isRequired:true}
     ];
 
+    // function that goes off once the add button has been clicked
     const addClass = () =>{
         if(selectedDays.length != 0 && selectedClass && selectedTime){
             const values = [];
