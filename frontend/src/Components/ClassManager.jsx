@@ -118,8 +118,7 @@ function ClassManager(){
                 <input type="search" className="search-input" placeholder="Search Student..."></input>
                 <img src={filter} className="filter"></img>
             </div>
-        )
-        
+        )  
     }
     
     function BodyPanel({activeTab, requiredClasses,edges}){

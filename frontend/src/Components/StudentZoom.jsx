@@ -17,9 +17,10 @@ function StudentZoom(){
 
 export default StudentZoom;
 
-function Schedule(){
+function Schedules(){
     <></>
 }
+
 function InProgress(){
     return(
         <div>

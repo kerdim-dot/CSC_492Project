@@ -84,8 +84,51 @@ function Testing(){
     }
 
 
+    const root = {
+        value: "CSC-120",
+        children: [{
+            value: "CSC-220",
+            children: [{
+                value: "CSC-270",
+                children:[{
+                    value:"CSC-310"
+                },
+                {
+                    value:"CSC-320"
+                }]
+            }]
+        }]
+     }
+
+
+    const treeHelper = (tree) =>{
+        if (!tree){
+            return;
+        }
+        const queue = [];
+        queue.push(tree);
+        
+        //bfs starts
+        while (queue.length != 0){
+            const thisLength = queue.length;
+            for (let i = 0 ; i<thisLength;i++){
+                const current = queue.shift();
+                console.log(current); 
+
+                if (current.children && current.children.length > 0) {
+                    for (let j = 0; j < current.children.length; j++) {
+                        queue.push(current.children[j]);
+                    }
+                }
+            }
+        }
+    }
+
+    console.log(treeHelper(root));
+
     return (
         <div className="test_div">
+            {/*
             <p className="year_title">Semester: {currentSemester}, Year: {currentYear}</p>
             {studentList? studentList.map((item,index)=>{
                 return(
@@ -101,7 +144,8 @@ function Testing(){
                 )
             }):<></>}
             <button onClick={()=>{timeCalculator(currentStudent)}}>graduation timer:</button>
-            <p>{timer}</p>
+            <p>{timer}</p>*/}
+            
         </div>
     )
 }

@@ -14,6 +14,7 @@
   background: #f6f6f6;
   margin-left: auto;
   margin-right: 10px;
+  z-index: 0;
 }
 
 .search-input{
