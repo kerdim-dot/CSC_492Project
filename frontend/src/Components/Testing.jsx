@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { buildRoots,buildTree, findPreReqs } from "../tools/treeBuilder";
 // feel free to break this as much as you want
 // to get here do '/testing'
 function Testing(){
@@ -29,22 +30,11 @@ function Testing(){
             {title:"Practice Software Engineering",header:"CSC-492", credits: 2}
         ];
 
-        const tree = {
-            value : "CSC-120",
-            children : [
-                {
-                    value: "CSC-220",
-                    children : [{
-                         value:"CSC-270",
-                         children: [{value:"CSC-310"}, {value:"CSC-320"}]
-                        }]
-                        
-                },
-            ]
-        }
-
-
-
+        // we make a forest, starting with classes that are not prereqs of another class
+        // using prereqs current -> csc 220 prereq -> csc 120
+        // using postreqs current -> csc 120 postreq -> csc 220
+        // in sql, do we map to postreq or prereq? I think it would be easier to map the posreqs of current class, because then we can simply map
+        // through the classes and see if they have any postreqs, but then would it be harder to get the children of the postreq?
 
         setRequiredClasses(requiredClasses);
 
@@ -84,20 +74,90 @@ function Testing(){
     }
 
 
-    const root = {
-        value: "CSC-120",
-        children: [{
-            value: "CSC-220",
-            children: [{
-                value: "CSC-270",
-                children:[{
-                    value:"CSC-310"
-                },
-                {
-                    value:"CSC-320"
-                }]
-            }]
-        }]
+const classes = ["csc-120","csc-220","csc-270","csc-310","csc-320","csc-410"];
+
+const data = [
+    {
+        current: "csc-120",
+        postreq: "csc-220"
+    },
+
+    {
+        current: "csc-220",
+        postreq: "csc-270"
+    },
+
+    {
+        current: "csc-270",
+        postreq: "csc-310"
+    },
+
+
+    {
+        current: "csc-270",
+        postreq: "csc-320"
+    },
+
+    
+]
+
+function addPrereq(current, prereq){
+    const exists = data.some(
+        item => item.current === prereq && item.postreq === current
+    );
+
+    if (!exists) {
+        data.push({
+            current: prereq,
+            postreq: current
+        });
+    }
+}
+
+function addPostreq(current, postreq){
+    const exists = data.some(
+        item => item.current === current && item.postreq === postreq
+    );
+
+    if (!exists) {
+        data.push({
+            current: current,
+            postreq: postreq
+        });
+    }
+}
+
+useEffect(() => {
+    addPrereq("csc-410","csc-320")
+    addPostreq("csc-310","csc-410")
+    console.log(findPreReqs(data, classes,"csc-410"));
+}, []);
+
+
+// function AddClassToTree(header,classes){
+//     classes.forEach((item)=>{
+//         if(header == item){
+
+//         }
+//     })
+// }
+
+
+
+    // const root = {
+    //     value: "CSC-120",
+    //     children: [{
+    //         value: "CSC-220",
+    //         children: [{
+    //             value: "CSC-270",
+    //             children:[{
+    //                 value:"CSC-310"
+    //             },
+    //             {
+    //                 value:"CSC-320"
+    //             }]
+    //         }]
+    //     }]
      }
 
 
@@ -122,7 +182,7 @@ function Testing(){
                 }
             }
         }
-    }
+    
 
     console.log(treeHelper(root));
 
