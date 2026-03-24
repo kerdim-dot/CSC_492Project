@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { buildRoots,buildTree, findPreReqs } from "../tools/treeBuilder";
+import { GraduationConverter } from "../tools/GraduationConverter";
 // feel free to break this as much as you want
 // to get here do '/testing'
 function Testing(){
@@ -132,6 +133,8 @@ useEffect(() => {
     addPostreq("csc-310","csc-410")
     console.log(findPreReqs(data, classes,"csc-410"));
 }, []);
+
+console.log(GraduationConverter("2028-02-01"));
 
 
 // function AddClassToTree(header,classes){
