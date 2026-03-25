@@ -214,6 +214,7 @@
   text-align: center;
   background-color: #f5f5f5af;
   border: 1px solid rgb(167, 167, 167);
+  outline: none;
 }
 
 .year{
@@ -255,7 +256,38 @@
   text-align: center;
   background-color: #f5f5f5af;
   border: 1px solid rgb(167, 167, 167);
+  outline: none;
 }
+
+.title-input{
+  border-radius: 10px;
+  height: 40px;
+  text-align: center;
+  background-color: #f5f5f5af;
+  border: 1px solid rgb(167, 167, 167);
+  outline: none;
+}
+
+.header-input{
+  border-radius: 10px;
+  height: 40px;
+  text-align: center;
+  background-color: #f5f5f5af;
+  border: 1px solid rgb(167, 167, 167);
+  outline: none;
+}
+
+
+.credits-input{
+  border-radius: 10px;
+  height: 40px;
+  text-align: center;
+  background-color: #f5f5f5af;
+  border: 1px solid rgb(167, 167, 167);
+  outline: none;
+}
+
+
 
 .name-input::placeholder{
   text-align: center;
@@ -318,3 +350,13 @@
    background-color: rgba(147, 147, 147, 0.668);
 }
 
+.class-headers-container{
+  display: flex;
+  gap:1vw;
+}
+
+.class-add-container{
+  display: flex;
+  flex-direction: column;
+  gap: 1vh;
+}

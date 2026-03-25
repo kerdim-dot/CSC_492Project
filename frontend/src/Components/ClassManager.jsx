@@ -184,14 +184,14 @@ function ClassManager(){
         return(
             <div className="tab-content">
                 {activeTab === "add" && 
-                <div className="placeholder">
+                <div className="class-add-container">
                     <p>Add Class</p>
-                    <div className="name-container">
-                        <input type= "text" placeholder="Title"/>
-                        <input type= "text" placeholder="Header"/>
+                    <div className="class-headers-container">
+                        <input type= "text" className="title-input" placeholder="Title"/>
+                        <input type= "text" className="header-input" placeholder="Header"/>
                     </div>
                     <div className="graduation-container">
-                        <input type="text" placeholder="Credits"></input>
+                        <input type="text" className="credits-input" placeholder="Credits"></input>
                     </div>
                     <div>
                         

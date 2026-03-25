@@ -15,6 +15,7 @@
   margin-left: auto;
   margin-right: 10px;
   z-index: 0;
+  margin-top: 10px;
 }
 
 .search-input{
@@ -87,4 +88,93 @@
 
 .behind{
   background-color: rgba(235, 15, 15, 0.25);
+}
+
+.filter-container {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 700px;
+  min-height: 500px;
+  left: 50vw;
+  top: 50vh;
+  transform: translate(-350px, -250px);
+  border-radius: 50px;
+  border: 5px double rgba(189, 189, 189, 0.671);
+  padding: 40px;
+  background-color: white;
+  z-index: 1000;
+}
+
+.filter-title {
+  align-self: center;
+  font-size: larger;
+  color: #666;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group input {
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.filter-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.btn-apply {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: #8c1da8;
+  color: white;
+  cursor: pointer;
+}
+
+.btn-reset {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: #ccc;
+  cursor: pointer;
+}
+
+.graduation-select{
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.filter-graduation-overview{
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.close-img{
+  position: absolute;
+  right: 2vw;
+  width: 40px;
+  cursor: pointer;
+  border-radius: 100px;
+  border: 1px solid rgba(128, 128, 128, 0.76);
+}
+
+.blocker{
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  background-color:transparent;
+  z-index: 999;
 }
