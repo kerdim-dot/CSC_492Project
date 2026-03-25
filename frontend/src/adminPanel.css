@@ -360,3 +360,11 @@
   flex-direction: column;
   gap: 1vh;
 }
+
+.close-img-two{
+  position: absolute;
+  left: 10px;
+  cursor: pointer;
+  border-radius: 100px;
+  border: 1px solid rgba(128, 128, 128, 0.76);
+}

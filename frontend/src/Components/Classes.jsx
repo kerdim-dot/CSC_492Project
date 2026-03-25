@@ -26,6 +26,62 @@ function Classes(){
     )
 }
 
+
+function FilterBlock({ year, setYear, requirement, setRequirement}) {
+
+    const onReset = ()=>{
+        setYear("All");
+        setRequirement("All");
+    }
+
+    const onFilter = () =>{
+
+    }
+    console.log(overview)
+
+    return (
+        <div>
+            <div className="filter-container">
+                <img className="close-img" src={close} onClick={()=>{setShowFilter(false)}}></img>
+
+                <p className="filter-title">Filter Classes</p>
+
+                 <div className="filter-graduation-overview">
+                    <label>Year Filter</label>
+                    <select className="year-select" value={requirement} onChange={(e)=>setRequirement(e.target.value)}>
+                        <option value="First">All</option>
+                        <option value="First">First Year</option>
+                        <option value="Second">Second Year</option>
+                        <option value="Third">Third Year</option>
+                        <option value="Fourth">Fourth Year</option>
+                    </select>
+                </div>
+
+                
+                <div className="filter-graduation-overview">
+                    <label>Year Filter</label>
+                    <select className="year-select" value={year} onChange={(e)=>setYear(e.target.value)}>
+                        <option value="First">All</option>
+                        <option value="First">First Year</option>
+                        <option value="Second">Second Year</option>
+                        <option value="Third">Third Year</option>
+                        <option value="Fourth">Fourth Year</option>
+                    </select>
+                </div>
+
+                <div className="filter-buttons">
+                    <button onClick={onFilter} className="btn-apply">Apply Filter</button>
+                    <button onClick={onReset} className="btn-reset">Reset</button>
+                </div>
+            </div>
+
+            <div className="blocker">
+            </div>
+
+        </div>
+    );
+}
+
 function SearchBar({requiredClasses,setClassSearchList}){
 
     
