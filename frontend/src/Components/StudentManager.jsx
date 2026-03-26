@@ -264,47 +264,47 @@ function FilterBlock({ startDate, endDate, setStartDate, setEndDate, setShowFilt
 }
 
 
-function UpdateBlock(updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue){
-    
-        return(
-            <div className="update-student-panel">
-                
+function UpdateBlock({updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue}){
 
-                <img className="close-img-two" src={close}></img>
+    return(
+        <div className="update-student-panel">
+            
 
-                <p className="student-panel-title">Update Student Panel</p>
+            <img className="close-img-two" src={close}></img>
 
-                <div className="panel-entry">
-                    <p>First Name</p>
-                    <input 
-                        className="panel-input" 
-                        value={updateFirstNameValue.updateFirstNameValue} 
-                        onChange={(e)=>{setUpdateFirstNameValue(e.target.value)}}
-                    />
-                </div>
-                
-                <div className="panel-entry">
-                    <p>Last Name</p>
-                    <input 
-                        className="panel-input" 
-                        value={updateFirstNameValue.updateLastNameValue} 
-                        onChange={(e)=>{setUpdateLastNameValue(e.target.value)}}
-                    />
-                </div>
+            <p className="student-panel-title">Update Student Panel</p>
 
-                <div className="panel-entry">
-                    <p>Graduation Date</p>
-                    <input 
-                        className="panel-input" 
-                        value={updateFirstNameValue.updateGraduationValue} 
-                        onChange={(e)=>{setUpdateGraduationValue(e.target.value)}}
-                    />
-                </div>
-
-                <button className="panel-button">Confirm</button>
+            <div className="panel-entry">
+                <p>First Name</p>
+                <input 
+                    className="panel-input" 
+                    value={updateFirstNameValue} 
+                    onChange={(e)=>{setUpdateFirstNameValue(e.target.value)}}
+                />
             </div>
-        )
-    }
+            
+            <div className="panel-entry">
+                <p>Last Name</p>
+                <input 
+                    className="panel-input" 
+                    value={updateLastNameValue} 
+                    onChange={(e)=>{setUpdateLastNameValue(e.target.value)}}
+                />
+            </div>
+
+            <div className="panel-entry">
+                <p>Graduation Date</p>
+                <input 
+                    className="panel-input" 
+                    value={updateGraduationValue} 
+                    onChange={(e)=>{setUpdateGraduationValue(e.target.value)}}
+                />
+            </div>
+
+            <button className="panel-button">Confirm</button>
+        </div>
+    )
+}
 
 
 function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntry, updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue}){

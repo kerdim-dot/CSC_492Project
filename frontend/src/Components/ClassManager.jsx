@@ -2,23 +2,38 @@ import { useEffect, useState } from "react";
 import '../adminPanel.css'
 import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
+import close from "./../assets/close.svg"
 import { ReactFlow, Background, Controls, Position } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { data } from "react-router-dom";
 
 function ClassManager(){
       const [activeTab, setActiveTab] = useState("update");
-        const [edges, setEdges] = useState(null);
-      const requiredClasses = [
-        {title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true}, 
-        {title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4,isActive: true},
-        {title:"Computer Organization" , header:"CSC-270", credits: 4,isActive: true}, 
-        {title:"Database Theory Implementation",header:"CSC-310", credits: 4,isActive: true}, 
-        {title:"Algorithms and Data Structures",header:"CSC-320", credits: 4,isActive: true}, 
-        {title:"Computer Networks",header:"CSC-360", credits: 4,isActive: false}, 
-        {title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2,isActive: false}, 
-        {title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false}
-     ];
+      const [edges, setEdges] = useState(null);
+      const [searchInput, setSearchInput] = useState("");
+      const [showFilter, setShowFilter] = useState(false);
+
+      const [year, setYear] = useState("All");
+      const [requirement, setRequirement] = useState("All");
+      const [credits, setCredits] = useState("");
+
+      const [filteredClasses, setFilteredClasses] = useState([]);
+
+      const [classUpdateEntry,setClassUpdateEntry] = useState(null);
+      const [updateClassTitle, setUpdateClassTitle] = useState(null);
+      const [updateClassHeader, setUpdateClassHeader] = useState(null);
+      const [updateClassCredits, setUpdateClassCredits] = useState(null);
+
+      const [requiredClasses, setRequiredClasses ]= useState ([
+        {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true}, 
+        {classId:2,title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4,isActive: true},
+        {classId:3,title:"Computer Organization" , header:"CSC-270", credits: 4,isActive: true}, 
+        {classId:4,title:"Database Theory Implementation",header:"CSC-310", credits: 4,isActive: true}, 
+        {classId:5,title:"Algorithms and Data Structures",header:"CSC-320", credits: 4,isActive: true}, 
+        {classId:6,title:"Computer Networks",header:"CSC-360", credits: 4,isActive: false}, 
+        {classId:7,title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2,isActive: false}, 
+        {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false}
+     ]);
 
      const tree = [{
         value: "CSC-120",
@@ -67,16 +82,80 @@ function ClassManager(){
         traverseTree(tree);
         setEdges(edges);
     },[])
+
+
+    useEffect(() => {
+        let filtered = [...requiredClasses];
+
+        // 🔍 SEARCH
+        if (searchInput) {
+            filtered = filtered.filter((item) => {
+                const header = item.header.toLowerCase();
+                const title = item.title.toLowerCase();
+                const search = searchInput.toLowerCase();
+
+                return header.includes(search) || title.includes(search);
+            });
+        }
+
+        // 🎓 YEAR FILTER
+        if (year !== "All") {
+            filtered = filtered.filter((item) => {
+                const num = Number(item.header.split("-")[1]);
+
+                if (year === "First") return num < 200;
+                if (year === "Second") return num >= 200 && num < 300;
+                if (year === "Third") return num >= 300 && num < 400;
+                if (year === "Fourth") return num >= 400;
+
+                return true;
+            });
+        }
+
+        // 📘 REQUIREMENT FILTER
+        if (requirement !== "All") {
+            if (requirement === "Required") {
+                filtered = filtered.filter(c => c.isActive); // or isRequired later
+            } else {
+                filtered = filtered.filter(c => !c.isActive);
+            }
+        }
+
+        // 🔢 CREDIT FILTER
+        if (credits) {
+            filtered = filtered.filter(c => c.credits === Number(credits));
+        }
+
+        setFilteredClasses(filtered);
+
+    }, [requiredClasses, searchInput, year, requirement, credits]);
     
       
       return (
         <div className="tab-pane-container">
+            {showFilter && 
+                <FilterBlock 
+                    year={year}
+                    setYear={setYear}
+                    requirement={requirement}
+                    setRequirement={setRequirement}
+                    credits={credits}
+                    setCredits={setCredits}
+                    setShowFilter={setShowFilter}
+                />
+            }
           <div className="top-container">
                 <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab}/>
-                {(activeTab === "delete" || activeTab === "update") && <SearchBar/>}
+                {(activeTab === "delete" || activeTab === "update") && 
+                    <SearchBar 
+                        searchInput={searchInput}
+                        setSearchInput={setSearchInput}
+                        setShowFilter={setShowFilter}
+                    />
+                }
           </div>
           
-          <BodyPanel activeTab={activeTab} requiredClasses={requiredClasses} edges={edges}/>
+          <BodyPanel activeTab={activeTab} requiredClasses={requiredClasses} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits}/>
           
         </div>
       );
@@ -110,33 +189,146 @@ function ClassManager(){
             </div>
         )
     }
+
+
+    function UpdateBlock({updateClassTitle, setUpdateClassTitle, updateClassHeader,setUpdateClassHeader,updateClassCredits, setUpdateClassCredits}){
     
-    function SearchBar(){
         return(
-            <div className="search">
-                <img src={search} className="search-icon"></img>
-                <input type="search" className="search-input" placeholder="Search Student..."></input>
-                <img src={filter} className="filter"></img>
+            <div className="update-student-panel">
+                
+    
+                <img className="close-img-two" src={close}></img>
+    
+                <p className="student-panel-title">Update Class Panel</p>
+    
+                <div className="panel-entry">
+                    <p>Class Title</p>
+                    <input 
+                        className="panel-input" 
+                        value={updateClassTitle} 
+                        onChange={(e)=>{setUpdateClassTitle(e.target.value)}}
+                    />
+                </div>
+                
+                <div className="panel-entry">
+                    <p>Class Header</p>
+                    <input 
+                        className="panel-input" 
+                        value={updateClassHeader} 
+                        onChange={(e)=>{setUpdateClassHeader(e.target.value)}}
+                    />
+                </div>
+    
+                <div className="panel-entry">
+                    <p>Class Credits</p>
+                    <input type="number"
+                        className="panel-input" 
+                        value={updateClassCredits} 
+                        onChange={(e)=>{setUpdateClassCredits(e.target.value)}}
+                    />
+                </div>
+    
+                <button className="panel-button">Confirm</button>
             </div>
-        )  
+        )
     }
     
-    function BodyPanel({activeTab, requiredClasses,edges}){
+
+    function FilterBlock({ year, setYear, requirement, setRequirement,credits,setCredits, setShowFilter}) {
+
+        const onReset = ()=>{
+            setCredits(null);
+            setYear("All");
+            setRequirement("All");
+        }
+
+        const onFilter = () =>{
+
+        }
+
+        return (
+            <div>
+                <div className="filter-container">
+                    <img className="close-img" src={close} onClick={()=>{setShowFilter(false)}}></img>
+
+                    <p className="filter-title">Filter Classes</p>
+
+
+                    <div className="filter-graduation-overview">
+                        <label>Credit Filter</label>
+                        <input className="credit-input" type = "number" value = {credits} onChange = {(e)=>{setCredits(e.target.value)}}/>
+                    </div>
+
+                    <div className="filter-graduation-overview">
+                        <label>Requirement Filter</label>
+                        <select className="year-select" value={requirement} onChange={(e)=>setRequirement(e.target.value)}>
+                            <option value="All">All</option>
+                            <option value="Required">First Year</option>
+                            <option value="Not Required">Second Year</option>
+                        </select>
+                    </div>
+
+                    
+                    <div className="filter-graduation-overview">
+                        <label>Year Filter</label>
+                        <select className="year-select" value={year} onChange={(e)=>setYear(e.target.value)}>
+                            <option value="All">All</option>
+                            <option value="First">First Year</option>
+                            <option value="Second">Second Year</option>
+                            <option value="Third">Third Year</option>
+                            <option value="Fourth">Fourth Year</option>
+                        </select>
+                    </div>
+
+                    <div className="filter-buttons">
+                        <button onClick={onFilter} className="btn-apply">Apply Filter</button>
+                        <button onClick={onReset} className="btn-reset">Reset</button>
+                    </div>
+                </div>
+
+                <div className="blocker">
+                </div>
+
+            </div>
+        );
+    }
+        
+    function SearchBar({ searchInput, setSearchInput, setShowFilter }) {
+        return (
+            <div className="search-two">
+                <img src={search} className="search-icon" />
+                <input
+                    type="search"
+                    className="search-input"
+                    placeholder="Search Class..."
+                    value={searchInput}
+                    onChange={(e) => setSearchInput(e.target.value)}
+                />
+                <img src={filter} className="filter" onClick={() => setShowFilter(true)} />
+            </div>
+        );
+    }
+    
+    function BodyPanel({activeTab, requiredClasses, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader, updateClassCredits, setUpdateClassCredits}){
         const [selectedEntry, setSelectedEntry] = useState(null);
         const [warning, setWarning] = useState(null);
         const [nodes,setNodes] = useState(null);
         const [classPool, setClassPool] = useState(null);
+
     
         const makeSelectedEntry = (index) =>{
             setSelectedEntry(index);
         }
     
         const deleteEntry = () =>{
-            if(!selectedEntry){
+            if(selectedEntry == null){
                 setWarning("No Entry Selected")
                 setTimeout(()=>{
                     setWarning("");
                 },2000)
+            }
+            else{
+                console.log("This is the Class id that needs to be deleted: "+selectedEntry)
             }
         }
         
@@ -181,6 +373,14 @@ function ClassManager(){
         //     { id: "e2-4", source: "2", target: "4" }
         // ];
         console.log(edges)
+
+        const clickOnEntry = (item) =>{
+            setClassUpdateEntry(item);
+            setUpdateClassTitle(item.title);
+            setUpdateClassHeader(item.header);
+            setUpdateClassCredits(item.credits);
+        }
+
         return(
             <div className="tab-content">
                 {activeTab === "add" && 
@@ -205,30 +405,31 @@ function ClassManager(){
                         <p>Update Class</p> 
     
                         <div className="entry-list">
-                            {requiredClasses.map((item,index)=>{
+                            {filteredClasses.map((item,index)=>{
                                 return(
-                                <div className="entry">
+                                <div className="entry" onClick={()=>{clickOnEntry(item)}}>
                                         <p>{item.title} </p>
                                         <p>{item.header} </p>
                                 </div>)
                             })}
+                            
                         </div>
-    
+                            {classUpdateEntry && <UpdateBlock updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits}/>}
                     </div>}
                 {activeTab === "delete" && 
                     <div className="placeholder">
                         <p>Delete Class</p>
                         <div className="entry-list">
-                            {requiredClasses.map((item,index)=>{
+                            {filteredClasses.map((item,index)=>{
                                 return(
-                                <div className={selectedEntry === index ?"entry highlighted":"entry"} onClick={()=>{makeSelectedEntry(index)}}>
+                                <div className={selectedEntry === item.classId ?"entry highlighted":"entry"} onClick={()=>{makeSelectedEntry(item.classId)}}>
                                         <p>{item.title} </p>
                                         <p>{item.header} </p>
                                 </div>)
                             })}
                         </div>
                         <p>{warning}</p>
-                        <button onClick={deleteEntry} className="btn-delete-student">Delete Student</button>
+                        <button onClick={deleteEntry} className="btn-delete-student">Delete Class</button>
                     </div>}
                 {activeTab === "tree" && 
                     <div className="graph-container">

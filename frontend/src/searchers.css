@@ -192,3 +192,22 @@
   background-color:transparent;
   z-index: 999;
 }
+
+
+.year-select{
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.requirement-select{
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+.credit-input{
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
