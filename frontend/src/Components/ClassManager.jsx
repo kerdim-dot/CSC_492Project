@@ -3,13 +3,15 @@ import '../adminPanel.css'
 import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
 import close from "./../assets/close.svg"
-import { ReactFlow, Background, Controls, Position } from '@xyflow/react';
+import { ReactFlow, Background, Controls, Position,applyEdgeChanges } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { data } from "react-router-dom";
+import { findParams, findPreReqs } from "../tools/treeBuilder";
 
 function ClassManager(){
       const [activeTab, setActiveTab] = useState("update");
-      const [edges, setEdges] = useState(null);
+      const [edges, setEdges] = useState([]);
+      const [nodes, setNodes] = useState(null);
       const [searchInput, setSearchInput] = useState("");
       const [showFilter, setShowFilter] = useState(false);
 
@@ -35,59 +37,80 @@ function ClassManager(){
         {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false}
      ]);
 
-     const tree = [{
-        value: "CSC-120",
-        children: [{
-            value: "CSC-220",
-            children: [{
-                value: "CSC-270",
-                children:[{
-                    value:"CSC-310"
-                },
-                {
-                    value:"CSC-320"
-                }]
-            }]
-        }]
-     }]
+    //  const tree = [{
+    //     value: "CSC-120",
+    //     children: [{
+    //         value: "CSC-220",
+    //         children: [{
+    //             value: "CSC-270",
+    //             children:[{
+    //                 value:"CSC-310"
+    //             },
+    //             {
+    //                 value:"CSC-320"
+    //             }]
+    //         }]
+    //     }]
+    //  }]
 
      
      
-    
-    
+    const classes = ["csc-120","csc-220","csc-270","csc-310","csc-320","csc-410"];
+
+    const data = [
+        {
+            current: "csc-120",
+            postreq: "csc-220"
+        },
+
+        {
+            current: "csc-220",
+            postreq: "csc-270"
+        },
+
+        {
+            current: "csc-270",
+            postreq: "csc-310"
+        },
+
+
+        {
+            current: "csc-270",
+            postreq: "csc-320"
+        },
+    ]
+
     useEffect(()=>{
-        let row = 1;
-        let count = 1;
-        const edges = [];
-        function traverseTree(nodes, parent = null) {
-            nodes.forEach(node => {
-                if (parent !== null) {
-                    edges.push({
-                        id: "e1-" + count,
-                        source: String(parent),
-                        target: String(count),
-                    });
-                    
-                }
-                //console.log("node:", node.value, "row:", row, "count:", count, "parent:", parent);
-                count++;
+        const nodes = [];
+        const tree = findParams(data,classes)
 
-                if (node.children) {
-                    row++;
-                    traverseTree(node.children, count-1);
-                }
-                
-            });
-        }
-        traverseTree(tree);
-        setEdges(edges);
+        let count = 1;
+        tree.map((item)=>{
+            nodes.push({
+                id: item.val,
+                data: {label:item.val},
+                position: {x:item.width * 100,y: item.height*100},
+                style: { width: 50, backgroundColor: '#f0f0f0' },
+            })
+            count +=1 ;
+        })
+        
+                        
+        // edges.push({
+        //                 id: "e1-" + count,
+        //                 source: String(parent),
+        //                 target: String(count),
+        //             });
+        setNodes(nodes);
     },[])
+
+   
+
 
 
     useEffect(() => {
         let filtered = [...requiredClasses];
 
-        // 🔍 SEARCH
         if (searchInput) {
             filtered = filtered.filter((item) => {
                 const header = item.header.toLowerCase();
@@ -98,7 +121,6 @@ function ClassManager(){
             });
         }
 
-        // 🎓 YEAR FILTER
         if (year !== "All") {
             filtered = filtered.filter((item) => {
                 const num = Number(item.header.split("-")[1]);
@@ -112,7 +134,6 @@ function ClassManager(){
             });
         }
 
-        // 📘 REQUIREMENT FILTER
         if (requirement !== "All") {
             if (requirement === "Required") {
                 filtered = filtered.filter(c => c.isActive); // or isRequired later
@@ -121,7 +142,6 @@ function ClassManager(){
             }
         }
 
-        // 🔢 CREDIT FILTER
         if (credits) {
             filtered = filtered.filter(c => c.credits === Number(credits));
         }
@@ -155,7 +175,7 @@ function ClassManager(){
                 }
           </div>
           
-          <BodyPanel activeTab={activeTab} requiredClasses={requiredClasses} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits}/>
+          <BodyPanel activeTab={activeTab} nodes = {nodes} requiredClasses={requiredClasses} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits}/>
           
         </div>
       );
@@ -309,13 +329,12 @@ function ClassManager(){
         );
     }
     
-    function BodyPanel({activeTab, requiredClasses, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader, updateClassCredits, setUpdateClassCredits}){
+    function BodyPanel({activeTab, nodes, requiredClasses, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader, updateClassCredits, setUpdateClassCredits}){
         const [selectedEntry, setSelectedEntry] = useState(null);
         const [warning, setWarning] = useState(null);
-        const [nodes,setNodes] = useState(null);
         const [classPool, setClassPool] = useState(null);
 
-    
+
         const makeSelectedEntry = (index) =>{
             setSelectedEntry(index);
         }
@@ -334,28 +353,14 @@ function ClassManager(){
         
 
         useEffect(()=>{
-            if(requiredClasses){
-                const nodes = [];
+            if(requiredClasses){               
                 const classPool = [];
-                let count = 1;
-                let y = 0
-                let x =0
                 requiredClasses.forEach((item,index)=>{
-                    if(item.isActive){
-                        nodes.push({
-                        id: String(count),
-                        data: {label:item.header},
-                        position: {x:x,y:y}
-                        })
-                        count +=1;
-                        y+=50;
-                        x+=50
-                    }
                     classPool.push(item.header);
                 })
                 
                 //console.log(nodes)
-                setNodes(nodes);
+
                 setClassPool(classPool);
                 
             }
@@ -372,7 +377,6 @@ function ClassManager(){
         //     { id: "e2-3", source: "2", target: "3" },
         //     { id: "e2-4", source: "2", target: "4" }
         // ];
-        console.log(edges)
 
         const clickOnEntry = (item) =>{
             setClassUpdateEntry(item);
@@ -380,6 +384,8 @@ function ClassManager(){
             setUpdateClassHeader(item.header);
             setUpdateClassCredits(item.credits);
         }
+        
+
 
         return(
             <div className="tab-content">
@@ -434,11 +440,9 @@ function ClassManager(){
                 {activeTab === "tree" && 
                     <div className="graph-container">
                         <div style={{ height: '80vh', width: '50vw' }}>
-                            {(nodes && edges) && <ReactFlow nodes={nodes} edges={edges} fitView nodesDraggable={false}
-                            nodesConnectable={false}
-                            elementsSelectable={false}
-                            zoomOnScroll={false}
-                            panOnDrag={false}/>}
+                            {(nodes) && <ReactFlow nodes={nodes} edges={edges}fitView nodesDraggable={false}
+                            nodesConnectable={true}
+                            ></ReactFlow>}
                         </div>
                         <div className="class-pool">
                             <h3>Class Pool</h3>

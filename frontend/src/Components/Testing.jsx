@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { buildRoots,buildTree, findPreReqs } from "../tools/treeBuilder";
+import { buildRoots,buildTree, findPreReqs, findParams } from "../tools/treeBuilder";
 import { GraduationConverter } from "../tools/GraduationConverter";
 // feel free to break this as much as you want
 // to get here do '/testing'
@@ -98,9 +98,16 @@ const data = [
         current: "csc-270",
         postreq: "csc-320"
     },
-
-    
 ]
+
+useEffect(() => {
+    // addPrereq("csc-410","csc-320")
+    // addPostreq("csc-310","csc-410")
+    console.log(findPreReqs(data, classes,"csc-320"));
+    console.log(findParams(data, classes))
+}, []);
+
+
 
 function addPrereq(current, prereq){
     const exists = data.some(
@@ -128,13 +135,9 @@ function addPostreq(current, postreq){
     }
 }
 
-useEffect(() => {
-    addPrereq("csc-410","csc-320")
-    addPostreq("csc-310","csc-410")
-    console.log(findPreReqs(data, classes,"csc-410"));
-}, []);
 
-console.log(GraduationConverter("2028-02-01"));
+
+// console.log(GraduationConverter("2028-02-01"));
 
 
 // function AddClassToTree(header,classes){

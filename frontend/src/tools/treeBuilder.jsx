@@ -76,6 +76,52 @@ function buildTree(data,classes){
     return tree;
 }
 
+function findParams(data,classes,value){
+    const roots = buildRoots(data,classes)
+    const tree = buildTree(data,classes);
+
+
+    const visited = new Set();
+
+    const treeMap = {};
+
+    tree.forEach(node => {
+        treeMap[node.val] = node;
+    });
+ 
+    let height = 0;
+    let q = roots.map(val => treeMap[val]);
+
+    // const treeMap = {};
+
+    // tree.forEach(node => {
+    //     treeMap[node.val] = node;
+    // });
+    
+    //bfs starts
+    while (q.length > 0){
+        const currentSize = q.length;
+        let width = 0;
+        for (let i = 0 ; i< currentSize; i++){
+            const current = q.shift();
+            current.height = height;
+            current.width = width;
+            width += 1;
+            for (let j = 0 ; j < current.children.length; j++){
+                const childVal = current.children[j];
+                if(!visited.has(childVal)){
+                    q.push(treeMap[childVal]);
+                    visited.add(childVal);
+                }
+            }
+        }
+        height+=1;
+    }
+
+    return tree;
+
+}
+
 function findPreReqs(data,classes,value){
 
     const roots = buildRoots(data,classes);
@@ -103,7 +149,7 @@ function findPreReqs(data,classes,value){
     while (q.length > 0){
 
         const current = q.shift();
-
+        
         if(current.val == value){
             q = [];
             record = true;
@@ -113,7 +159,7 @@ function findPreReqs(data,classes,value){
             const childVal = current.children[i];
             if(!visited.has(childVal)){
                 q.push(treeMap[childVal]);
-                visited.add(childVal);
+                //visited.add(childVal);
                 if(record){
                     prereqs.push(treeMap[childVal].val);
                 }
@@ -123,4 +169,4 @@ function findPreReqs(data,classes,value){
     return prereqs;
 }
 
-export { buildRoots, buildTree, findPreReqs };
+export { buildRoots, buildTree, findPreReqs, findParams };
