@@ -9,6 +9,7 @@ import { data } from "react-router-dom";
 import { findParams, findPreReqs } from "../tools/treeBuilder";
 
 function ClassManager(){
+    
       const [activeTab, setActiveTab] = useState("update");
       const [edges, setEdges] = useState([]);
       const [nodes, setNodes] = useState(null);
@@ -21,6 +22,7 @@ function ClassManager(){
 
       const [filteredClasses, setFilteredClasses] = useState([]);
 
+      const [selectedEntry, setSelectedEntry] = useState(null);
       const [classUpdateEntry,setClassUpdateEntry] = useState(null);
       const [updateClassTitle, setUpdateClassTitle] = useState(null);
       const [updateClassHeader, setUpdateClassHeader] = useState(null);
@@ -82,6 +84,7 @@ function ClassManager(){
 
     useEffect(()=>{
         const nodes = [];
+        const edges = [];
         const tree = findParams(data,classes)
 
         let count = 1;
@@ -102,6 +105,17 @@ function ClassManager(){
         //                 target: String(count),
         //             });
         setNodes(nodes);
+
+        let edgeCount = 1;
+        tree.map((item)=>{
+            for (let i = 0; i<item.children ; i++)
+            edges.push({
+                id: edgeCount
+                
+            })
+            edgeCount++;
+        })
+
     },[])
 
    
@@ -136,7 +150,7 @@ function ClassManager(){
 
         if (requirement !== "All") {
             if (requirement === "Required") {
-                filtered = filtered.filter(c => c.isActive); // or isRequired later
+                filtered = filtered.filter(c => c.isActive); 
             } else {
                 filtered = filtered.filter(c => !c.isActive);
             }
@@ -165,7 +179,7 @@ function ClassManager(){
                 />
             }
           <div className="top-container">
-                <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} classUpdateEntry={classUpdateEntry} setClassUpdateEntry={setClassUpdateEntry}/>
+                <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setClassUpdateEntry={setClassUpdateEntry} setSelectedEntry = {setSelectedEntry}/>
                 {(activeTab === "delete" || activeTab === "update") && 
                     <SearchBar 
                         searchInput={searchInput}
@@ -175,7 +189,7 @@ function ClassManager(){
                 }
           </div>
           
-          <BodyPanel activeTab={activeTab} nodes = {nodes} requiredClasses={requiredClasses} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits}/>
+          <BodyPanel activeTab={activeTab} nodes = {nodes} requiredClasses={requiredClasses} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry}/>
           
         </div>
       );
@@ -183,20 +197,29 @@ function ClassManager(){
     
     export default ClassManager;
     
-    function HeaderPanel({activeTab, setActiveTab, classUpdateEntry, setClassUpdateEntry}){
+    function HeaderPanel({activeTab, setActiveTab, setClassUpdateEntry, setSelectedEntry}){
 
         const onClickAdd = () =>{
             setClassUpdateEntry(null);
+            setSelectedEntry(null);
             setActiveTab("add");
         }
 
         const onClickUpdate = () =>{
-            setClassUpdateEntry(null);
+            setSelectedEntry(null);
             setActiveTab("update");
         }
         const onClickDelete = () =>{
+            setClassUpdateEntry(null);
             setActiveTab("delete");
         }
+
+        const onClickTree = () =>{
+            setClassUpdateEntry(null);
+            setSelectedEntry(null);
+            setActiveTab("tree");
+        }
+
         return(
             <div className="tab-header">
                 <button className={activeTab === "add" ? "tab active" : "tab"}
@@ -206,17 +229,17 @@ function ClassManager(){
     
                 <button
                     className={activeTab === "update" ? "tab active" : "tab"}
-                    onClick={() => setActiveTab("update")}
+                    onClick={onClickUpdate}
                 >
                 Update
                 </button>
     
                 <button className={activeTab === "delete" ? "tab active" : "tab"}
-                onClick={() => setActiveTab("delete")}>
+                onClick={onClickDelete}>
                 Delete
                 </button>
                 <button className={activeTab === "tree" ? "tab active" : "tab"}
-                onClick={() => setActiveTab("tree")}>
+                onClick={onClickTree}>
                 Tree
                 </button>
             </div>
@@ -342,8 +365,8 @@ function ClassManager(){
         );
     }
     
-    function BodyPanel({activeTab, nodes, requiredClasses, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader, updateClassCredits, setUpdateClassCredits}){
-        const [selectedEntry, setSelectedEntry] = useState(null);
+    function BodyPanel({activeTab, nodes, requiredClasses, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader, updateClassCredits, setUpdateClassCredits, selectedEntry, setSelectedEntry}){
+       
         const [warning, setWarning] = useState(null);
         const [classPool, setClassPool] = useState(null);
 

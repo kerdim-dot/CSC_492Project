@@ -175,6 +175,7 @@ function AddClass(){
                             setSelectedDays(prev=>{
                                 const tempDays = [...prev]
                                 const removeElementIndex = tempDays.indexOf("Wednesday");
+                                console.log(removeElementIndex)
                                 if (removeElementIndex !== -1) {
                                     tempDays.splice(removeElementIndex, 1);
                                 }
@@ -187,7 +188,7 @@ function AddClass(){
                                 const tempDays = [...prev]
                                 // preserves the order of the list to always be [monday,wednesday,friday]
                                 if(currentList[0]){
-                                    tempDays.splice(0,1,"Wednesday");
+                                    tempDays.splice(1,0,"Wednesday");
                                 }else{
                                     tempDays.splice(0,0,"Wednesday");
                                 }
