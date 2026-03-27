@@ -7,6 +7,7 @@ import close from "./../assets/close.svg"
 function StudentManager(){
   const [activeTab, setActiveTab] = useState("update");
   const [selectedEntry, setSelectedEntry] = useState(null);
+  const [studentUpdateEntry, setStudentUpdateEntry] = useState(null);
   const [studentSearchList,setStudentSearchList] = useState(null);
 
 
@@ -140,13 +141,13 @@ useEffect(()=>{
   return (
     <div className="tab-pane-container">
       <div className="top-container">
-            <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setSelectedEntry={setSelectedEntry}/>
-            {(activeTab === "delete" || activeTab === "update") && <SearchBar   searchInput={searchInput} setSearchInput={setSearchInput} setShowFilter={setShowFilter}/>}
+            <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setSelectedEntry={setSelectedEntry} setStudentUpdateEntry={setStudentUpdateEntry} studentUpdateEntry={studentUpdateEntry}/>
+            {(activeTab === "delete" || activeTab === "update") && <SearchBar searchInput={searchInput} setSearchInput={setSearchInput} setShowFilter={setShowFilter}/>}
       </div>
 
        {showFilter && <FilterBlock startDate={startDate} setStartDate={setStartDate} endDate = {endDate} setEndDate={setEndDate} setShowFilter={setShowFilter} overview={overview} setOverview ={setOverview}/>}
 
-      <BodyPanel activeTab={activeTab} studentSearchList={studentSearchList} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue}/>
+      <BodyPanel activeTab={activeTab} studentSearchList={studentSearchList} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry}/>
       
     </div>
   );
@@ -154,16 +155,18 @@ useEffect(()=>{
 
 export default StudentManager;
 
-function HeaderPanel({activeTab, setActiveTab, setSelectedEntry}){
+function HeaderPanel({activeTab, setActiveTab, setSelectedEntry, setStudentUpdateEntry, studentUpdateEntry}){
 
     const makeAddTab = () =>{
-    setActiveTab("add");
-    setSelectedEntry(null);  
+        setActiveTab("add");
+        setSelectedEntry(null);  
+        setStudentUpdateEntry(null);
     }
 
     const makeUpdateTab = () =>{
         setActiveTab("update");
-        setSelectedEntry(null);  
+        setSelectedEntry(null);
+        setStudentUpdateEntry(null);  
     }
 
     return(
@@ -307,10 +310,9 @@ function UpdateBlock({updateFirstNameValue, updateLastNameValue, updateGraduatio
 }
 
 
-function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntry, updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue}){
+function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntry, updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, setStudentUpdateEntry, studentUpdateEntry}){
     const [warning, setWarning] = useState(null);
     const [multipleStudentText, setMultipleStudentText] = useState(null);
-    const [studentUpdateEntry, setStudentUpdateEntry] = useState(null);
     const [csvIsSelected, setcsvIsSelected] = useState(true);
     
     const makeSelectedEntry = (id) =>{
@@ -373,7 +375,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
     }
 
     const clickOnEntry = (item) =>{
-        setStudentUpdateEntry(item);
+        setStudentUpdateEntry(item.studentId);
         setUpdateFirstNameValue(item.firstName);
         setUpdateLastNameValue(item.lastName);
         setUpdateGraduationValue(item.graduation);
@@ -416,7 +418,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
                     <div className="entry-list">
                         {studentSearchList && studentSearchList.map((item,index)=>{
                             return(
-                            <div className={item.isBehind? "entry behind" : "entry"} onClick={()=>{clickOnEntry(item)}} >
+                            <div className={item.studentId == studentUpdateEntry? "entry highlighted":item.isBehind? "entry behind" : "entry"} onClick={()=>{clickOnEntry(item)}} >
                                     <p>{item.firstName} {item.lastName}</p>
                                     <p>{item.graduation}</p>
                             </div>)
@@ -430,7 +432,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
                     <div className="entry-list">
                         {studentSearchList && studentSearchList.map((item,index)=>{
                             return(
-                            <div className={item.isBehind? "entry behind" : "entry"} onClick={()=>{makeSelectedEntry(item.studentId)}}>
+                            <div className={item.studentId == selectedEntry? "entry highlighted" :item.isBehind? "entry behind" : "entry"} onClick={()=>{makeSelectedEntry(item.studentId)}}>
                                     <p>{item.firstName} {item.lastName}</p>
                                     <p>{item.graduation}</p>
                             </div>)

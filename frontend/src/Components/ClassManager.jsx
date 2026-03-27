@@ -165,7 +165,7 @@ function ClassManager(){
                 />
             }
           <div className="top-container">
-                <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab}/>
+                <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} classUpdateEntry={classUpdateEntry} setClassUpdateEntry={setClassUpdateEntry}/>
                 {(activeTab === "delete" || activeTab === "update") && 
                     <SearchBar 
                         searchInput={searchInput}
@@ -183,17 +183,30 @@ function ClassManager(){
     
     export default ClassManager;
     
-    function HeaderPanel({activeTab, setActiveTab}){
+    function HeaderPanel({activeTab, setActiveTab, classUpdateEntry, setClassUpdateEntry}){
+
+        const onClickAdd = () =>{
+            setClassUpdateEntry(null);
+            setActiveTab("add");
+        }
+
+        const onClickUpdate = () =>{
+            setClassUpdateEntry(null);
+            setActiveTab("update");
+        }
+        const onClickDelete = () =>{
+            setActiveTab("delete");
+        }
         return(
             <div className="tab-header">
                 <button className={activeTab === "add" ? "tab active" : "tab"}
-                onClick={() => setActiveTab("add")}>
+                    onClick={onClickAdd}>
                 Add
                 </button>
     
                 <button
-                className={activeTab === "update" ? "tab active" : "tab"}
-                onClick={() => setActiveTab("update")}
+                    className={activeTab === "update" ? "tab active" : "tab"}
+                    onClick={() => setActiveTab("update")}
                 >
                 Update
                 </button>
@@ -379,7 +392,7 @@ function ClassManager(){
         // ];
 
         const clickOnEntry = (item) =>{
-            setClassUpdateEntry(item);
+            setClassUpdateEntry(item.classId);
             setUpdateClassTitle(item.title);
             setUpdateClassHeader(item.header);
             setUpdateClassCredits(item.credits);
@@ -413,7 +426,7 @@ function ClassManager(){
                         <div className="entry-list">
                             {filteredClasses.map((item,index)=>{
                                 return(
-                                <div className="entry" onClick={()=>{clickOnEntry(item)}}>
+                                <div className={item.classId == classUpdateEntry?"entry highlighted":"entry"} onClick={()=>{clickOnEntry(item)}}>
                                         <p>{item.title} </p>
                                         <p>{item.header} </p>
                                 </div>)
