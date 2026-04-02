@@ -101,10 +101,12 @@
 .dropdown-arrow {
   width: 14px;
   height: 14px;
-  transition: transform 0.2s ease;
+  display: block;
+  transform: rotate(0deg);
+  transition: transform 0.25s ease;
 }
 
-.transition_up {
+.dropdown-arrow-open {
   transform: rotate(180deg);
 }
 

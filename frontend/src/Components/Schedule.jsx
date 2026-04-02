@@ -320,10 +320,14 @@ function ClassControls() {
                 <button
                     className="dropdown-button"
                     onClick={() => setShowCSC((prev) => !prev)}
-                >
-                    CSC Classes
-                <img src={down_arrow_black} className={showCSC?'transition_up':""}></img>
-                </button>
+                    >
+                    <span>CSC Classes</span>
+                    <img
+                        src={down_arrow_black}
+                        className={`dropdown-arrow ${showCSC ? "dropdown-arrow-open" : ""}`}
+                        alt=""
+                    />
+                    </button>
 
                 {showCSC && (
                     <div className="dropdown-menu">
@@ -340,10 +344,14 @@ function ClassControls() {
                 <button
                     className="dropdown-button"
                     onClick={() => setShowElectives((prev) => !prev)}
-                >
-                    Electives
-                <img src={down_arrow_black} className={showElectives?'transition_up':""}></img>
-                </button>
+                    >
+                    <span>Electives</span>
+                    <img
+                        src={down_arrow_black}
+                        className={`dropdown-arrow ${showElectives ? "dropdown-arrow-open" : ""}`}
+                        alt=""
+                    />
+                    </button>
 
                 {showElectives && (
                     <div className="dropdown-menu">
