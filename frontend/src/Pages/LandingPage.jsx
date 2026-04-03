@@ -18,6 +18,9 @@ export default function LoginPage() {
     const admin_account = [
         { username: "admin", password: "admin123" },
     ];
+    const supervisor_account = [
+        { username: "supervisor", password: "supervisor123" },
+    ];
           
     const user_matched = user_account.some(
       (user_account) =>
@@ -29,11 +32,19 @@ export default function LoginPage() {
         admin_account.username === username && admin_account.password === password
     );
 
+    const supervisor_matched = supervisor_account.some(
+      (supervisor_account) =>
+        supervisor_account.username === username && supervisor_account.password === password
+    );
+
     if (user_matched) {
         localStorage.setItem("role", "user");
         navigate("../user_dashboard");
     } else if (admin_matched) {
         localStorage.setItem("role", "admin");
+        navigate("../admin_dashboard")
+    } else if (supervisor_matched) {
+        localStorage.setItem("role", "supervisor");
         navigate("../admin_dashboard")
     } else {
       setError("Invalid username or password.");
