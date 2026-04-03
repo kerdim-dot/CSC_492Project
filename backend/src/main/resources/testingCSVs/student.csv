@@ -1,4 +1,4 @@
-id,firstName,lastName,graduationDate,isMajor
+id,firstName,lastName,graduationDate,isCSMajor
 1,Bill,Johnson,2027-05-15,true
 2,Alice,Smith,2027-12-20,false
 3,Bob,Brown,2028-05-15,true

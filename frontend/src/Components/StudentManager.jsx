@@ -404,7 +404,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
                     <p>Add Multiple Students </p>
                     <div className="mass-btns">
                         <button className={csvIsSelected ? "mass-add-btn-active":"mass-add-btn"} onClick={()=>{setcsvIsSelected(true)}}>CSV</button>
-                        <button className={csvIsSelected ? "mass-add-btn":"mass-add-btn-active"} onClick={()=>{setcsvIsSelected(false)}}>JSON?</button>
+                        <button className={csvIsSelected ? "mass-add-btn":"mass-add-btn-active"} onClick={()=>{setcsvIsSelected(false)}}>JSON</button>
                     </div>
                     <textarea className="mass-add-textarea" value={multipleStudentText} onChange={(e)=>{setMultipleStudentText(e.target.value)}}/>
                     <button onClick={()=>{structureStudentData(multipleStudentText)}}>submit</button>

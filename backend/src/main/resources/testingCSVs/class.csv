@@ -1,9 +1,9 @@
-1.title,header,credits,isActive
-2.Programming Problem Solving I,CSC-120,4,true
-3.Programming Problem Solving II,CSC-220,4,true
-4.Computer Organization,CSC-270,4,true
-5.Database Theory Implementation,CSC-310,4,true
-6.Algorithms and Data Structures,CSC-320,4,true
-7.Computer Networks,CSC-360,4,false
-8.Software Engineer Fundamentals,CSC-491,2,false
-9.Practice Software Engineering,CSC-492,2,false
+id,title,header,credits,isActive
+1,Programming Problem Solving I,CSC-120,4,true
+2,Programming Problem Solving II,CSC-220,4,true
+3,Computer Organization,CSC-270,4,true
+4,Database Theory Implementation,CSC-310,4,true
+5,Algorithms and Data Structures,CSC-320,4,true
+6,Computer Networks,CSC-360,4,false
+7,Software Engineer Fundamentals,CSC-491,2,false
+8,Practice Software Engineering,CSC-492,2,false

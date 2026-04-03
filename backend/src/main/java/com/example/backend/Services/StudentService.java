@@ -16,6 +16,11 @@ public class StudentService {
     }
 
     // this example does not need an abstract repository function creation, because find all is built in
+
+    public void addStudent(Student student){
+        studentRepository.save(student);
+    }
+
     public List<Student> getAllStudents(){
         return studentRepository.findAll();
     }

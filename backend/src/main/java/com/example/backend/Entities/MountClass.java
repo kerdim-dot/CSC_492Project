@@ -19,6 +19,7 @@ public class MountClass {
     private String title;
     private String header;
     private Integer credits;
+    private boolean isActive;
 
     @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <Enrollment> enrollments = new ArrayList<>();
@@ -33,10 +34,11 @@ public class MountClass {
     public MountClass() {
     }
 
-    public MountClass(String title, String header, Integer credits) {
+    public MountClass(String title, String header, Integer credits, boolean isActive) {
         this.title = title;
         this.header = header;
         this.credits = credits;
+        this.isActive = isActive;
     }
 
     public Long getClass_id() {
@@ -70,6 +72,15 @@ public class MountClass {
     public void setCredits(Integer credits) {
         this.credits = credits;
     }
+
+    public boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(boolean isActive) {
+        this.isActive = isActive;
+    }
+
 
 
 }

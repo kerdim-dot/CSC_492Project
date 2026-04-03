@@ -369,3 +369,6 @@
   border: 1px solid rgba(128, 128, 128, 0.76);
 }
 
+.completedClass{
+  background-color: rgb(60, 197, 42);
+}

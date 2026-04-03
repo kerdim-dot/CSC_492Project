@@ -1,5 +1,8 @@
 package com.example.backend.Entities;
 
+import java.time.LocalDate;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,5 +21,34 @@ public class Schedule {
     @ManyToOne
     @JoinColumn(name = "student_id")
     private Student student;
+
+    @Column(nullable = false)
+    private LocalDate scheduleStartDate;
+
+    public Schedule(){
+        
+    }
+
+    public Schedule(Student student, LocalDate scheduleStartDate){
+        this.student = student;
+        this.scheduleStartDate = scheduleStartDate;
+    }
+
+    public Student getStudent(){
+        return student;
+    }
+
+    public LocalDate getScheduleStartDate(){
+        return scheduleStartDate;
+    }
+
+
+    public void setStudent(Student student){
+        this.student = student;
+    }
+
+    public void setScheduleStartDate(LocalDate scheduleStartDate){
+        this.scheduleStartDate = scheduleStartDate;
+    }
 
 }
