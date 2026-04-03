@@ -351,13 +351,13 @@ body {
   display: none;
   list-style: none;
   padding: 0;
-  margin: 0 0 0 12px;
+  margin: 0 0 0 24px;
 }
 
 .sub_menu.show {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 0px;
 }
 
 .sub_menu li {
@@ -365,5 +365,5 @@ body {
 }
 
 .sub_menu .sidebar_link {
-  padding: 10px 12px;
+  padding: 0px 0px;
 }

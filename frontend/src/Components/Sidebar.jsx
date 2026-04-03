@@ -4,13 +4,27 @@ import admin from "./../assets/admin.svg";
 import student from "./../assets/person.svg";
 import classes from "./../assets/classes.svg";
 import schedule from "./../assets/schedule.svg";
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import down_arrow from "./../assets/down_arrow.svg";
+import { useEffect, useState } from "react";
 
 function SideBar() {
+
+    const location = useLocation();
+
+    const managementRoutes = [
+        "/student/manager",
+        "/class/manager",
+        "/enrollment/manager",
+        "/admin/manager",
+    ];
+
+    const isOnManagementRoute = managementRoutes.includes(location.pathname);
+
     const [expandedDesktop, setExpandedDesktop] = useState(true);
-    const [subbarManagement, setSubbarManagement] = useState(false);
+    const [subbarManagement, setSubbarManagement] = useState(() => {
+        return localStorage.getItem("subbarManagementOpen") === "true";
+    });
 
     const role = localStorage.getItem("role") || "user";
     const isAdmin = role === "admin" || role === "supervisor";
@@ -36,6 +50,10 @@ function SideBar() {
             : role === "admin"
                 ? "Admin"
                 : "User";
+
+    useEffect(() => {
+        localStorage.setItem("subbarManagementOpen", String(subbarManagement));
+    }, [subbarManagement]);
 
     return (
         <nav id="desktop_sidebar" className={expandedDesktop ? "" : "close"}>
@@ -115,6 +133,7 @@ function SideBar() {
                         </li>
 
                         <li className="sidebar-dropdown-group">
+
                             <button className="dropdown_btn" onClick={changeSubbarManagement}>
                                 <div className="dropdown-btn-left">
                                     <img src={admin} alt="" />
@@ -123,12 +142,12 @@ function SideBar() {
 
                                 <img
                                     src={down_arrow}
-                                    className={`dropdown-arrow ${subbarManagement ? "dropdown-arrow-open" : ""}`}
+                                    className={`dropdown-arrow ${(subbarManagement || isOnManagementRoute) ? "dropdown-arrow-open" : ""}`}
                                     alt=""
                                 />
                             </button>
 
-                            <ul className={`sub_menu ${subbarManagement ? "show" : ""}`}>
+                            <ul className={`sub_menu ${(subbarManagement || isOnManagementRoute) ? "show" : ""}`}>
                                 <li>
                                     <NavLink to="/student/manager" className="sidebar_link">
                                         <img src={admin} alt="" />
