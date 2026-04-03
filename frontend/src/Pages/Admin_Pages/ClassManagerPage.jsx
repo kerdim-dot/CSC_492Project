@@ -1,10 +1,10 @@
 
-import AdminSideBar from "../../Components/Admin_SideBar"
+import SideBar from "../../Components/Sidebar"
 import ClassManager from "../../Components/ClassManager";
 function ClassManagerPage(){
     return(
         <div className="desktop_container">
-            <AdminSideBar/>
+            <SideBar/>
             <ClassManager/>
         </div>
         

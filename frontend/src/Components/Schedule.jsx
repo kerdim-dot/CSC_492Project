@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "../schedule.css"
-// import down_arrow_black from './../assets/down_arrow_black.svg'
+import down_arrow_black from './../assets/down_arrow_black.svg'
 
 function Schedule() {
     return (

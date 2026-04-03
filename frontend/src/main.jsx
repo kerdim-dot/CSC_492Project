@@ -4,8 +4,7 @@ import './sidebar.css'
 
 import { createBrowserRouter,RouterProvider } from 'react-router-dom'
 import TestPage from './Pages/TestPage.jsx'
-import UserDashboard from './Pages/User_Pages/User_Dashboard.jsx'
-import AdminDashboard from './Pages/Admin_Pages/Admin_Dashboard.jsx'
+import Dashboard from './Pages/Dashboard.jsx'
 import Schedule from './Pages/SchedulePage.jsx'
 import StudentsPage from './Pages/Admin_Pages/StudentsPage.jsx'
 import ClassesPage from './Pages/ClassesPage.jsx'
@@ -19,8 +18,7 @@ import EnrollementManagerPage from './Pages/Admin_Pages/EnrollmentManagerPage.js
 
 const router = createBrowserRouter([
     {path:"/", element:<LandingPage/>},
-    {path:"/user_dashboard", element:<UserDashboard/>},
-    {path:"/admin_dashboard", element:<AdminDashboard/>},
+    {path:"/dashboard", element:<Dashboard/>},
     {path:"/classes", element:<ClassesPage/>},
     {path:"/students", element:<StudentsPage/>},
     {path:"/schedule", element:<Schedule/>},

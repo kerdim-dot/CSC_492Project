@@ -1,6 +1,5 @@
 import Classes from "../Components/Classes";
-import UserSideBar from "../Components/User_SideBar";
-import AdminSideBar from "../Components/Admin_SideBar";
+import SideBar from "../Components/Sidebar";
 import TestPage from "./TestPage";
 
 
@@ -8,7 +7,7 @@ function ClassesPage (){
     const role = localStorage.getItem("role");
     return (
         <div className="desktop_container">
-            {role === "admin" ? <AdminSideBar /> : <UserSideBar/>}
+            <SideBar/>
             <Classes/>
         </div>
     );

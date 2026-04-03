@@ -39,13 +39,13 @@ export default function LoginPage() {
 
     if (user_matched) {
         localStorage.setItem("role", "user");
-        navigate("../user_dashboard");
+        navigate("../dashboard");
     } else if (admin_matched) {
         localStorage.setItem("role", "admin");
-        navigate("../admin_dashboard")
+        navigate("../dashboard")
     } else if (supervisor_matched) {
         localStorage.setItem("role", "supervisor");
-        navigate("../admin_dashboard")
+        navigate("../dashboard")
     } else {
       setError("Invalid username or password.");
     }
