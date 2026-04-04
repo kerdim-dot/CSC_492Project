@@ -6,10 +6,7 @@ import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import axios from 'axios'
 
-
-function Classes(){
-
-    const requiredClasses = [
+const requiredClasses = [
         {title:	"Programming Problem Solving I",header:"CSC-120", credits: 4}, 
         {title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4},
         {title:"Computer Organization" , header:"CSC-270", credits: 4}, 
@@ -19,6 +16,8 @@ function Classes(){
         {title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2}, 
         {title:"Practice Software Engineering",header:"CSC-492", credits: 2}
     ];
+
+function Classes(){
     
     const [classes, setClasses] = useState([]);
 

@@ -3,6 +3,11 @@ import dashboard from "./../assets/dashboard.svg";
 import admin from "./../assets/admin.svg";
 import student from "./../assets/person.svg";
 import classes from "./../assets/classes.svg";
+import checklist from "./../assets/checklist.svg";
+import edit from "./../assets/edit.svg"
+import edit_person from "./../assets/person_edit.svg"
+import table_edit from "./../assets/table_edit.svg"
+import edit_admin from "./../assets/edit_admin.svg"
 import schedule from "./../assets/schedule.svg";
 import { NavLink, useLocation } from "react-router-dom";
 import down_arrow from "./../assets/down_arrow.svg";
@@ -118,6 +123,18 @@ function SideBar() {
                     </NavLink>
                 </li>
 
+                <li>
+                    <NavLink
+                        to="/progress"
+                        className={({ isActive }) =>
+                            isActive ? "sidebar_link active" : "sidebar_link"
+                        }
+                    >
+                        <img src={checklist} alt="Progress" />
+                        <span>{isAdmin || isSupervisor ? "Progress Summary" : "Progress"}</span>
+                    </NavLink>
+                </li>
+
                 {isAdmin && (
                     <>
                         <li>
@@ -136,7 +153,7 @@ function SideBar() {
 
                             <button className="dropdown_btn" onClick={changeSubbarManagement}>
                                 <div className="dropdown-btn-left">
-                                    <img src={admin} alt="" />
+                                    <img src={edit} alt="" />
                                     <span className="dropdown-btn-label">Management Tools</span>
                                 </div>
 
@@ -150,13 +167,13 @@ function SideBar() {
                             <ul className={`sub_menu ${(subbarManagement || isOnManagementRoute) ? "show" : ""}`}>
                                 <li>
                                     <NavLink to="/student/manager" className="sidebar_link">
-                                        <img src={admin} alt="" />
+                                        <img src={edit_person} alt="" />
                                         <span>Manage Students</span>
                                     </NavLink>
                                 </li>
                                 <li>
                                     <NavLink to="/class/manager" className="sidebar_link">
-                                        <img src={admin} alt="" />
+                                        <img src={table_edit} alt="" />
                                         <span>Manage Classes</span>
                                     </NavLink>
                                 </li>
@@ -170,7 +187,7 @@ function SideBar() {
                                 {isSupervisor && (
                                     <li>
                                         <NavLink to="/admin/manager" className="sidebar_link">
-                                            <img src={admin} alt="" />
+                                            <img src={edit_admin} alt="" />
                                             <span>Manage Admins</span>
                                         </NavLink>
                                     </li>
