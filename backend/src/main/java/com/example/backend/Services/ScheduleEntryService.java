@@ -20,8 +20,8 @@ public class ScheduleEntryService {
         scheduleEntryRepository.save(scheduleEntry);
     }
 
-    public List<ScheduleEntry> getAllScheduleEntries(){
-        return scheduleEntryRepository.findAll();
+    public List<ScheduleEntry> getAllStudentScheduleEntries(Long scheduleId){
+        return scheduleEntryRepository.findAllBySchedule_ScheduleId(scheduleId);
     }
 
 }

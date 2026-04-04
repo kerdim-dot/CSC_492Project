@@ -4,7 +4,9 @@ import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
 import close from "./../assets/close.svg"
 import axios from 'axios'
+import { GraduationConverter
 
+ } from "../tools/GraduationConverter";
 function StudentManager(){
   const [activeTab, setActiveTab] = useState("update");
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -27,22 +29,32 @@ function StudentManager(){
     const [currentYear, setCurrentYear] = useState(2026);
     const [currentSemester, setCurrentSemester] = useState(2);
 
+    const[classes, setClasses] = useState([]);
+    const[students, setStudents] = useState([]);
+    const[enrollment, setEnrollment] = useState([]);
 
 
     useEffect(()=>{
         
         const retriveClassData = async() =>{
             const classData = await axios.get('http://localhost:8080/test/get/classes');
+            setClasses(classData.data);
             console.log("class fetch:", classData.data)
         }
 
         const retriveStudentData = async() =>{
             const studentData = await axios.get('http://localhost:8080/test/get/students');
+            const updatedStudents = studentData.data.map((item) => ({
+                ...item,
+                graduationFormula: GraduationConverter(item.graduationDate)
+            }));
+            setStudents(updatedStudents);
             console.log("student fetch:", studentData.data)
         }
 
         const retriveEnrollmentData = async() =>{
             const enrollmentData = await axios.get('http://localhost:8080/test/get/enrollments');
+            setEnrollment(enrollmentData.data);
             console.log("enrollment fetch:",enrollmentData.data)
         }
 
@@ -52,39 +64,45 @@ function StudentManager(){
 
     },[])
 
-  const classes = [
-        {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true,isRequired:true}, 
-        {classId:2,title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4,isActive: true,isRequired:true},
-        {classId:3,title:"Computer Organization" , header:"CSC-270", credits: 4,isActive: true,isRequired:true}, 
-        {classId:4,title:"Database Theory Implementation",header:"CSC-310", credits: 4,isActive: true,isRequired:true}, 
-        {classId:5,title:"Algorithms and Data Structures",header:"CSC-320", credits: 4,isActive: true,isRequired:true}, 
-        {classId:6,title:"Computer Networks",header:"CSC-360", credits: 4,isActive: false,isRequired:true}, 
-        {classId:7,title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2,isActive: false,isRequired:true}, 
-        {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false,isRequired:true}
-    ];
+//   const classes = [
+//         {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true,isRequired:true}, 
+//         {classId:2,title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4,isActive: true,isRequired:true},
+//         {classId:3,title:"Computer Organization" , header:"CSC-270", credits: 4,isActive: true,isRequired:true}, 
+//         {classId:4,title:"Database Theory Implementation",header:"CSC-310", credits: 4,isActive: true,isRequired:true}, 
+//         {classId:5,title:"Algorithms and Data Structures",header:"CSC-320", credits: 4,isActive: true,isRequired:true}, 
+//         {classId:6,title:"Computer Networks",header:"CSC-360", credits: 4,isActive: false,isRequired:true}, 
+//         {classId:7,title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2,isActive: false,isRequired:true}, 
+//         {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false,isRequired:true}
+//     ];
 
-    const enrollment = [
-        {enrollmentId:1,studentId:1, classId:1},
-        {enrollmentId:2,studentId:1, classId:2},
-        {enrollmentId:3,studentId:1, classId:3},
-        {enrollmentId:4,studentId:2, classId:1},
-    ]
+//     const enrollment = [
+//         {enrollmentId:1,studentId:1, classId:1},
+//         {enrollmentId:2,studentId:1, classId:2},
+//         {enrollmentId:3,studentId:1, classId:3},
+//         {enrollmentId:4,studentId:2, classId:1},
+//     ]
 
-    const students = [
-            {studentId:1,firstName:"Bill" , lastName:"Hart", graduation: "1/2029", isMajor:true ,classes:null, credits:0},
-            {studentId:2,firstName:"John" , lastName:"Doe", graduation: "2/2028", isMajor:true ,classes:null, credits:0}
-    ]
+//     const students = [
+//             {studentId:1,firstName:"Bill" , lastName:"Hart", graduation: "1/2029", isMajor:true ,classes:null, credits:0},
+//             {studentId:2,firstName:"John" , lastName:"Doe", graduation: "2/2028", isMajor:true ,classes:null, credits:0}
+//     ]
 
 useEffect(()=>{
 
-        if(enrollment && classes && students){
+        if(enrollment.length != 0 && classes.length != 0 && students.length != 0){
             const enrollmentMap = {};
 
             enrollment.forEach((item, index)=>{
+                if(!enrollmentMap[item.student_id]){
+                    enrollmentMap[item.student_id] = [];
+                }
+                enrollmentMap[item.student_id].push(item.class_id);
+            })
+
+            students.forEach((item)=>{
                 if(!enrollmentMap[item.studentId]){
                     enrollmentMap[item.studentId] = [];
                 }
-                enrollmentMap[item.studentId].push(item.classId);
             })
 
             //console.log(enrollmentMap)
@@ -93,8 +111,8 @@ useEffect(()=>{
 
             // checks how many semesters a student has, not including the current semester
             function timeCalculator(student){
-                const graduationSemester = student.graduation.substring(0,student.graduation.indexOf("/"));
-                const graduationYear = student.graduation.substring(1+student.graduation.indexOf("/"));
+                const graduationSemester = student.graduationFormula.substring(0,student.graduationFormula.indexOf("/"));
+                const graduationYear = student.graduationFormula.substring(1+student.graduationFormula.indexOf("/"));
                 const timerFormula =  ((graduationYear - currentYear)*2) + (graduationSemester - currentSemester)
                 return timerFormula;
             }
@@ -108,7 +126,7 @@ useEffect(()=>{
                 const studentSemestersLeft = timeCalculator(studentItem);
                 classes.forEach((classItem)=>{
                     const headerNumber = Number(classItem.header.substring(classItem.header.indexOf("-")+1,classItem.header.indexOf("-")+2));
-                    const hasTakenClass = enrollmentMap[studentItem.studentId].includes(classItem.classId);
+                    const hasTakenClass = enrollmentMap[studentItem.studentId].includes(classItem.class_id);
                     const classSemesters = 8-(headerNumber*2)
                     if(!hasTakenClass && studentSemestersLeft<=classSemesters){
                         //console.log(classItem.header,classSemesters,studentSemestersLeft);
@@ -126,7 +144,7 @@ useEffect(()=>{
 
         // key is studentsId, value is a list of classes they have taken
         
-    },[])
+    },[enrollment,students,classes])
 
     useEffect(() => {
     if (!studentsActive) return;
@@ -404,7 +422,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
         setStudentUpdateEntry(item.studentId);
         setUpdateFirstNameValue(item.firstName);
         setUpdateLastNameValue(item.lastName);
-        setUpdateGraduationValue(item.graduation);
+        setUpdateGraduationValue(item.graduationDate);
     }
 
     return(

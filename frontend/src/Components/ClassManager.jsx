@@ -29,46 +29,48 @@ function ClassManager(){
       const [updateClassHeader, setUpdateClassHeader] = useState(null);
       const [updateClassCredits, setUpdateClassCredits] = useState(null);
 
+      const [classes,setClasses] = useState([]);
 
       useEffect(()=>{
         
         const retriveClassData = async() =>{
             const classData = await axios.get('http://localhost:8080/test/get/classes');
+            setClasses(classData.data);
             console.log("class fetch:", classData.data)
         }
         retriveClassData();
     },[])
 
-      const [requiredClasses, setRequiredClasses ]= useState ([
-        {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true}, 
-        {classId:2,title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4,isActive: true},
-        {classId:3,title:"Computer Organization" , header:"CSC-270", credits: 4,isActive: true}, 
-        {classId:4,title:"Database Theory Implementation",header:"CSC-310", credits: 4,isActive: true}, 
-        {classId:5,title:"Algorithms and Data Structures",header:"CSC-320", credits: 4,isActive: true}, 
-        {classId:6,title:"Computer Networks",header:"CSC-360", credits: 4,isActive: false}, 
-        {classId:7,title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2,isActive: false}, 
-        {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false}
-     ]);
+    //   const [requiredClasses, setRequiredClasses ]= useState ([
+    //     {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true}, 
+    //     {classId:2,title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4,isActive: true},
+    //     {classId:3,title:"Computer Organization" , header:"CSC-270", credits: 4,isActive: true}, 
+    //     {classId:4,title:"Database Theory Implementation",header:"CSC-310", credits: 4,isActive: true}, 
+    //     {classId:5,title:"Algorithms and Data Structures",header:"CSC-320", credits: 4,isActive: true}, 
+    //     {classId:6,title:"Computer Networks",header:"CSC-360", credits: 4,isActive: false}, 
+    //     {classId:7,title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2,isActive: false}, 
+    //     {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false}
+    //  ]);
 
-    //  const tree = [{
-    //     value: "CSC-120",
-    //     children: [{
-    //         value: "CSC-220",
-    //         children: [{
-    //             value: "CSC-270",
-    //             children:[{
-    //                 value:"CSC-310"
-    //             },
-    //             {
-    //                 value:"CSC-320"
-    //             }]
-    //         }]
-    //     }]
-    //  }]
+     const tree = [{
+        value: "CSC-120",
+        children: [{
+            value: "CSC-220",
+            children: [{
+                value: "CSC-270",
+                children:[{
+                    value:"CSC-310"
+                },
+                {
+                    value:"CSC-320"
+                }]
+            }]
+        }]
+     }]
 
      
      
-    const classes = ["csc-120","csc-220","csc-270","csc-310","csc-320","csc-410"];
+    const classess = ["csc-120","csc-220","csc-270","csc-310","csc-320","csc-410"];
 
     const data = [
         {
@@ -96,7 +98,7 @@ function ClassManager(){
     useEffect(()=>{
         const nodes = [];
         const edges = [];
-        const tree = findParams(data,classes)
+        const tree = findParams(data,classess)
 
         let count = 1;
         tree.map((item)=>{
@@ -134,7 +136,7 @@ function ClassManager(){
 
 
     useEffect(() => {
-        let filtered = [...requiredClasses];
+        let filtered = [...classes];
 
         if (searchInput) {
             filtered = filtered.filter((item) => {
@@ -173,7 +175,7 @@ function ClassManager(){
 
         setFilteredClasses(filtered);
 
-    }, [requiredClasses, searchInput, year, requirement, credits]);
+    }, [classes, searchInput, year, requirement, credits]);
     
       
       return (
@@ -200,7 +202,7 @@ function ClassManager(){
                 }
           </div>
           
-          <BodyPanel activeTab={activeTab} nodes = {nodes} requiredClasses={requiredClasses} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry}/>
+          <BodyPanel activeTab={activeTab} nodes = {nodes} classes={classes} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry}/>
           
         </div>
       );
@@ -376,7 +378,7 @@ function ClassManager(){
         );
     }
     
-    function BodyPanel({activeTab, nodes, requiredClasses, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader, updateClassCredits, setUpdateClassCredits, selectedEntry, setSelectedEntry}){
+    function BodyPanel({activeTab, nodes, classes, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader, updateClassCredits, setUpdateClassCredits, selectedEntry, setSelectedEntry}){
        
         const [warning, setWarning] = useState(null);
         const [classPool, setClassPool] = useState(null);
@@ -400,9 +402,9 @@ function ClassManager(){
         
 
         useEffect(()=>{
-            if(requiredClasses){               
+            if(classes){               
                 const classPool = [];
-                requiredClasses.forEach((item,index)=>{
+                classes.forEach((item,index)=>{
                     classPool.push(item.header);
                 })
                 
@@ -411,7 +413,7 @@ function ClassManager(){
                 setClassPool(classPool);
                 
             }
-        },[requiredClasses])
+        },[classes])
         // const nodes = [
         //     { id: "1", position: { x: 250, y: 0 }, data: { label: "CSC120" } },
         //     { id: "2", position: { x: 250, y: 100 }, data: { label: "CSC220" } },
@@ -426,7 +428,7 @@ function ClassManager(){
         // ];
 
         const clickOnEntry = (item) =>{
-            setClassUpdateEntry(item.classId);
+            setClassUpdateEntry(item.class_id);
             setUpdateClassTitle(item.title);
             setUpdateClassHeader(item.header);
             setUpdateClassCredits(item.credits);
@@ -460,7 +462,7 @@ function ClassManager(){
                         <div className="entry-list">
                             {filteredClasses.map((item,index)=>{
                                 return(
-                                <div className={item.classId == classUpdateEntry?"entry highlighted":"entry"} onClick={()=>{clickOnEntry(item)}}>
+                                <div className={item.class_id == classUpdateEntry?"entry highlighted":"entry"} onClick={()=>{clickOnEntry(item)}}>
                                         <p>{item.title} </p>
                                         <p>{item.header} </p>
                                 </div>)
@@ -475,7 +477,7 @@ function ClassManager(){
                         <div className="entry-list">
                             {filteredClasses.map((item,index)=>{
                                 return(
-                                <div className={selectedEntry === item.classId ?"entry highlighted":"entry"} onClick={()=>{makeSelectedEntry(item.classId)}}>
+                                <div className={selectedEntry === item.class_id ?"entry highlighted":"entry"} onClick={()=>{makeSelectedEntry(item.class_id)}}>
                                         <p>{item.title} </p>
                                         <p>{item.header} </p>
                                 </div>)

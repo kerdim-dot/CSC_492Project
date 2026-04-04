@@ -16,13 +16,12 @@ public class ScheduleService {
         this.scheduleRepository = scheduleRepository;
     }
 
-    public void addScheduleEntry(Schedule schedule){
+    public void addSchedule(Schedule schedule){
         scheduleRepository.save(schedule);
     }
 
-    public List<Schedule> getAllScheduleEntries(){
-        return scheduleRepository.findAll();
+
+    public List<Schedule> getAllStudentSchedules(long studentId){
+        return scheduleRepository.findAllByStudent_StudentId(studentId);
     }
-
-
 }

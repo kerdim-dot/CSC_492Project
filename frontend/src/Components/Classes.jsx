@@ -6,16 +6,16 @@ import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import axios from 'axios'
 
-const requiredClasses = [
-        {title:	"Programming Problem Solving I",header:"CSC-120", credits: 4}, 
-        {title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4},
-        {title:"Computer Organization" , header:"CSC-270", credits: 4}, 
-        {title:"Database Theory Implementation",header:"CSC-310", credits: 4}, 
-        {title:"Algorithms and Data Structures",header:"CSC-320", credits: 4}, 
-        {title:"Computer Networks",header:"CSC-360", credits: 4}, 
-        {title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2}, 
-        {title:"Practice Software Engineering",header:"CSC-492", credits: 2}
-    ];
+// const requiredClasses = [
+//         {title:	"Programming Problem Solving I",header:"CSC-120", credits: 4}, 
+//         {title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4},
+//         {title:"Computer Organization" , header:"CSC-270", credits: 4}, 
+//         {title:"Database Theory Implementation",header:"CSC-310", credits: 4}, 
+//         {title:"Algorithms and Data Structures",header:"CSC-320", credits: 4}, 
+//         {title:"Computer Networks",header:"CSC-360", credits: 4}, 
+//         {title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2}, 
+//         {title:"Practice Software Engineering",header:"CSC-492", credits: 2}
+//     ];
 
 function Classes(){
     
@@ -25,7 +25,7 @@ function Classes(){
         
         const retriveClassData = async() =>{
             const classData = await axios.get('http://localhost:8080/test/get/classes');
-            setClasses (classData);
+            setClasses (classData.data);
             console.log("class fetch:", classData.data)
         }
 
@@ -45,9 +45,9 @@ function Classes(){
      
 
     useEffect(() => {
-    if (!requiredClasses) return;
+    if (!classes) return;
 
-        let filtered = [...requiredClasses];
+        let filtered = [...classes];
 
         // 🔍 SEARCH
         if (searchInput) {
@@ -91,7 +91,7 @@ function Classes(){
 
         setClassSearchList(filtered);
 
-    }, [requiredClasses, searchInput, year, requirement, credits]);
+    }, [classes, searchInput, year, requirement, credits]);
 
     return(
         <div className="classes-container">

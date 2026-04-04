@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.backend.Entities.Enrollment;
 import com.example.backend.Entities.Student;
 import com.example.backend.Repositories.EnrollmentRepository;
+import com.example.backend.dtos.EnrollmentDTO;
 
 @Service
 public class EnrollmentService {
@@ -20,7 +21,7 @@ public class EnrollmentService {
         enrollmentRepository.save(enrollment);
     }
 
-    public List<Enrollment> getAllEnrollments(){
-        return enrollmentRepository.findAll();
+    public List<EnrollmentDTO> getAllEnrollments(){
+        return enrollmentRepository.findAllEnrollmentDTOs();
     }
 }
