@@ -7,6 +7,7 @@ import { ReactFlow, Background, Controls, Position,applyEdgeChanges } from '@xyf
 import '@xyflow/react/dist/style.css';
 import { data } from "react-router-dom";
 import { findParams, findPreReqs } from "../tools/treeBuilder";
+import axios from 'axios';
 
 function ClassManager(){
     
@@ -27,6 +28,16 @@ function ClassManager(){
       const [updateClassTitle, setUpdateClassTitle] = useState(null);
       const [updateClassHeader, setUpdateClassHeader] = useState(null);
       const [updateClassCredits, setUpdateClassCredits] = useState(null);
+
+
+      useEffect(()=>{
+        
+        const retriveClassData = async() =>{
+            const classData = await axios.get('http://localhost:8080/test/get/classes');
+            console.log("class fetch:", classData.data)
+        }
+        retriveClassData();
+    },[])
 
       const [requiredClasses, setRequiredClasses ]= useState ([
         {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true}, 

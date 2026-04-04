@@ -2,7 +2,7 @@ import { useLocation } from 'react-router'
 import { useEffect, useState } from "react";
 import { buildRoots,buildTree, findPreReqs, findParams } from "../tools/treeBuilder";
 import Students from './Students';
-
+import axios from 'axios'
 
 function StudentZoom(){
 
@@ -32,6 +32,28 @@ function StudentZoom(){
     const [showFilter,setShowFilter] = useState(false);
     const [overview, setOverview] = useState("All");
 
+    useEffect(()=>{
+        
+        const retriveClassData = async() =>{
+            const classData = await axios.get('http://localhost:8080/test/get/classes');
+            console.log("class fetch:", classData.data)
+        }
+
+        const retriveStudentData = async() =>{
+            const studentData = await axios.get('http://localhost:8080/test/get/students');
+            console.log("student fetch:", studentData.data)
+        }
+
+        const retriveEnrollmentData = async() =>{
+            const enrollmentData = await axios.get('http://localhost:8080/test/get/enrollments');
+            console.log("enrollment fetch:",enrollmentData.data)
+        }
+
+        retriveClassData();
+        retriveStudentData();
+        retriveEnrollmentData();
+
+    },[])
     
 
     useEffect(()=>{

@@ -59,7 +59,7 @@ public class TestController {
 
         String line;
         String[] columnSpliter = {};
-        while((line = brClass.readLine())!= null){
+        while((line = brClass.readLine()) != null){
             columnSpliter = line.split(",");
             boolean convertIsActive = Boolean.parseBoolean(columnSpliter[4]);
             int convertCredits = Integer.parseInt(columnSpliter[3]);
@@ -67,7 +67,7 @@ public class TestController {
             mountClassService.addClass(mountClass);
         }
 
-        while((line = brStudent.readLine())!= null){
+        while((line = brStudent.readLine()) != null){
             columnSpliter = line.split(",");
             LocalDate graduationDateConverter = LocalDate.parse(columnSpliter[3]);
             Boolean isCSMajorConverter = Boolean.parseBoolean(columnSpliter[4]);
@@ -76,7 +76,7 @@ public class TestController {
         }
 
 
-        while((line = brEnrollment.readLine())!= null){
+        while((line = brEnrollment.readLine()) != null){
             columnSpliter = line.split(",");
             
             Optional <Student> studentOptional  = studentRepository.findById(Long.parseLong(columnSpliter[1]));
@@ -89,6 +89,12 @@ public class TestController {
                 Enrollment enrollment = new Enrollment(mountClass,student,statusConverter);
                 enrollmentService.addEnrollment(enrollment);
             }          
+        }
+
+        while((line = brSchedule.readLine()) != null){
+            columnSpliter = line.split(",");
+        
+            
         }
     }
 
@@ -105,4 +111,5 @@ public class TestController {
     public List<Enrollment> getAllEnrollments(){
         return enrollmentService.getAllEnrollments();
     }
+
 }

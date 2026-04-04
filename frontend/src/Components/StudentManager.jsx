@@ -3,6 +3,7 @@ import '../adminPanel.css'
 import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
 import close from "./../assets/close.svg"
+import axios from 'axios'
 
 function StudentManager(){
   const [activeTab, setActiveTab] = useState("update");
@@ -25,6 +26,31 @@ function StudentManager(){
     const [studentsActive, setStudentsActive] = useState(null);
     const [currentYear, setCurrentYear] = useState(2026);
     const [currentSemester, setCurrentSemester] = useState(2);
+
+
+
+    useEffect(()=>{
+        
+        const retriveClassData = async() =>{
+            const classData = await axios.get('http://localhost:8080/test/get/classes');
+            console.log("class fetch:", classData.data)
+        }
+
+        const retriveStudentData = async() =>{
+            const studentData = await axios.get('http://localhost:8080/test/get/students');
+            console.log("student fetch:", studentData.data)
+        }
+
+        const retriveEnrollmentData = async() =>{
+            const enrollmentData = await axios.get('http://localhost:8080/test/get/enrollments');
+            console.log("enrollment fetch:",enrollmentData.data)
+        }
+
+        retriveClassData();
+        retriveStudentData();
+        retriveEnrollmentData();
+
+    },[])
 
   const classes = [
         {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true,isRequired:true}, 

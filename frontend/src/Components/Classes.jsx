@@ -4,8 +4,12 @@ import close from "./../assets/close.svg"
 import "../searchers.css"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
+import axios from 'axios'
 
-const requiredClasses = [
+
+function Classes(){
+
+    const requiredClasses = [
         {title:	"Programming Problem Solving I",header:"CSC-120", credits: 4}, 
         {title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4},
         {title:"Computer Organization" , header:"CSC-270", credits: 4}, 
@@ -16,7 +20,19 @@ const requiredClasses = [
         {title:"Practice Software Engineering",header:"CSC-492", credits: 2}
     ];
     
-function Classes(){
+    const [classes, setClasses] = useState([]);
+
+    useEffect(()=>{
+        
+        const retriveClassData = async() =>{
+            const classData = await axios.get('http://localhost:8080/test/get/classes');
+            setClasses (classData);
+            console.log("class fetch:", classData.data)
+        }
+
+        retriveClassData();
+    },[])
+
 
     const [classSearchList, setClassSearchList] = useState(null);
     

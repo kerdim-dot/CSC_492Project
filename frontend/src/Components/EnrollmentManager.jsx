@@ -8,6 +8,29 @@ function EnrollmentManager(){
     const [studentSearchList, setStudentSearchList] = useState(null);
     const [selectedStudentId, setSelectedStudentId] = useState(null);
 
+    useEffect(()=>{
+        
+        const retriveClassData = async() =>{
+            const classData = await axios.get('http://localhost:8080/test/get/classes');
+            console.log("class fetch:", classData.data)
+        }
+
+        const retriveStudentData = async() =>{
+            const studentData = await axios.get('http://localhost:8080/test/get/students');
+            console.log("student fetch:", studentData.data)
+        }
+
+        const retriveEnrollmentData = async() =>{
+            const enrollmentData = await axios.get('http://localhost:8080/test/get/enrollments');
+            console.log("enrollment fetch:",enrollmentData.data)
+        }
+
+        retriveClassData();
+        retriveStudentData();
+        retriveEnrollmentData();
+
+    },[])
+
     const classes = [
         {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true,isRequired:true}, 
         {classId:2,title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4,isActive: true,isRequired:true},
