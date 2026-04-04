@@ -257,19 +257,184 @@ function AlterCoursesModal({ isAdmin = false, courses = [], onClose }) {
     );
 }
 
+function CourseDropdownItem({ course }) {
+    const sections = Array.isArray(course.sections) ? course.sections : [];
+    const [selectedSectionIndex, setSelectedSectionIndex] = useState(0);
+    const [showDetails, setShowDetails] = useState(false);
+    const [isWide, setIsWide] = useState(false);
+
+    if (!course || sections.length === 0) return null;
+
+    const selectedSection = sections[selectedSectionIndex] ?? sections[0];
+    const canExpandWide = sections.length > 3;
+
+    return (
+        <div className={`course-layout-card ${isWide ? "wide" : ""}`}>
+
+            {/* Top row: header box + sections */}
+            <div className="course-layout-top">
+                <div className="course-header-box">
+                    <div className="course-code-pill">{course.code}</div>
+                    <div className="course-name-pill">{course.title}</div>
+                    <div className="course-card-credits">{course.credits} credits</div>
+                </div>
+                <div className="course-sections-area">
+                    {sections.map((section, index) => (
+                        <button
+                            key={section.sectionNumber}
+                            type="button"
+                            className={`section-choice-card ${index === selectedSectionIndex ? "active" : ""}`}
+                            onClick={() => setSelectedSectionIndex(index)}
+                        >
+                            <div className="section-number-badge">{section.sectionNumber}</div>
+                            <div className="section-choice-stack">{section.days}</div>
+                            <div className="section-choice-stack">
+                                {section.startTime} - {section.endTime}
+                            </div>
+                            <div className="section-choice-stack">
+                                {section.seatsFilled}/{section.totalSeats}
+                            </div>
+                        </button>
+                    ))}
+                    {canExpandWide && (
+                        <button
+                            type="button"
+                            className="section-width-toggle"
+                            onClick={() => setIsWide((prev) => !prev)}
+                        >
+                            {isWide ? "←" : "→"}
+                        </button>
+                    )}
+                </div>
+            </div>
+
+            {/* Bottom row: professor + description, fully independent */}
+            <div className="course-professor-description-row">
+                <div className="course-professor-box">
+                    <div className="course-professor-label">Professor</div>
+                    <div className="course-card-professor">{selectedSection.professor}</div>
+                </div>
+                <div className="course-description-box">
+                    <span className="course-description-text">{course.description}</span>
+                </div>
+            </div>
+
+            {showDetails && (
+                <CourseDetailsModal
+                    course={course}
+                    onClose={() => setShowDetails(false)}
+                />
+            )}
+
+        </div>
+    );
+}
+
+function CourseDetailsModal({ course, onClose }) {
+    return (
+        <div className="course-details-backdrop">
+            <div className="course-details-modal">
+                <div className="course-details-header">
+                    <div>
+                        <h2>{course.code}</h2>
+                        <p>{course.title}</p>
+                    </div>
+                    <button className="alter-close-button" onClick={onClose}>
+                        ×
+                    </button>
+                </div>
+
+                <div className="course-details-body">
+                    <p>{course.description}</p>
+
+                    <div className="course-details-sections">
+                        {course.sections.map((section) => (
+                            <div key={section.sectionNumber} className="course-details-section-card">
+                                <strong>Section {section.sectionNumber}</strong>
+                                <p>{section.professor}</p>
+                                <p>{section.days}</p>
+                                <p>
+                                    {section.startTime} - {section.endTime}
+                                </p>
+                                <p>
+                                    {section.seatsFilled}/{section.totalSeats} seats
+                                </p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 function ClassControls() {
     const [showCSC, setShowCSC] = useState(false);
     const [showElectives, setShowElectives] = useState(false);
 
     const cscClasses = [
-        "CSC-120",
-        "CSC-220",
-        "CSC-270",
-        "CSC-310",
-        "CSC-320",
-        "CSC-360",
-        "CSC-491",
-        "CSC-492",
+        {
+            code: "CSC-120",
+            title: "Programming Problem Solving I",
+            credits: 4,
+            description:
+                "Introduction to programming fundamentals, structured problem solving, and basic software development practices.",
+            sections: [
+                {
+                    sectionNumber: "01",
+                    days: "MWF",
+                    startTime: "7:30 AM",
+                    endTime: "8:35 AM",
+                    seatsFilled: 18,
+                    totalSeats: 24,
+                    professor: "Dr. Smith",
+                },
+            ],
+        },
+        {
+            code: "CSC-320",
+            title: "Algorithms and Data Structures",
+            credits: 4,
+            description:
+                "Study of data structures, algorithm design, asymptotic analysis, and implementation techniques for efficient software systems.",
+            sections: [
+                {
+                    sectionNumber: "01",
+                    days: "MWF",
+                    startTime: "10:00 AM",
+                    endTime: "11:05 AM",
+                    seatsFilled: 22,
+                    totalSeats: 30,
+                    professor: "Dr. Jones",
+                },
+                {
+                    sectionNumber: "02",
+                    days: "TR",
+                    startTime: "2:20 PM",
+                    endTime: "4:00 PM",
+                    seatsFilled: 28,
+                    totalSeats: 28,
+                    professor: "Dr. Patel",
+                },
+            ],
+        },
+        {
+            code: "CSC-360",
+            title: "Computer Networks",
+            credits: 4,
+            description: "This course discusses network traffic, packets, DNS, DHCP, and more.",
+            sections: [
+                {
+                    sectionNumber: "01",
+                    days: "MWF",
+                    startTime: "8:45 AM",
+                    endTime: "9:50 AM",
+                    seatsFilled: 10,
+                    totalSeats: 15,
+                    professor: "Dr. Acula",
+                }
+            ]
+        }
     ];
 
     const electives = [
@@ -278,7 +443,8 @@ function ClassControls() {
         "Elective 3",
     ];
 
-    const isAdmin = true;
+    const role = localStorage.getItem("role") || "user";
+    const isAdmin = role === "admin" || role === "supervisor";
     const [showAlter, setShowAlter] = useState(false);
 
     const existingCourses = [
@@ -332,9 +498,7 @@ function ClassControls() {
                 {showCSC && (
                     <div className="dropdown-menu">
                         {cscClasses.map((course) => (
-                            <button key={course} className="dropdown-item">
-                                {course}
-                            </button>
+                            <CourseDropdownItem key={course.code} course={course} />
                         ))}
                     </div>
                 )}
@@ -356,9 +520,7 @@ function ClassControls() {
                 {showElectives && (
                     <div className="dropdown-menu">
                         {electives.map((course) => (
-                            <button key={course} className="dropdown-item">
-                                {course}
-                            </button>
+                            <CourseDropdownItem key={course.code} course={course} />
                         ))}
                     </div>
                 )}

@@ -46,7 +46,7 @@
 
 .class-controls {
   display: flex;
-  gap: 50px;
+  gap: 125px;
   align-items: flex-start;
   flex-wrap: wrap;
   padding-bottom: 180px;
@@ -74,52 +74,291 @@
   box-sizing: border-box;
 }
 
-.dropdown-menu {
-  min-width: 320px;
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  box-sizing: border-box;
-}
-
-.dropdown-item {
-  width: 100%;
-  border: none;
-  background: #f5f5f5;
-  padding: 10px 12px;
-  border-radius: 6px;
-  text-align: left;
-  cursor: pointer;
-  box-sizing: border-box;
+.dropdown-button:hover {
+  background: #f7f7f7;
 }
 
 .dropdown-arrow {
-  width: 14px; 
+  width: 14px;
   height: 14px;
   display: block;
   transform: rotate(0deg);
   transition: transform 0.25s ease;
+  flex-shrink: 0;
 }
 
 .dropdown-arrow-open {
   transform: rotate(180deg);
 }
 
-.dropdown-button:hover {
+.dropdown-menu {
+  min-width: 760px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-sizing: border-box;
+}
+
+.course-dropdown-item {
+  width: 100%;
+}
+
+/* New unified course card layout */
+
+.course-layout-card {
+  width: 100%;
+  max-width: 760px;
+  border: 1px solid #d8d8d8;
+  border-radius: 22px;
+  background: #fafafa;
+  padding: 14px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.course-layout-card.wide {
+  max-width: 1040px;
+}
+
+.course-layout-top {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.course-layout-top-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  width: 100%;
+}
+
+.course-header-box {
+  flex: 1;
+  background: #ece8f3;
+  border-radius: 22px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.course-code-pill,
+.course-name-pill {
+  background: rgba(255, 255, 255, 0.78);
+  border-radius: 10px;
+  padding: 8px 10px;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.course-code-pill {
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.course-name-pill {
+  font-size: 16px;
+  color: #333;
+}
+
+.course-card-credits {
+  font-size: 16px;
+  color: #282828;
+  text-align: left;
+  padding-left: 6px;
+}
+
+.course-professor-label {
+  font-size: 14px;
+  color: #282828;
+}
+
+.course-card-professor {
+  font-weight: 600;
+  text-align: left;
+}
+
+.course-sections-area {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: nowrap;
+}
+
+.section-choice-card {
+  min-width: 120px;
+  border: 1px solid #d5d5d5;
+  background: white;
+  border-radius: 16px;
+  padding: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  text-align: left;
+  box-sizing: border-box;
+}
+
+.section-choice-card:hover {
+  background: #f8f3fc;
+}
+
+.section-choice-card.active {
+  border-color: #8e5cc7;
+  background: #f4effa;
+}
+
+.section-number-badge {
+  width: fit-content;
+  background: #ece8f3;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.section-choice-stack {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.section-width-toggle {
+  min-width: 40px;
+  height: 40px;
+  border: 1px solid #d5d5d5;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.section-width-toggle:hover {
   background: #f7f7f7;
 }
 
-.dropdown-item:hover {
-  background: #e9e9e9;
+.course-professor-description-row {
+  display: flex;
+  flex-wrap: nowrap;       /* Prevent wrapping to a second row */
+  gap: 12px;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.course-description-box {
+  flex: 1 1 0;             /* 0 basis lets it shrink/grow correctly */
+  min-width: 0;
+  overflow: hidden;        /* Prevents long text from blowing out the row */
+  display: block;
+}
+
+.course-professor-box {
+  flex: 0 0 190px;
+  width: 190px;
+  min-width: 190px;
+  max-width: 190px;
+  background: #ece8f3;
+  border-radius: 16px;
+  padding: 16px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.course-description-text {
+  margin: 0;
+  padding: 0;
+  display: block;
+  text-align: left;
+  line-height: 1.5;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: normal;
+}
+
+/* Course details modal */
+
+.course-details-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.25);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.course-details-modal {
+  width: min(700px, 90vw);
+  max-height: 85vh;
+  overflow-y: auto;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.course-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.course-details-header h2 {
+  margin: 0 0 4px 0;
+}
+
+.course-details-header p {
+  margin: 0;
+}
+
+.course-details-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.course-details-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.course-details-section-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+/* Admin controls */
+
+.admin-actions {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
 }
 
 .admin-assign {
-  margin-left: auto;
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -152,16 +391,7 @@
   pointer-events: auto;
 }
 
-.admin-assign-button {
-  padding: 10px 16px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  background: white;
-  cursor: pointer;
-  font-weight: 600;
-  white-space: nowrap;
-}
-
+.admin-assign-button,
 .admin-alter-button {
   padding: 10px 16px;
   border: 1px solid #ccc;
@@ -172,17 +402,12 @@
   white-space: nowrap;
 }
 
-.admin-assign-button:hover {
+.admin-assign-button:hover,
+.admin-alter-button:hover {
   background: #f7f7f7;
 }
 
-.admin-actions {
-  margin-left: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 10px;
-}
+/* Alter modal */
 
 .alter-modal-backdrop {
   position: fixed;
@@ -206,7 +431,98 @@
   border-radius: 16px;
   background:
     linear-gradient(white, white) padding-box,
-    linear-gradient(135deg, rgb(119, 48, 151),rgb(206, 87, 230)) border-box;
+    linear-gradient(135deg, rgb(119, 48, 151), rgb(206, 87, 230)) border-box;
   padding: 24px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.alter-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.alter-close-button {
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.alter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.alter-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.alter-form input,
+.alter-form select {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font: inherit;
+}
+
+.alter-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.alter-save-button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #ac30e6;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.alter-save-button:hover {
+  background: #c461f1;
+}
+
+/* Responsive */
+
+@media (max-width: 1100px) {
+  .dropdown-menu {
+    min-width: 100%;
+    width: 100%;
+  }
+
+  .course-layout-card,
+  .course-layout-card.wide {
+    max-width: 100%;
+  }
+
+  .course-layout-main {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) auto;
+    gap: 16px;
+    align-items: start;
+  }
+
+  .course-sections-area {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 700px) {
+  .class-controls {
+    gap: 24px;
+  }
+
+  .course-layout-card {
+    padding: 12px;
+  }
 }
