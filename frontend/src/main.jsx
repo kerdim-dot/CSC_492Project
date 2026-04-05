@@ -7,8 +7,6 @@ import TestPage from './Pages/TestPage.jsx'
 
 import LandingPage from './Pages/LandingPage.jsx'
 
-import Dashboard from './Pages/Dashboard.jsx'
-
 import Schedule from './Pages/SchedulePage.jsx'
 
 import StudentsPage from './Pages/Admin_Pages/StudentsPage.jsx'
@@ -22,11 +20,12 @@ import ClassManagerPage from './Pages/Admin_Pages/ClassManagerPage.jsx'
 import EnrollementManagerPage from './Pages/Admin_Pages/EnrollmentManagerPage.jsx'
 import StudentManager from './Pages/Admin_Pages/StudentManager.jsx'
 import ProgressPage from './Pages/ProgressPage.jsx'
+import DashboardPage from './Pages/DashboardPage.jsx'
 
 
 const router = createBrowserRouter([
     {path:"/", element:<LandingPage/>},
-    {path:"/dashboard", element:<Dashboard/>},
+    {path:"/dashboard", element:<DashboardPage/>},
     {path:"/classes", element:<ClassesPage/>},
     {path:"/students", element:<StudentsPage/>},
     {path:"/schedule", element:<Schedule/>},
