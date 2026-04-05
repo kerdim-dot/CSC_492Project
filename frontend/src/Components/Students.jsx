@@ -92,8 +92,8 @@ function Students(){
             })
 
             students.forEach((item)=>{
-                if(!enrollmentMap[item.studentId]){
-                    enrollmentMap[item.studentId] = [];
+                if(!enrollmentMap[item.student_id]){
+                    enrollmentMap[item.student_id] = [];
                 }
             })
 
@@ -116,7 +116,7 @@ function Students(){
                 const studentSemestersLeft = timeCalculator(studentItem);
                 classes.forEach((classItem)=>{
                     const headerNumber = Number(classItem.header.substring(classItem.header.indexOf("-")+1,classItem.header.indexOf("-")+2));
-                    const hasTakenClass = enrollmentMap[studentItem.studentId].includes(classItem.class_id);
+                    const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
                     const classSemesters = 8-(headerNumber*2)
                     if(!hasTakenClass && studentSemestersLeft<=classSemesters){
                         //console.log(classItem.header,classSemesters,studentSemestersLeft);

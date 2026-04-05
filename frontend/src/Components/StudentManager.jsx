@@ -100,8 +100,8 @@ useEffect(()=>{
             })
 
             students.forEach((item)=>{
-                if(!enrollmentMap[item.studentId]){
-                    enrollmentMap[item.studentId] = [];
+                if(!enrollmentMap[item.student_id]){
+                    enrollmentMap[item.student_id] = [];
                 }
             })
 
@@ -126,7 +126,7 @@ useEffect(()=>{
                 const studentSemestersLeft = timeCalculator(studentItem);
                 classes.forEach((classItem)=>{
                     const headerNumber = Number(classItem.header.substring(classItem.header.indexOf("-")+1,classItem.header.indexOf("-")+2));
-                    const hasTakenClass = enrollmentMap[studentItem.studentId].includes(classItem.class_id);
+                    const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
                     const classSemesters = 8-(headerNumber*2)
                     if(!hasTakenClass && studentSemestersLeft<=classSemesters){
                         //console.log(classItem.header,classSemesters,studentSemestersLeft);
@@ -419,7 +419,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
     }
 
     const clickOnEntry = (item) =>{
-        setStudentUpdateEntry(item.studentId);
+        setStudentUpdateEntry(item.student_id);
         setUpdateFirstNameValue(item.firstName);
         setUpdateLastNameValue(item.lastName);
         setUpdateGraduationValue(item.graduationDate);
@@ -462,7 +462,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
                     <div className="entry-list">
                         {studentSearchList && studentSearchList.map((item,index)=>{
                             return(
-                            <div className={item.studentId == studentUpdateEntry? "entry highlighted":item.isBehind? "entry behind" : "entry"} onClick={()=>{clickOnEntry(item)}} >
+                            <div className={item.student_id == studentUpdateEntry? "entry highlighted":item.isBehind? "entry behind" : "entry"} onClick={()=>{clickOnEntry(item)}} >
                                     <p>{item.firstName} {item.lastName}</p>
                                     <p>{item.graduation}</p>
                             </div>)
@@ -476,7 +476,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
                     <div className="entry-list">
                         {studentSearchList && studentSearchList.map((item,index)=>{
                             return(
-                            <div className={item.studentId == selectedEntry? "entry highlighted" :item.isBehind? "entry behind" : "entry"} onClick={()=>{makeSelectedEntry(item.studentId)}}>
+                            <div className={item.student_id == selectedEntry? "entry highlighted" :item.isBehind? "entry behind" : "entry"} onClick={()=>{makeSelectedEntry(item.student_id)}}>
                                     <p>{item.firstName} {item.lastName}</p>
                                     <p>{item.graduation}</p>
                             </div>)

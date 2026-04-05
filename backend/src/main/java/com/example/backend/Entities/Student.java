@@ -57,7 +57,7 @@ public class Student {
         this.is_major = isMajor;
     }
 
-    public Long getStudentId(){
+    public Long getStudent_id(){
         return student_id;
     }
     public String getFirstName(){

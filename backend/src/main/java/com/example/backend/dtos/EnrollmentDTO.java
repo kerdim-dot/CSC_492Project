@@ -23,6 +23,9 @@ public class EnrollmentDTO {
         this.student_id = student_id;
         this.status = status;
     } 
+    public EnrollmentDTO(){
+        
+    }
     
     public long getEnrollment_id() {
         return enrollment_id;

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.example.backend.Entities.ScheduleEntry;
 import com.example.backend.Repositories.ScheduleEntryRepository;
+import com.example.backend.dtos.ScheduleEntryDTO;
 
 @Service
 public class ScheduleEntryService {
@@ -20,8 +21,8 @@ public class ScheduleEntryService {
         scheduleEntryRepository.save(scheduleEntry);
     }
 
-    public List<ScheduleEntry> getAllStudentScheduleEntries(Long scheduleId){
-        return scheduleEntryRepository.findAllBySchedule_ScheduleId(scheduleId);
+    public List<ScheduleEntryDTO> getAllStudentScheduleEntries(Long scheduleId){
+        return scheduleEntryRepository.findAllScheduleEntryDTOs(scheduleId);
     }
 
 }

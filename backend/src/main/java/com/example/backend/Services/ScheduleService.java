@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.example.backend.Entities.Schedule;
 
 import com.example.backend.Repositories.ScheduleRepository;
+import com.example.backend.dtos.ScheduleDTO;
 
 @Service
 public class ScheduleService {
@@ -21,7 +22,7 @@ public class ScheduleService {
     }
 
 
-    public List<Schedule> getAllStudentSchedules(long studentId){
-        return scheduleRepository.findAllByStudent_StudentId(studentId);
+    public List<ScheduleDTO> getAllStudentSchedules(long studentId){
+        return scheduleRepository.findSchedulesByStudentId(studentId);
     }
 }

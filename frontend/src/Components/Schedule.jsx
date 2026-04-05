@@ -1,8 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "../schedule.css"
 import down_arrow_black from './../assets/down_arrow_black.svg'
+import axios from "axios";
 
 function Schedule() {
+
+    
+    useEffect(()=>{
+        const student_id = 1;
+        const fetchSchedules = async()=>{
+            const scheduleData = await axios.get(`http://localhost:8080/test/get/schedules?studentId=${student_id}`);
+            console.log(`Schedules for student ${student_id}`, scheduleData.data);
+            
+            for (let i = 0; i< scheduleData.data.length ; i++){
+                const scheduleEntryData = await axios.get(`http://localhost:8080/test/get/scheduleEntries?scheduleId=${scheduleData.data[i].schedule_id}`);
+                console.log(`Entries for schedule ${scheduleData.data[i].schedule_id}:`, scheduleEntryData.data);
+            }
+
+        }
+        fetchSchedules();
+    },[])
+
     return (
         <div className="schedule-container">
             <ScheduleBlock />
@@ -10,6 +28,7 @@ function Schedule() {
         </div>
     )
 }
+
 
 
 function ScheduleBlock() {

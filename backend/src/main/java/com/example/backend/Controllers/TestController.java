@@ -30,6 +30,8 @@ import com.example.backend.Services.ScheduleService;
 import com.example.backend.Services.StudentService;
 import com.example.backend.Services.UserService;
 import com.example.backend.dtos.EnrollmentDTO;
+import com.example.backend.dtos.ScheduleDTO;
+import com.example.backend.dtos.ScheduleEntryDTO;
 
 
 @RestController
@@ -157,12 +159,12 @@ public class TestController {
     }
 
     @GetMapping("/get/schedules")
-    public List<Schedule> getAllPersonalSchedules(@RequestParam long studentId){
+    public List<ScheduleDTO> getAllPersonalSchedules(@RequestParam long studentId){
         return scheduleService.getAllStudentSchedules(studentId);
     }
 
     @GetMapping("/get/scheduleEntries")
-    public List<ScheduleEntry> getAllPersonalScheduleEntries(@RequestParam long scheduleId){
+    public List<ScheduleEntryDTO> getAllPersonalScheduleEntries(@RequestParam long scheduleId){
         return scheduleEntryService.getAllStudentScheduleEntries(scheduleId);
     }
 

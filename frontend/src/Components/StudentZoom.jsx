@@ -32,6 +32,21 @@ function StudentZoom(){
     const [showFilter,setShowFilter] = useState(false);
     const [overview, setOverview] = useState("All");
 
+     useEffect(()=>{
+        const student_id = 1;
+        const fetchSchedules = async()=>{
+            const scheduleData = await axios.get(`http://localhost:8080/test/get/schedules?studentId=${student_id}`);
+            console.log(`Schedules for student ${student_id}`, scheduleData.data);
+            
+            for (let i = 0; i< scheduleData.data.length ; i++){
+                const scheduleEntryData = await axios.get(`http://localhost:8080/test/get/scheduleEntries?scheduleId=${scheduleData.data[i].schedule_id}`);
+                console.log(`Entries for schedule ${scheduleData.data[i].schedule_id}:`, scheduleEntryData.data);
+            }
+
+        }
+        fetchSchedules();
+    },[])
+
     useEffect(()=>{
         
         const retriveClassData = async() =>{
