@@ -27,6 +27,9 @@ public class MountClass {
     @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <ScheduleEntry> scheduleEntries = new ArrayList<>();
 
+    @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List <MountClassEntry> mountClassEntries = new ArrayList<>();
+
 
     // @ManyToMany
     // private List <Student> students;
