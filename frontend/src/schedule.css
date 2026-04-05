@@ -16,7 +16,7 @@
 
 .cell {
   border: 1px solid #ccc;
-  min-height: 56px;
+  min-height: 38px;
   box-sizing: border-box;
 }
 
@@ -35,8 +35,7 @@
   font-weight: 600;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding-top: 8px;
+  align-items: center;
   font-size: 14px;
 }
 
@@ -44,12 +43,352 @@
   background-color: white;
 }
 
+/* =========================
+   Required course carousel
+   ========================= */
+
+.required-carousel-section {
+  width: 100%;
+  margin-bottom: 2rem;
+}
+
+.required-carousel-shell {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) 72px;
+  align-items: center;
+  gap: 1rem;
+  background: #f6f2fb;
+  border: 1px solid #ddd4ea;
+  border-radius: 28px;
+  padding: 1.25rem;
+  box-shadow: 0 8px 24px rgba(66, 20, 110, 0.08);
+}
+
+.carousel-arrow {
+  width: 56px;
+  height: 56px;
+  border: 1px solid #d7caea;
+  border-radius: 999px;
+  background: white;
+  color: #5f2b8c;
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease,
+    background 0.18s ease;
+}
+
+.carousel-arrow:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(66, 20, 110, 0.12);
+  background: #fbf9fe;
+}
+
+.carousel-arrow:disabled,
+.carousel-arrow.disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.required-carousel-center {
+  min-width: 0;
+}
+
+.carousel-position {
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #6f6480;
+  margin-bottom: 0.85rem;
+}
+
+.carousel-track-preview {
+  display: grid;
+  grid-template-columns: minmax(0, 140px) minmax(0, 1fr) minmax(0, 140px);
+  align-items: center;
+  gap: 1rem;
+}
+
+.course-preview {
+  min-height: 120px;
+  border-radius: 20px;
+  border: 1px dashed #dacfee;
+  background: rgba(255, 255, 255, 0.45);
+  color: #837693;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 1rem;
+  overflow: hidden;
+}
+
+.preview-code {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #5f2b8c;
+  margin-bottom: 0.35rem;
+}
+
+.preview-title {
+  font-size: 0.86rem;
+  line-height: 1.35;
+}
+
+.preview-placeholder {
+  display: block;
+  height: 1px;
+}
+
+.focused-course-card {
+  min-width: 0;
+  min-height: 360px;
+  background: white;
+  border: 1px solid #dfd5ee;
+  border-radius: 26px;
+  padding: 1.25rem;
+  box-shadow: 0 10px 28px rgba(66, 20, 110, 0.1);
+  display: flex;
+  flex-direction: column;
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    transform 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.focused-course-card.completed {
+  border-color: #9fd7b0;
+  box-shadow: 0 10px 28px rgba(56, 124, 73, 0.13);
+}
+
+.focused-course-card.in-progress {
+  border-color: #d6c2f2;
+}
+
+.focused-course-card.available {
+  border-color: #c9b1e9;
+}
+
+.focused-course-card.locked {
+  border-color: #e1dbe8;
+  opacity: 0.97;
+}
+
+.focused-course-main {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.focused-course-top {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.focused-course-header-box {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  padding: 1rem;
+  border-radius: 22px;
+  background: #f3eef9;
+  border: 1px solid #ddd4ea;
+}
+
+.focused-course-sections-area {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 0.75rem;
+  align-items: stretch;
+  overflow-x: auto;
+  padding-bottom: 0.15rem;
+}
+
+.focused-course-professor-description-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.focused-course-description-box {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+}
+
+.focused-course-description-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: #372c44;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.focused-course-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.42rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.focused-course-badge.completed {
+  background: #e6f6ea;
+  color: #23663a;
+}
+
+.focused-course-badge.in-progress {
+  background: #efe7fb;
+  color: #6636a3;
+}
+
+.focused-course-badge.available {
+  background: #f1ebf9;
+  color: #5f2b8c;
+}
+
+.focused-course-badge.locked {
+  background: #f8e7e7;
+  color: #9f2f2f;
+}
+
+.focused-course-footer {
+  margin-top: auto;
+  border-top: 1px solid #eee6f7;
+  padding-top: 1rem;
+}
+
+.prereq-label {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #4f3c68;
+  margin-bottom: 0.8rem;
+}
+
+.prereq-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.prereq-chip {
+  border: 1px solid transparent;
+  border-radius: 18px;
+  padding: 0.8rem 0.95rem;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 140px;
+  max-width: 240px;
+  text-align: left;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    border-color 0.16s ease;
+}
+
+.prereq-chip:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(66, 20, 110, 0.1);
+}
+
+.prereq-chip.completed {
+  background: #eef9f1;
+  border-color: #9fd7b0;
+}
+
+.prereq-chip.missing {
+  background: #fcecec;
+  border-color: #e2a8a8;
+}
+
+.prereq-chip-code {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #24192f;
+}
+
+.prereq-chip-title {
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: #5e536c;
+}
+
+.no-prereqs-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7rem 0.95rem;
+  border-radius: 16px;
+  background: #f4f0f9;
+  color: #5d5070;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.focused-course-card.slide-left {
+  animation: courseSlideLeft 0.32s ease;
+}
+
+.focused-course-card.slide-right {
+  animation: courseSlideRight 0.32s ease;
+}
+
+@keyframes courseSlideLeft {
+  0% {
+    opacity: 0;
+    transform: translateX(36px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes courseSlideRight {
+  0% {
+    opacity: 0;
+    transform: translateX(-36px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* =========================
+   Class controls / dropdowns
+   ========================= */
+
 .class-controls {
   display: flex;
   gap: 125px;
   align-items: flex-start;
   flex-wrap: wrap;
-  padding-bottom: 180px;
+  padding-bottom: 80px;
 }
 
 .dropdown-group {
@@ -108,7 +447,9 @@
   width: 100%;
 }
 
-/* New unified course card layout */
+/* =========================
+   Unified course cards
+   ========================= */
 
 .course-layout-card {
   width: 100%;
@@ -132,14 +473,6 @@
   flex-direction: row;
   align-items: flex-start;
   gap: 16px;
-}
-
-.course-layout-top-left {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-  width: 100%;
 }
 
 .course-header-box {
@@ -250,32 +583,30 @@
 
 .course-professor-description-row {
   display: flex;
-  flex-wrap: nowrap;       /* Prevent wrapping to a second row */
+  flex-wrap: nowrap;
   gap: 12px;
   align-items: center;
   width: 100%;
   min-width: 0;
 }
 
-.course-description-box {
-  flex: 1 1 0;             /* 0 basis lets it shrink/grow correctly */
-  min-width: 0;
-  overflow: hidden;        /* Prevents long text from blowing out the row */
-  display: block;
-}
-
 .course-professor-box {
-  flex: 0 0 190px;
-  width: 190px;
-  min-width: 190px;
+  flex: 0 0 120px;
+  min-width: 60px;
   max-width: 190px;
   background: #ece8f3;
   border-radius: 16px;
-  padding: 16px;
-  padding-left: 20px;
+  padding: 16px 16px 16px 20px;
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.course-description-box {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  display: block;
 }
 
 .course-description-text {
@@ -289,14 +620,13 @@
   word-break: normal;
 }
 
-/* Course details modal */
+/* =========================
+   Course details modal
+   ========================= */
 
 .course-details-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.25);
   display: flex;
   justify-content: center;
@@ -348,7 +678,9 @@
   padding: 12px;
 }
 
-/* Admin controls */
+/* =========================
+   Admin controls
+   ========================= */
 
 .admin-actions {
   margin-left: auto;
@@ -407,14 +739,13 @@
   background: #f7f7f7;
 }
 
-/* Alter modal */
+/* =========================
+   Alter modal
+   ========================= */
 
 .alter-modal-backdrop {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset: 0;
   background: rgba(0, 0, 0, 0.25);
   display: flex;
   justify-content: center;
@@ -492,9 +823,19 @@
   background: #c461f1;
 }
 
-/* Responsive */
+/* =========================
+   Responsive
+   ========================= */
 
 @media (max-width: 1100px) {
+  .carousel-track-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .course-preview {
+    display: none;
+  }
+
   .dropdown-menu {
     min-width: 100%;
     width: 100%;
@@ -505,19 +846,52 @@
     max-width: 100%;
   }
 
-  .course-layout-main {
-    display: grid;
-    grid-template-columns: minmax(320px, 1fr) auto;
-    gap: 16px;
-    align-items: start;
-  }
-
   .course-sections-area {
     flex-wrap: wrap;
   }
 }
 
+@media (max-width: 900px) {
+  .focused-course-top,
+  .focused-course-professor-description-row {
+    flex-direction: column;
+  }
+
+  .focused-course-header-box {
+    max-width: none;
+  }
+
+  .focused-course-sections-area {
+    width: 100%;
+  }
+}
+
 @media (max-width: 700px) {
+  .required-carousel-shell {
+    grid-template-columns: 54px minmax(0, 1fr) 54px;
+    gap: 0.75rem;
+    padding: 0.9rem;
+    border-radius: 22px;
+  }
+
+  .carousel-arrow {
+    width: 46px;
+    height: 46px;
+    font-size: 1.65rem;
+  }
+
+  .focused-course-card {
+    min-height: 360px;
+    padding: 1rem;
+    border-radius: 20px;
+  }
+
+  .prereq-chip {
+    min-width: 120px;
+    max-width: none;
+    flex: 1 1 140px;
+  }
+
   .class-controls {
     gap: 24px;
   }

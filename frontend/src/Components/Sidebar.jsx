@@ -34,6 +34,7 @@ function SideBar() {
     const role = localStorage.getItem("role") || "user";
     const isAdmin = role === "admin" || role === "supervisor";
     const isSupervisor = role === "supervisor";
+    const isUser = role === "user";
 
     const changeSubbarManagement = () => {
         setSubbarManagement((prev) => !prev);
@@ -123,6 +124,7 @@ function SideBar() {
                     </NavLink>
                 </li>
 
+                {isUser && (
                 <li>
                     <NavLink
                         to="/progress"
@@ -134,6 +136,7 @@ function SideBar() {
                         <span>{isAdmin || isSupervisor ? "Progress Summary" : "Progress"}</span>
                     </NavLink>
                 </li>
+                )}
 
                 {isAdmin && (
                     <>

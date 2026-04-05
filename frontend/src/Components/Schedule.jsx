@@ -1,14 +1,352 @@
-import { useState } from "react";
-import "../schedule.css"
-import down_arrow_black from './../assets/down_arrow_black.svg'
+import { useEffect, useMemo, useState } from "react";
+import "../schedule.css";
+import down_arrow_black from "./../assets/down_arrow_black.svg";
 
 function Schedule() {
     return (
         <div className="schedule-container">
+            <RequiredCourseCarousel
+                completedCourses={["CSC-120", "CSC-220"]}
+                inProgressCourses={["CSC-130"]}
+            />
+
             <ScheduleBlock />
+
             <ClassControls />
         </div>
-    )
+    );
+}
+
+function RequiredCourseCarousel({
+    completedCourses = [],
+    inProgressCourses = [],
+}) {
+
+    const requiredCourses = [
+        {
+            code: "CSC-120",
+            title: "Programming Problem Solving I",
+            credits: 4,
+            description:
+                "Introduction to programming fundamentals, structured problem solving, and basic software development practices.",
+            prerequisites: [],
+            sections: [
+                {
+                    sectionNumber: "01",
+                    days: "MWF",
+                    startTime: "7:30 AM",
+                    endTime: "8:35 AM",
+                    seatsFilled: 18,
+                    totalSeats: 24,
+                    professor: "Dr. Smith",
+                },
+            ],
+        },
+        {
+            code: "CSC-130",
+            title: "Programming Problem Solving II",
+            credits: 4,
+            description:
+                "Continuation of introductory programming with more complex data structures, abstraction, and program design.",
+            prerequisites: ["CSC-120"],
+            sections: [
+                {
+                    sectionNumber: "01",
+                    days: "MWF",
+                    startTime: "8:45 AM",
+                    endTime: "9:50 AM",
+                    seatsFilled: 20,
+                    totalSeats: 24,
+                    professor: "Dr. Allen",
+                },
+                {
+                    sectionNumber: "02",
+                    days: "TR",
+                    startTime: "2:20 PM",
+                    endTime: "3:35 PM",
+                    seatsFilled: 16,
+                    totalSeats: 24,
+                    professor: "Dr. Allen",
+                },
+            ],
+        },
+        {
+            code: "CSC-220",
+            title: "Discrete Structures",
+            credits: 3,
+            description:
+                "Logic, sets, functions, counting, relations, graphs, and proof techniques used in computer science.",
+            prerequisites: ["CSC-120"],
+            sections: [
+                {
+                    sectionNumber: "01",
+                    days: "MWF",
+                    startTime: "10:00 AM",
+                    endTime: "11:05 AM",
+                    seatsFilled: 15,
+                    totalSeats: 24,
+                    professor: "Dr. Brown",
+                },
+            ],
+        },
+        {
+            code: "CSC-320",
+            title: "Algorithms and Data Structures",
+            credits: 4,
+            description:
+                "Study of algorithm design, asymptotic analysis, linear and non-linear data structures, and implementation techniques.",
+            prerequisites: ["CSC-130", "CSC-220"],
+            sections: [
+                {
+                    sectionNumber: "01",
+                    days: "MWF",
+                    startTime: "10:00 AM",
+                    endTime: "11:05 AM",
+                    seatsFilled: 22,
+                    totalSeats: 30,
+                    professor: "Dr. Jones",
+                },
+                {
+                    sectionNumber: "02",
+                    days: "TR",
+                    startTime: "2:20 PM",
+                    endTime: "4:00 PM",
+                    seatsFilled: 28,
+                    totalSeats: 28,
+                    professor: "Dr. Patel",
+                },
+            ],
+        },
+    ];
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [selectedSectionIndex, setSelectedSectionIndex] = useState(0);
+    const [slideDirection, setSlideDirection] = useState("");
+
+    const selectedCourse = requiredCourses[selectedIndex];
+    const prevCourse = selectedIndex > 0 ? requiredCourses[selectedIndex - 1] : null;
+    const nextCourse =
+        selectedIndex < requiredCourses.length - 1
+            ? requiredCourses[selectedIndex + 1]
+            : null;
+
+    const sections = Array.isArray(selectedCourse.sections) ? selectedCourse.sections : [];
+    const selectedSection = sections[selectedSectionIndex] ?? sections[0];
+
+    const courseMap = useMemo(
+        () => Object.fromEntries(requiredCourses.map((course) => [course.code, course])),
+        []
+    );
+
+    const completedSet = useMemo(() => new Set(completedCourses), [completedCourses]);
+    const inProgressSet = useMemo(() => new Set(inProgressCourses), [inProgressCourses]);
+
+
+    function isCompleted(code) {
+        return completedSet.has(code);
+    }
+
+    function isInProgress(code) {
+        return inProgressSet.has(code);
+    }
+
+    function getCourseState(course) {
+        if (isCompleted(course.code)) return "completed";
+        if (isInProgress(course.code)) return "in-progress";
+
+        const prereqsMet = course.prerequisites.every((prereq) => isCompleted(prereq));
+        return prereqsMet ? "available" : "locked";
+    }
+
+    const selectedCourseState = getCourseState(selectedCourse);
+
+    function getStatusText(course) {
+        const state = getCourseState(course);
+
+        if (state === "completed") return "Completed";
+        if (state === "in-progress") return "Currently taking";
+        if (state === "available") return "Eligible to take";
+
+        const missingCount = course.prerequisites.filter((code) => !isCompleted(code)).length;
+        return `Missing ${missingCount} prerequisite${missingCount === 1 ? "" : "s"}`;
+    }
+
+    function goPrev() {
+        if (selectedIndex === 0) return;
+        setSlideDirection("slide-right");
+        setSelectedIndex((prev) => Math.max(prev - 1, 0));
+    }
+
+    function goNext() {
+        if (selectedIndex === requiredCourses.length - 1) return;
+        setSlideDirection("slide-left");
+        setSelectedIndex((prev) => Math.min(prev + 1, requiredCourses.length - 1));
+    }
+
+    function jumpToCourse(code) {
+        const newIndex = requiredCourses.findIndex((course) => course.code === code);
+        if (newIndex === -1 || newIndex === selectedIndex) return;
+
+        setSlideDirection(newIndex > selectedIndex ? "slide-left" : "slide-right");
+        setSelectedIndex(newIndex);
+    }
+
+    useEffect(() => {
+        if (!slideDirection) return;
+
+        const timer = setTimeout(() => {
+            setSlideDirection("");
+        }, 320);
+
+        return () => clearTimeout(timer);
+    }, [slideDirection]);
+
+    return (
+        <section className="required-carousel-section">
+            <div className="required-carousel-shell">
+                {prevCourse ? (
+                    <button
+                        type="button"
+                        className="carousel-arrow"
+                        onClick={goPrev}
+                        aria-label="Previous required course"
+                    >
+                        ‹
+                    </button>
+                ) : (
+                    <div className="carousel-arrow-placeholder" aria-hidden="true" />
+                )}
+
+                <div className="required-carousel-center">
+                    <div className="carousel-position">
+                        {selectedIndex + 1} of {requiredCourses.length}
+                    </div>
+
+                    <div className="carousel-track-preview">
+                        {prevCourse ? (
+                            <div className="course-preview preview-left" aria-hidden="true">
+                                <span className="preview-code">{prevCourse.code}</span>
+                                <span className="preview-title">{prevCourse.title}</span>
+                            </div>
+                        ) : (
+                            <div className="course-preview-placeholder" aria-hidden="true" />
+                        )}
+
+                        <article className={`focused-course-card ${selectedCourseState} ${slideDirection}`}>
+                            <div className="focused-course-main">
+                                <div className="focused-course-top">
+                                    <div className="focused-course-header-box">
+                                        <div className="course-code-pill">{selectedCourse.code}</div>
+                                        <div className="course-name-pill">{selectedCourse.title}</div>
+                                        <div className="course-card-credits">{selectedCourse.credits} credits</div>
+                                        <div className={`focused-course-badge ${selectedCourseState}`}>
+                                            {getStatusText(selectedCourse)}
+                                        </div>
+                                    </div>
+
+                                    <div className="focused-course-sections-area">
+                                        {sections.map((section, index) => (
+                                            <button
+                                                key={section.sectionNumber}
+                                                type="button"
+                                                className={`section-choice-card ${index === selectedSectionIndex ? "active" : ""
+                                                    }`}
+                                                onClick={() => setSelectedSectionIndex(index)}
+                                            >
+                                                <div className="section-number-badge">{section.sectionNumber}</div>
+                                                <div className="section-choice-stack">{section.days}</div>
+                                                <div className="section-choice-stack">
+                                                    {section.startTime} - {section.endTime}
+                                                </div>
+                                                <div className="section-choice-stack">
+                                                    {section.seatsFilled}/{section.totalSeats}
+                                                </div>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="focused-course-professor-description-row">
+                                    <div className="course-professor-box">
+                                        <div className="course-professor-label">Professor</div>
+                                        <div className="course-card-professor">
+                                            {selectedSection?.professor ?? "TBA"}
+                                        </div>
+                                    </div>
+
+                                    <div className="focused-course-description-box">
+                                        <span className="focused-course-description-text">
+                                            {selectedCourse.description}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="focused-course-footer">
+                                <div className="prereq-label">Prerequisites</div>
+
+                                {selectedCourse.prerequisites.length === 0 ? (
+                                    <div className="no-prereqs-chip">No prerequisites</div>
+                                ) : (
+                                    <div className="prereq-chip-row">
+                                        {selectedCourse.prerequisites.map((prereqCode) => {
+                                            const prereqCourse = courseMap[prereqCode];
+                                            const prereqCompleted = isCompleted(prereqCode);
+
+                                            return (
+                                                <button
+                                                    key={prereqCode}
+                                                    type="button"
+                                                    className={`prereq-chip ${prereqCompleted ? "completed" : "missing"
+                                                        }`}
+                                                    onClick={() => jumpToCourse(prereqCode)}
+                                                    title={
+                                                        prereqCourse
+                                                            ? prereqCourse.title
+                                                            : prereqCode
+                                                    }
+                                                >
+                                                    <span className="prereq-chip-code">
+                                                        {prereqCode}
+                                                    </span>
+                                                    {prereqCourse && (
+                                                        <span className="prereq-chip-title">
+                                                            {prereqCourse.title}
+                                                        </span>
+                                                    )}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </div>
+                        </article>
+
+                        {nextCourse ? (
+                            <div className="course-preview preview-right" aria-hidden="true">
+                                <span className="preview-code">{nextCourse.code}</span>
+                                <span className="preview-title">{nextCourse.title}</span>
+                            </div>
+                        ) : (
+                            <div className="course-preview-placeholder" aria-hidden="true" />
+                        )}
+                    </div>
+                </div>
+
+                {nextCourse ? (
+                    <button
+                        type="button"
+                        className="carousel-arrow"
+                        onClick={goNext}
+                        aria-label="Next required course"
+                    >
+                        ›
+                    </button>
+                ) : (
+                    <div className="carousel-arrow-placeholder" aria-hidden="true" />
+                )}
+            </div>
+        </section>
+    );
 }
 
 
