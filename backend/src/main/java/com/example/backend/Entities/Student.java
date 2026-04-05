@@ -57,7 +57,7 @@ public class Student {
         this.is_major = isMajor;
     }
 
-    public Long getStudentId(){
+    public Long getStudent_id(){
         return student_id;
     }
     public String getFirstName(){
@@ -68,11 +68,11 @@ public class Student {
         return last_name;
     }
 
-    public LocalDate graduationDate(){
+    public LocalDate getGraduationDate(){
         return graduation_date;
     }
 
-    public Boolean isMajor(){
+    public Boolean getIsMajor(){
         return is_major;
     }
 

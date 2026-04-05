@@ -5,6 +5,7 @@ import "../searchers.css"
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from 'axios'
+import { GraduationConverter } from "../tools/GraduationConverter";
 
 function Students(){
 
@@ -28,19 +29,23 @@ function Students(){
         
         const retriveClassData = async() =>{
             const classData = await axios.get('http://localhost:8080/test/get/classes');
-            setClasses (classData);
+            setClasses(classData.data);
             console.log("class fetch:", classData.data)
         }
 
         const retriveStudentData = async() =>{
             const studentData = await axios.get('http://localhost:8080/test/get/students');
-            setClasses (studentData);
-            console.log("student fetch:", studentData.data)
+            const updatedStudents = studentData.data.map((item) => ({
+                ...item,
+                graduationFormula: GraduationConverter(item.graduationDate)
+            }));
+            setStudents(updatedStudents);
+            //console.log("student fetch:", updatedStudents)
         }
 
         const retriveEnrollmentData = async() =>{
             const enrollmentData = await axios.get('http://localhost:8080/test/get/enrollments');
-            setEnrollment(enrollmentData);
+            setEnrollment(enrollmentData.data);
             console.log("enrollment fetch:",enrollmentData.data)
         }
 
@@ -75,24 +80,29 @@ function Students(){
 
      useEffect(()=>{
 
-        if(enrollment && classes && students){
+        if(enrollment.length > 0 && classes.length > 0 && students.length > 0){
+
             const enrollmentMap = {};
 
             enrollment.forEach((item, index)=>{
-                if(!enrollmentMap[item.studentId]){
-                    enrollmentMap[item.studentId] = [];
+                if(!enrollmentMap[item.student_id]){
+                    enrollmentMap[item.student_id] = [];
                 }
-                enrollmentMap[item.studentId].push(item.class_id);
+                enrollmentMap[item.student_id].push(item.mountClass_id);
             })
 
-            //console.log(enrollmentMap)
+            students.forEach((item)=>{
+                if(!enrollmentMap[item.student_id]){
+                    enrollmentMap[item.student_id] = [];
+                }
+            })
 
             students.sort((a,b)=>{return a.lastName.localeCompare(b.lastName)})
 
             // checks how many semesters a student has, not including the current semester
             function timeCalculator(student){
-                const graduationSemester = student.graduation.substring(0,student.graduation.indexOf("/"));
-                const graduationYear = student.graduation.substring(1+student.graduation.indexOf("/"));
+                const graduationSemester = student.graduationFormula.substring(0,student.graduationFormula.indexOf("/"));
+                const graduationYear = student.graduationFormula.substring(1+student.graduationFormula.indexOf("/"));
                 const timerFormula =  ((graduationYear - currentYear)*2) + (graduationSemester - currentSemester)
                 return timerFormula;
             }
@@ -106,7 +116,7 @@ function Students(){
                 const studentSemestersLeft = timeCalculator(studentItem);
                 classes.forEach((classItem)=>{
                     const headerNumber = Number(classItem.header.substring(classItem.header.indexOf("-")+1,classItem.header.indexOf("-")+2));
-                    const hasTakenClass = enrollmentMap[studentItem.studentId].includes(classItem.class_id);
+                    const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
                     const classSemesters = 8-(headerNumber*2)
                     if(!hasTakenClass && studentSemestersLeft<=classSemesters){
                         //console.log(classItem.header,classSemesters,studentSemestersLeft);
@@ -115,7 +125,6 @@ function Students(){
                 })
                 studentItem.isBehind = isBehind;
             })
-
             setStudentsActive(students);
         }
          // replace this with a fetch students method
@@ -124,7 +133,7 @@ function Students(){
 
         // key is studentsId, value is a list of classes they have taken
         
-    },[])
+    },[enrollment, students, classes])
 
     useEffect(() => {
     if (!studentsActive) return;
@@ -284,7 +293,7 @@ function StudentList({studentSearchList}){
                 return(
                 <div className= {item.isBehind? "entry behind" : "entry"} onClick={()=>{navigate(`/students/${item.firstName}/${item.lastName}`)}}>
                     <p>{item.firstName} {item.lastName}</p>
-                    <p>{item.graduation}</p>
+                    <p>{item.graduationDate}</p>
                 </div>
                 )
             })}

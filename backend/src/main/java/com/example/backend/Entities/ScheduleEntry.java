@@ -14,7 +14,7 @@ public class ScheduleEntry {
     private Long entry_id;
 
     @ManyToOne
-    @JoinColumn(name = "student_id")
+    @JoinColumn(name = "schedule_id")
     private Schedule schedule;
 
     @ManyToOne

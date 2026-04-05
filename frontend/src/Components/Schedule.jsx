@@ -2,8 +2,10 @@ import { useState, useMemo, useEffect } from "react";
 import "../schedule.css"
 import down_arrow_black from './../assets/down_arrow_black.svg'
 import axios from "axios";
+import axios from "axios";
 
 function Schedule() {
+
     
     useEffect(()=>{
         const student_id = 1;
