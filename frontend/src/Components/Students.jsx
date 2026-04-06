@@ -291,7 +291,7 @@ function StudentList({studentSearchList}){
         <div className="entry-list">
             {studentSearchList && studentSearchList.map((item,index)=>{
                 return(
-                <div className= {item.isBehind? "entry behind" : "entry"} onClick={()=>{navigate(`/students/${item.firstName}/${item.lastName}`)}}>
+                <div className= {item.isBehind? "entry behind" : "entry"} onClick={()=>{navigate(`/students/${item.student_id}`)}}>
                     <p>{item.firstName} {item.lastName}</p>
                     <p>{item.graduationDate}</p>
                 </div>

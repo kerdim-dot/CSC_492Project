@@ -35,7 +35,7 @@ const router = createBrowserRouter([
     {path:"/enrollment/manager", element:<EnrollementManagerPage/>},
     {path:"/admin/manager", element:<AdminManager/>},
     {path:"/test", element:<TestPage/>},
-    {path:"/students/:firstName/:lastName", element:<StudentZoomPage/>},
+    {path:"/students/:id/", element:<StudentZoomPage/>},
     {path:"/classes/:header", element:<ClassZoomPage/>}
 
     
