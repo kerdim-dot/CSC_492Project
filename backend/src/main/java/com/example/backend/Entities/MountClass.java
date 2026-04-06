@@ -30,6 +30,9 @@ public class MountClass {
     @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <MountClassEntry> mountClassEntries = new ArrayList<>();
 
+    @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PrerequisiteMapping> preReqMappings = new ArrayList<>();
+
 
     // @ManyToMany
     // private List <Student> students;

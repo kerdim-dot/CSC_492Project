@@ -22,18 +22,21 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.backend.Entities.Enrollment;
 import com.example.backend.Entities.MountClass;
 import com.example.backend.Entities.MountClassEntry;
+import com.example.backend.Entities.PrerequisiteMapping;
 import com.example.backend.Entities.Schedule;
 import com.example.backend.Entities.ScheduleEntry;
 import com.example.backend.Entities.Student;
 import com.example.backend.Repositories.MountClassRepository;
 import com.example.backend.Repositories.StudentRepository;
 import com.example.backend.Services.MountClassService;
+import com.example.backend.Services.PrerequisiteMappingService;
 import com.example.backend.Services.ScheduleEntryService;
 import com.example.backend.Services.ScheduleService;
 import com.example.backend.Services.StudentService;
 import com.example.backend.Services.UserService;
 import com.example.backend.dtos.EnrollmentDTO;
 import com.example.backend.dtos.MountClassEntryDTO;
+import com.example.backend.dtos.PrerequisiteDTO;
 import com.example.backend.dtos.ScheduleDTO;
 import com.example.backend.dtos.ScheduleEntryDTO;
 
@@ -52,12 +55,13 @@ public class TestController {
     private final StudentRepository studentRepository;
     private final MountClassRepository mountClassRepository;
     private final MountClassEntryService mountClassEntryService;
+    private final PrerequisiteMappingService prerequisiteMappingService;
 
     public TestController(MountClassService mountClassService,StudentService studentService,
         StudentRepository studentRepository,MountClassRepository mountClassRepository, 
         EnrollmentRepository enrollmentRepository, EnrollmentService enrollmentService, 
         ScheduleService scheduleService, ScheduleEntryService scheduleEntryService, ScheduleRepository scheduleRepository,
-        MountClassEntryService mountClassEntryService){
+        MountClassEntryService mountClassEntryService, PrerequisiteMappingService prerequisiteMappingService){
 
         this.mountClassService = mountClassService;
         this.studentService = studentService;
@@ -69,6 +73,7 @@ public class TestController {
         this.scheduleEntryService = scheduleEntryService;
         this.scheduleRepository = scheduleRepository;
         this.mountClassEntryService = mountClassEntryService;
+        this.prerequisiteMappingService = prerequisiteMappingService;
         
     }
 
@@ -80,6 +85,7 @@ public class TestController {
         BufferedReader brSchedule = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/schedule.csv")));
         BufferedReader brScheduleEntry = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/scheduleEntry.csv")));
         BufferedReader brClassEntry = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/classEntry.csv")));
+        BufferedReader brPrerequisites = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/prerequisites.csv")));
 
         brClass.readLine();
         brStudent.readLine();
@@ -87,6 +93,7 @@ public class TestController {
         brSchedule.readLine();
         brScheduleEntry.readLine();
         brClassEntry.readLine();
+        brPrerequisites.readLine();
 
         String line;
         String[] columnSpliter = {};
@@ -156,6 +163,22 @@ public class TestController {
             }          
         }
 
+
+        while((line = brPrerequisites.readLine()) != null){
+            columnSpliter = line.split(",");
+            
+            Optional <MountClass> mountClassOptional = mountClassRepository.findById(Long.parseLong(columnSpliter[0]));
+            Optional <MountClass> mountClassPrequisiteOptional = mountClassRepository.findById(Long.parseLong(columnSpliter[1]));
+
+            if(mountClassOptional.isPresent() && mountClassPrequisiteOptional.isPresent()){
+                MountClass mountClass = mountClassOptional.get();
+                MountClass mountClassPrequisite = mountClassPrequisiteOptional.get();
+
+                PrerequisiteMapping prerequisiteMapping = new PrerequisiteMapping(mountClass, mountClassPrequisite);
+                prerequisiteMappingService.addPrerequisiteMapping(prerequisiteMapping);
+            }          
+        }
+
         while((line = brEnrollment.readLine()) != null){
             columnSpliter = line.split(",");
             
@@ -206,5 +229,9 @@ public class TestController {
         return mountClassEntryService.getAllMountClassEntries();
     }
 
+    @GetMapping("/get/prequisiteMapping")
+    public List<PrerequisiteDTO> getAllPrerequisiteMapping(){
+        return prerequisiteMappingService.getAllPrerequisiteMapping();
+    }
 
 }

@@ -59,6 +59,24 @@
   gap: 12px; 
   padding: 10px;
   width: 100%;
+
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.entry-list::-webkit-scrollbar {
+  display: block; 
+  width: 8px;
+}
+
+.entry-list::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 6px;
+}
+
+.entry-list::-webkit-scrollbar-thumb:hover {
+  background: #999;
 }
 
 .entry {

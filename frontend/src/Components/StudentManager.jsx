@@ -311,13 +311,13 @@ function FilterBlock({ startDate, endDate, setStartDate, setEndDate, setShowFilt
 }
 
 
-function UpdateBlock({updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue}){
+function UpdateBlock({studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue}){
 
     return(
-        <div className="update-student-panel">
+        <div className={studentUpdateEntry ? "update-student-panel" : "update-student-panel-hidden" }>
             
 
-            <img className="close-img-two" src={close}></img>
+            <img className="close-img-two" src={close} onClick={()=>{setStudentUpdateEntry(null)}}></img>
 
             <p className="student-panel-title">Update Student Panel</p>
 
@@ -468,22 +468,43 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
                             </div>)
                         })}
                     </div>
-                    {studentUpdateEntry && <UpdateBlock updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue}/>}
+                    {<UpdateBlock studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue}/>}
                 </div>}
             {activeTab === "delete" && 
                 <div className="placeholder">
                     <p>Delete Student</p>
+
                     <div className="entry-list">
-                        {studentSearchList && studentSearchList.map((item,index)=>{
-                            return(
-                            <div className={item.student_id == selectedEntry? "entry highlighted" :item.isBehind? "entry behind" : "entry"} onClick={()=>{makeSelectedEntry(item.student_id)}}>
+                        {studentSearchList && studentSearchList.map((item,index)=> {
+                            return (
+                                <div 
+                                    key={index}
+                                    className={
+                                        item.student_id == selectedEntry
+                                        ? "entry highlighted"
+                                        : item.isBehind
+                                        ? "entry behind"
+                                        : "entry"
+                                    }
+                                    onClick={() => makeSelectedEntry(item.student_id)}
+                                >
                                     <p>{item.firstName} {item.lastName}</p>
                                     <p>{item.graduation}</p>
-                            </div>)
+                                </div>
+                            )
                         })}
                     </div>
-                    <p>{warning}</p>
-                    <button onClick={deleteEntry} className="btn-delete-student">Delete Student</button>
+
+                    <div className="action-bar">
+                        <p className="warning-text">{warning}</p>
+                        <button 
+                            onClick={deleteEntry} 
+                            className="btn-delete-student"
+                            disabled={!selectedEntry}
+                        >
+                            Delete Student
+                        </button>
+                    </div>
                 </div>}
         </div>
     )

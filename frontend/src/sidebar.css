@@ -161,9 +161,6 @@ body {
   padding: 0;
 }
 
-::-webkit-scrollbar {
-  display: none;
-}
 
 .desktop_container {
   width: 100%;
