@@ -1,0 +1,190 @@
+.dashboard-page {
+  width: 100%;
+  padding: 2rem;
+}
+
+.dashboard-top-section {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.dashboard-chart-card {
+  width: 200px;
+  padding: 1.5rem;
+  border: 2px solid #000;
+  border-radius: 24px;
+  background: #f5f5f5;
+}
+
+.requirement-progress-card {
+  --card-width: 700px;
+  --card-min-height: 100px;
+  --card-padding-y: 1.5rem;
+  --card-padding-x: 1.5rem;
+  --row-gap: 1.5rem;
+
+  width: var(--card-width);
+  min-height: var(--card-min-height);
+  padding: var(--card-padding-y) var(--card-padding-x);
+  border: 1px solid #000;
+  border-radius: 24px;
+  background: #ececec;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--row-gap);
+
+  box-sizing: border-box;
+}
+
+.requirement-progress-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.requirement-progress-main {
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.requirement-progress-grid {
+  flex: 1;
+  display: grid;
+  min-height: 32px;
+  border: 1px solid #000;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.requirement-progress-label {
+  min-width: 70px;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.requirement-grid-cell {
+  position: relative;
+  border: none;
+  border-right: 1px solid #000;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+}
+
+.requirement-grid-cell:last-child {
+  border-right: none;
+}
+
+.requirement-grid-cell.completed {
+  background: #55ad2a;
+}
+
+.requirement-grid-cell.in-progress {
+  background: #f1ed00;
+}
+
+.requirement-grid-cell.warning {
+  background: #ff1a0a;
+}
+
+.requirement-grid-cell.empty {
+  background: #e7e7e7;
+  cursor: default;
+}
+
+.requirement-grid-cell:not(.empty):hover {
+  transform: scale(1.08);
+  z-index: 2;
+  filter: brightness(1.03);
+}
+
+.requirement-grid-tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  background: #1f1f1f;
+  color: #fff;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.requirement-grid-cell:hover .requirement-grid-tooltip {
+  opacity: 1;
+}
+
+.requirement-progress-summary {
+  margin-left: 5rem;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.credit-ring-widget {
+  --widget-size: 320px;
+
+  position: relative;
+  width: var(--widget-size);
+  height: var(--widget-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.credit-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.credit-pill {
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #0c2a3a;
+  border-radius: 14px;
+  overflow: hidden;
+  background: white;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.credit-pill span {
+  padding: 0.5rem 0.5rem;
+}
+
+.credit-pill-complete span:first-child {
+  background: #10b84f;
+  color: white;
+}
+
+.credit-pill-progress span:first-child {
+    width: 4.5rem;
+  background: #f3ef00;
+  color: black;
+}
+
+.credit-pill-value {
+  min-width: 32px;
+  text-align: center;
+  background: #f5f5f5;
+  color: black;
+}
