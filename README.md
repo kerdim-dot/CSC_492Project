@@ -9,3 +9,6 @@
 
 * MySQL
 * Spring Boot
+
+## Blog Website
+https://name-not-completed.netlify.app/about
