@@ -1,9 +1,9 @@
-id,title,header,credits,isActive,description
-1,Programming Problem Solving I,CSC-120,4,true,Introduction to programming fundamentals, structured problem solving, and basic software development practices.
-2,Programming Problem Solving II,CSC-220,4,true,Introduction to programming fundamentals, structured problem solving, and basic software development practices.
-3,Computer Organization,CSC-270,4,true,Introduction to programming fundamentals, structured problem solving, and basic software development practices.
-4,Database Theory Implementation,CSC-310,4,true,Introduction to programming fundamentals, structured problem solving, and basic software development practices.
-5,Algorithms and Data Structures,CSC-320,4,true,Introduction to programming fundamentals, structured problem solving, and basic software development practices.
-6,Computer Networks,CSC-360,4,false,Introduction to programming fundamentals, structured problem solving, and basic software development practices.
-7,Software Engineer Fundamentals,CSC-491,2,false,Introduction to programming fundamentals, structured problem solving, and basic software development practices.
-8,Practice Software Engineering,CSC-492,2,false,Introduction to programming fundamentals, structured problem solving, and basic software development practices.
+id, title                         , header , credits, isActive, description
+ 1, Programming Problem Solving I , CSC-120,       4, true    , Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
+ 2, Programming Problem Solving II, CSC-220,       4, true    , Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
+ 3, Computer Organization         , CSC-270,       4, true    , Introduction to programming fundamentals\; structured problem solving; and basic software development practices.
+ 4, Database Theory Implementation, CSC-310,       4, true    , Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
+ 5, Algorithms and Data Structures, CSC-320,       4, true    , Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
+ 6, Computer Networks             , CSC-360,       4, false   , Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
+ 7, Software Engineer Fundamentals, CSC-491,       2, false   , Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
+ 8, Practice Software Engineering , CSC-492,       2, false   , Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
