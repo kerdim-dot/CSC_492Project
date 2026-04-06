@@ -60,7 +60,6 @@ function Classes(){
             });
         }
 
-        // 🎓 YEAR FILTER (based on class number)
         if (year !== "All") {
             filtered = filtered.filter((item) => {
                 const num = Number(item.header.split("-")[1]);
@@ -74,9 +73,8 @@ function Classes(){
             });
         }
 
-        // 📘 REQUIREMENT FILTER (you need to define this better later)
+
         if (requirement !== "All") {
-            // TEMP: assume all are required
             if (requirement === "Required") {
                 filtered = filtered;
             } else if (requirement === "Not Required") {
@@ -84,7 +82,6 @@ function Classes(){
             }
         }
 
-        // 🔢 CREDIT FILTER
         if (credits) {
             filtered = filtered.filter((item) => item.credits === Number(credits));
         }

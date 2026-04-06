@@ -53,6 +53,9 @@
 }
 
 .mass-add{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
   width: 100%;
 }
 
@@ -60,6 +63,7 @@
   width: 100%;
   min-height: 400px;
   overflow-y: scroll;
+  border-radius: 5px;
 }
 
 .mass-add-textarea::-webkit-scrollbar {
@@ -247,6 +251,7 @@
 } 
 
 .graduation-input{
+  display: flex;
   border-radius: 10px;
   width: 50px;
   height: 40px;
@@ -326,6 +331,15 @@
   outline: none;
 }
 
+.description-input{
+  border-radius: 10px;
+  height: 40px;
+  text-align: center;
+  background-color: #f5f5f5af;
+  border: 1px solid rgb(167, 167, 167);
+  outline: none;
+  width: 100%;
+}
 
 
 .name-input::placeholder{
@@ -335,6 +349,7 @@
 .name-container{
   display: flex;
   gap: 1vw;
+  align-items: center;
 }
 
 .graduation-input::placeholder{
@@ -409,7 +424,7 @@
 .class-add-container{
   display: flex;
   flex-direction: column;
-  gap: 1vh;
+  gap: 20px;
 }
 
 .close-img-two{
@@ -419,6 +434,8 @@
   border-radius: 100px;
   border: 1px solid rgba(128, 128, 128, 0.76);
 }
+
+
 
 .completedClass{
   background-color: rgb(60, 197, 42);
@@ -433,3 +450,20 @@
   flex-direction: column;
   gap: 10px;
 }
+
+
+.add-class-title{
+  font-size: 18px;
+  color: #555;
+  opacity: 0.8;
+}
+
+
+.individual-add{
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  border-bottom: 5px solid rgba(128, 128, 128, 0.759);
+  gap: 20px;
+}
+
