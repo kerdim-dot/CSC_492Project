@@ -1,0 +1,5 @@
+classId, meetingTime    , TotalSeats, ProfessorName, isMonday, isTuesday, isWednesday, isThursday, isFriday
+      1, 7:30am-8:45pm  ,         24, prof. cindric, true    , false    , true       , false     , true
+      1, 11:15am-12:20pm,         24, prof. cindric, true    , false    , true       , false     , true
+      2, 10:00am-11:05am,         24, prof. cindric, true    , false    , true       , false     , true
+      2, 1:45pm-2:50pm  ,         24, prof. cindric, true    , false    , true       , false     , false

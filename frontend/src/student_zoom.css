@@ -1,0 +1,83 @@
+/* Container for the whole ClassZoom page */
+.class-zoom-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 20px;
+  font-family: 'lexend', sans-serif;
+}
+
+/* Class info card at the top */
+.class-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 20px;
+}
+
+.class-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.class-details {
+  font-size: 16px;
+  color: #666;
+}
+
+/* Section wrapper for InProgress / Completed / Incomplete */
+.section {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 16px 20px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+/* List of students inside a section */
+.student-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Each student item */
+.student-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+
+.student-item:hover {
+  background-color: #f6f6f6;
+}
+
+/* Student name and details */
+.student-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin: 0;
+}
+
+.student-status {
+  font-size: 14px;
+  color: #666;
+}

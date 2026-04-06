@@ -1,0 +1,16 @@
+id, firstName, lastName, graduationDate, isCSMajor
+ 1, Bill     , Johnson , 2027-05-15    , true
+ 2, Alice    , Smith   , 2027-12-20    , false
+ 3, Bob      , Brown   , 2028-05-15    , true
+ 4, Carol    , Davis   , 2028-12-15    , false
+ 5, David    , Miller  , 2029-05-20    , true
+ 6, Eva      , Wilson  , 2027-05-25    , false
+ 7, Frank    , Moore   , 2027-12-10    , true
+ 8, Grace    , Taylor  , 2028-05-05    , false
+ 9, Henry    , Anderson, 2028-12-20    , true
+10, Ivy      , Thomas  , 2029-05-10    , false
+11, Jack     , Jackson , 2027-05-18    , true
+12, Kara     , White   , 2027-12-22    , false
+13, Liam     , Harris  , 2028-05-12    , true
+14, Mia      , Martin  , 2028-12-05    , false
+15, Noah     , Lee     , 2029-05-15    , true
