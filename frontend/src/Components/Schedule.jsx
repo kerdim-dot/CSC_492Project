@@ -1006,26 +1006,63 @@ function AdminControls() {
 
     const importantDates = [
         {
-            dayName: "Spring Exams",
-            dateStart: "5/1/26",
-            dateEnd: "5/5/26",
-            dayOfWeekStart: "Friday",
-            dayOfWeekEnd: "Tuesday",
-        },
-        {
-            dayName: "Fall Exams",
-            dateStart: "12/1/26",
-            dateEnd: "12/8/26",
-            dayOfWeekStart: "Thursday",
-            dayOfWeekEnd: "Thursday",
-        },
-        {
             dayName: "Graduation",
             dateStart: "5/9/26",
             dateEnd: "5/9/26",
             dayOfWeekStart: "Saturday",
             dayOfWeekEnd: "Saturday",
-        }
+        },
+        {
+            dayName: "Classes Resume from Easter Recess",
+            dateStart: "4/6/26",
+            dateEnd: "4/6/26",
+            dayOfWeekStart: "Monday",
+            dayOfWeekEnd: "Monday",
+        },
+        {
+            dayName: "Last Day to Petition to Change Day/Time of a Final Exam",
+            dateStart: "4/17/26",
+            dateEnd: "4/17/26",
+            dayOfWeekStart: "Friday",
+            dayOfWeekEnd: "Friday",
+        },
+        {
+            dayName: "SCHOLAR Day/Honors Convo (No Day Classes; Classes Resume at 6pm)",
+            dateStart: "4/21/26",
+            dateEnd: "4/21/26",
+            dayOfWeekStart: "Tuesday",
+            dayOfWeekEnd: "Tuesday",
+        },
+        {
+            dayName: "Last Day of Regular Classes",
+            dateStart: "4/30/26",
+            dateEnd: "4/30/26",
+            dayOfWeekStart: "Thursday",
+            dayOfWeekEnd: "Thursday",
+        },
+        {
+            dayName: "Final Exam Period (Includes Sunday 6pm Exam; No Saturday Exams)",
+            dateStart: "5/1/26",
+            dateEnd: "5/6/26",
+            dayOfWeekStart: "Friday",
+            dayOfWeekEnd: "Wednesday",
+        },
+        {
+            dayName: "Semester Ends at 11:00pm",
+            dateStart: "5/6/26",
+            dateEnd: "5/6/26",
+            dayOfWeekStart: "Wednesday",
+            dayOfWeekEnd: "Wednesday",
+        },
+        {
+            dayName: "Commencement",
+            dateStart: "5/9/26",
+            dateEnd: "5/9/26",
+            dayOfWeekStart: "Saturday",
+            dayOfWeekEnd: "Saturday",
+        },
+        
+        
     ]
 
     const existingCourses = [

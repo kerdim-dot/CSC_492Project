@@ -728,15 +728,16 @@
   padding: 10px 16px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  background: white;
+  background: #5f2b8c;
   cursor: pointer;
   font-weight: 600;
   white-space: nowrap;
+  color: white;
 }
 
 .admin-assign-button:hover,
 .admin-alter-button:hover {
-  background: #f7f7f7;
+  background: #c461f1;
 }
 
 /* =========================
@@ -985,7 +986,7 @@
   padding: 1rem 1.25rem;
   background: rgba(119, 48, 151, 0.2);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  max-width: 500px;
+  max-width: 600px;
 }
 
 .important-dates-title {

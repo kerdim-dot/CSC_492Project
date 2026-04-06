@@ -57,18 +57,17 @@
   flex: 1;
   display: grid;
   min-height: 32px;
-  border: 1px solid #000;
-  border-radius: 999px;
-  overflow: hidden;
+  border: 0.1rem solid #000;
   background: #fff;
+  border-radius: 999px;
   width: 100%;
   box-sizing: border-box;
 }
 
 .requirement-progress-label {
   min-width: 70px;
-  font-size: 1rem;
-  font-weight: 500;
+  font-size: 1.2rem;
+  font-weight: 700;
 }
 
 .requirement-grid-cell {
@@ -81,6 +80,14 @@
 
 .requirement-grid-cell:last-child {
   border-right: none;
+  border-top-right-radius: 999px;
+  border-bottom-right-radius: 999px;
+}
+
+.requirement-grid-cell:first-child {
+  border-left: none;
+  border-top-left-radius: 999px;
+  border-bottom-left-radius: 999px;
 }
 
 .requirement-grid-cell.completed {
@@ -101,9 +108,11 @@
 }
 
 .requirement-grid-cell:not(.empty):hover {
-  transform: scale(1.08);
+  transform: scale(1.3);
   z-index: 2;
   filter: brightness(1.03);
+  box-shadow: 12px 12px 12px rgba(0, 0, 0, 0.5);
+  border: 0.1rem solid #000000;
 }
 
 .requirement-grid-tooltip {
