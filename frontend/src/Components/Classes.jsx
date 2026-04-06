@@ -60,7 +60,6 @@ function Classes(){
             });
         }
 
-        // 🎓 YEAR FILTER (based on class number)
         if (year !== "All") {
             filtered = filtered.filter((item) => {
                 const num = Number(item.header.split("-")[1]);
@@ -74,9 +73,8 @@ function Classes(){
             });
         }
 
-        // 📘 REQUIREMENT FILTER (you need to define this better later)
+
         if (requirement !== "All") {
-            // TEMP: assume all are required
             if (requirement === "Required") {
                 filtered = filtered;
             } else if (requirement === "Not Required") {
@@ -84,7 +82,6 @@ function Classes(){
             }
         }
 
-        // 🔢 CREDIT FILTER
         if (credits) {
             filtered = filtered.filter((item) => item.credits === Number(credits));
         }
@@ -186,16 +183,17 @@ function ClassList({classSearchList}){
    
 
     return(
-
-        <div className="entry-list">
-            {classSearchList && classSearchList.map((item,index)=>{
-                return(
-                <div className="entry" onClick={()=>{navigate(`/classes/${item.header}`)}}>
-                    <p>{item.title} </p>
-                    <p>{item.header} </p>
-                </div>
-                )
-            })}
+        <div className="placeholder">
+             <div className="entry-list">
+                {classSearchList && classSearchList.map((item,index)=>{
+                    return(
+                    <div className="entry" onClick={()=>{navigate(`/classes/${item.header}`)}}>
+                        <p>{item.title} </p>
+                        <p>{item.header} </p>
+                    </div>
+                    )
+                })}
+            </div>
         </div>
     ) 
 }

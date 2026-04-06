@@ -2,26 +2,35 @@ import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
 import close from "./../assets/close.svg"
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 function EnrollmentManager(){
 
     const [studentSearchList, setStudentSearchList] = useState(null);
     const [selectedStudentId, setSelectedStudentId] = useState(null);
+    const [isBeginning, setIsBeginning] = useState(true);
+
+    const [classes, setClasses] = useState([]);
+    const [students, setStudents] = useState([]);
+    const [enrollment, setEnrollment] = useState([]);
 
     useEffect(()=>{
         
         const retriveClassData = async() =>{
             const classData = await axios.get('http://localhost:8080/test/get/classes');
+            setClasses(classData.data);
             console.log("class fetch:", classData.data)
         }
 
         const retriveStudentData = async() =>{
             const studentData = await axios.get('http://localhost:8080/test/get/students');
+            setStudents(studentData.data);
             console.log("student fetch:", studentData.data)
         }
 
         const retriveEnrollmentData = async() =>{
             const enrollmentData = await axios.get('http://localhost:8080/test/get/enrollments');
+            setEnrollment(enrollmentData.data)
             console.log("enrollment fetch:",enrollmentData.data)
         }
 
@@ -31,37 +40,38 @@ function EnrollmentManager(){
 
     },[])
 
-    const classes = [
-        {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true,isRequired:true}, 
-        {classId:2,title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4,isActive: true,isRequired:true},
-        {classId:3,title:"Computer Organization" , header:"CSC-270", credits: 4,isActive: true,isRequired:true}, 
-        {classId:4,title:"Database Theory Implementation",header:"CSC-310", credits: 4,isActive: true,isRequired:true}, 
-        {classId:5,title:"Algorithms and Data Structures",header:"CSC-320", credits: 4,isActive: true,isRequired:true}, 
-        {classId:6,title:"Computer Networks",header:"CSC-360", credits: 4,isActive: false,isRequired:true}, 
-        {classId:7,title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2,isActive: false,isRequired:true}, 
-        {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false,isRequired:true}
-    ];
 
-    const enrollment = [
-        {enrollmentId:1,studentId:2, classId:1, status: 2},
-        {enrollmentId:2,studentId:2, classId:2, status: 2},
-        {enrollmentId:3,studentId:2, classId:3, status: 1},
-        {enrollmentId:5,studentId:1, classId:1, status: 2},
-        {enrollmentId:6,studentId:1, classId:2, status: 2},
-        {enrollmentId:7,studentId:1, classId:3, status: 1},
-        {enrollmentId:8,studentId:1, classId:4, status: 1}
-    ]
+    // const classes = [
+    //     {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true,isRequired:true}, 
+    //     {classId:2,title: "Programming Problem Solving II" ,header:"CSC-220", credits: 4,isActive: true,isRequired:true},
+    //     {classId:3,title:"Computer Organization" , header:"CSC-270", credits: 4,isActive: true,isRequired:true}, 
+    //     {classId:4,title:"Database Theory Implementation",header:"CSC-310", credits: 4,isActive: true,isRequired:true}, 
+    //     {classId:5,title:"Algorithms and Data Structures",header:"CSC-320", credits: 4,isActive: true,isRequired:true}, 
+    //     {classId:6,title:"Computer Networks",header:"CSC-360", credits: 4,isActive: false,isRequired:true}, 
+    //     {classId:7,title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2,isActive: false,isRequired:true}, 
+    //     {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false,isRequired:true}
+    // ];
 
-    const students = [
-            {studentId:1,firstName:"Bill" , lastName:"Hart", graduation: "1/2029", isMajor:true ,classes:null, credits:0},
-            {studentId:2,firstName:"John" , lastName:"Doe", graduation: "2/2028", isMajor:true ,classes:null, credits:0}
-    ]
+    // const enrollment = [
+    //     {enrollmentId:1,studentId:2, classId:1, status: 2},
+    //     {enrollmentId:2,studentId:2, classId:2, status: 2},
+    //     {enrollmentId:3,studentId:2, classId:3, status: 1},
+    //     {enrollmentId:5,studentId:1, classId:1, status: 2},
+    //     {enrollmentId:6,studentId:1, classId:2, status: 2},
+    //     {enrollmentId:7,studentId:1, classId:3, status: 1},
+    //     {enrollmentId:8,studentId:1, classId:4, status: 1}
+    // ]
+
+    // const students = [
+    //         {studentId:1,firstName:"Bill" , lastName:"Hart", graduation: "1/2029", isMajor:true ,classes:null, credits:0},
+    //         {studentId:2,firstName:"John" , lastName:"Doe", graduation: "2/2028", isMajor:true ,classes:null, credits:0}
+    // ]
 
     return(
         <div>
             <SearchBar students = {students} setStudentSearchList={setStudentSearchList}/>
-            <StudentList studentSearchList={studentSearchList} selectedStudentId = {selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
-            <UpdateBlock classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
+            <StudentList setIsBeginning = {setIsBeginning} studentSearchList={studentSearchList} selectedStudentId = {selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
+            <UpdateBlock isBeginning = {isBeginning} classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
         </div>
     )
 }
@@ -70,8 +80,8 @@ function EnrollmentManager(){
 function SearchBar({students, setStudentSearchList}){
     const [searchInput, setSearchInput] = useState();
 
-    useState(()=>{
-        if(students){
+    useEffect(()=>{
+        if(students.length > 0){
             setStudentSearchList(students);
         }
     },[students])
@@ -108,18 +118,18 @@ function SearchBar({students, setStudentSearchList}){
     )
 }
 
-function UpdateBlock({classes, enrollment, selectedStudentId, setSelectedStudentId}){
+function UpdateBlock({isBeginning,classes, enrollment, selectedStudentId, setSelectedStudentId}){
     const [studentEnrollmentMap, setStudentEnrollmentMap] = useState({});
 
     useEffect(()=>{
-        if(enrollment && classes){
+        if(enrollment.length > 0 && classes.length >0){
             const enrollmentMap = {};
 
             enrollment.forEach((item)=>{
-                if(!enrollmentMap[item.studentId]){
-                    enrollmentMap[item.studentId] = [];
+                if(!enrollmentMap[item.student_id]){
+                    enrollmentMap[item.student_id] = [];
                 }
-                enrollmentMap[item.studentId].push({classId: item.classId, status: item.status});
+                enrollmentMap[item.student_id].push({classId: item.mountClass_id, status: item.status});
             });
 
             const result = {};
@@ -127,7 +137,7 @@ function UpdateBlock({classes, enrollment, selectedStudentId, setSelectedStudent
             Object.keys(enrollmentMap).forEach((key) => {
                 classes.forEach((classs) => {
                     enrollmentMap[key].forEach((enrollment)=>{
-                        if(enrollment.classId == classs.classId){
+                        if(enrollment.classId == classs.class_id){
                             if(!result[key]){
                                 result[key] = []
                             }
@@ -143,7 +153,7 @@ function UpdateBlock({classes, enrollment, selectedStudentId, setSelectedStudent
     },[classes,enrollment]);
 
     return(
-        <div className= {selectedStudentId ? "update-student-panel": "update-student-panel-hidden"}>
+        <div className= {selectedStudentId?"update-student-panel-out":isBeginning?"update-student-panel":"update-student-panel-hidden"}>
             <img className="close-img-two" src={close} onClick={()=>{setSelectedStudentId(null)}}></img>
 
             <p className="student-panel-title">Update Enrollment Panel</p>
@@ -155,7 +165,7 @@ function UpdateBlock({classes, enrollment, selectedStudentId, setSelectedStudent
                     studentEnrollmentMap[selectedStudentId].some(enrollment => enrollment.classHeader === item.header);;
 
                 return(
-                    <button className={isEnrolled ? "completedClass" : ""}>
+                    <button className={isEnrolled ? "class-pool completedClass" : "class-pool"}>
                         {item.header}
                     </button>
                 )
@@ -166,20 +176,29 @@ function UpdateBlock({classes, enrollment, selectedStudentId, setSelectedStudent
     )
 }
 
-function StudentList({studentSearchList,selectedStudentId ,setSelectedStudentId}){
+function StudentList({setIsBeginning, studentSearchList,selectedStudentId ,setSelectedStudentId}){
+
+    const selectEntry = (studentId) =>{
+        setIsBeginning(false);
+        setSelectedStudentId(studentId);
+    }
+
+
     return(
-        <div className="entry-list">
-            {studentSearchList && studentSearchList.map((item,index)=>{
-                return(
-                <div 
-                    className={selectedStudentId === item.studentId ? "entry highlighted": "entry"}
-                    onClick={() => setSelectedStudentId(item.studentId)}
-                >
-                    <p>{item.firstName} {item.lastName}</p>
-                    <p>{item.graduation}</p>
-                </div>
-                )
-            })}
+        <div className="placeholder">
+            <div className="entry-list">
+                {studentSearchList && studentSearchList.map((item,index)=>{
+                    return(
+                    <div 
+                        className={selectedStudentId === item.student_id ? "entry highlighted": "entry"}
+                        onClick={() => selectEntry(item.student_id)}
+                    >
+                        <p>{item.firstName} {item.lastName}</p>
+                        <p>{item.graduation}</p>
+                    </div>
+                    )
+                })}
+            </div>
         </div>
     )
 }

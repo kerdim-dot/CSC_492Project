@@ -435,17 +435,21 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                 <div className="individual-add">
                     <p>Add Student</p>
                     <div className="name-container">
+                        <p>Student Name:</p>
                         <input type= "text" className="name-input" placeholder="first name"/>
                         <input type= "text" className="name-input" placeholder="last name"/>
                     </div>
-                    <p>Grduation Date</p>
                     <div className="graduation-container">
+                        <p>Grduation Date:</p>
                         <input type="text" className = "graduation-input" placeholder="DD"></input>
                         <p>-</p>
                         <input type="text" className = "graduation-input" placeholder="MM"></input>
                         <p>-</p>
                         <input type="text" className = "graduation-input year" placeholder="YYYY"></input>
                     </div>  
+                    <div className="graduation-container">
+                        <button>Add Student</button>
+                    </div>
                 </div>
                 <div className="mass-add">
                     <p>Add Multiple Students </p>
@@ -454,7 +458,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                         <button className={csvIsSelected ? "mass-add-btn":"mass-add-btn-active"} onClick={()=>{setcsvIsSelected(false)}}>JSON</button>
                     </div>
                     <textarea className="mass-add-textarea" value={multipleStudentText} onChange={(e)=>{setMultipleStudentText(e.target.value)}}/>
-                    <button onClick={()=>{structureStudentData(multipleStudentText)}}>submit</button>
+                    <button onClick={()=>{structureStudentData(multipleStudentText)}}>Add Student</button>
                 </div>
             </div>
             }
