@@ -61,7 +61,7 @@ function EnrollmentManager(){
         <div>
             <SearchBar students = {students} setStudentSearchList={setStudentSearchList}/>
             <StudentList studentSearchList={studentSearchList} selectedStudentId = {selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
-            <UpdateBlock classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId}/>
+            <UpdateBlock classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
         </div>
     )
 }
@@ -108,7 +108,7 @@ function SearchBar({students, setStudentSearchList}){
     )
 }
 
-function UpdateBlock({classes, enrollment, selectedStudentId}){
+function UpdateBlock({classes, enrollment, selectedStudentId, setSelectedStudentId}){
     const [studentEnrollmentMap, setStudentEnrollmentMap] = useState({});
 
     useEffect(()=>{
@@ -143,8 +143,8 @@ function UpdateBlock({classes, enrollment, selectedStudentId}){
     },[classes,enrollment]);
 
     return(
-        <div className="update-student-panel">
-            <img className="close-img-two" src={close}></img>
+        <div className= {selectedStudentId ? "update-student-panel": "update-student-panel-hidden"}>
+            <img className="close-img-two" src={close} onClick={()=>{setSelectedStudentId(null)}}></img>
 
             <p className="student-panel-title">Update Enrollment Panel</p>
 

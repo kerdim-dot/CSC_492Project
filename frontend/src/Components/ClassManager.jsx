@@ -484,7 +484,7 @@ function ClassManager(){
                             })}
                         </div>
                         <p>{warning}</p>
-                        <button onClick={deleteEntry} className="btn-delete-student">Delete Class</button>
+                        <button onClick={deleteEntry} className={"btn-delete-student" } disabled={!selectedEntry}>Delete Class</button>
                     </div>}
                 {activeTab === "tree" && 
                     <div className="graph-container">
