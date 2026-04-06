@@ -97,7 +97,7 @@ public class TestController {
             columnSpliter = line.split(",");
             boolean convertIsActive = Boolean.parseBoolean(columnSpliter[4]);
             int convertCredits = Integer.parseInt(columnSpliter[3]);
-            MountClass mountClass = new MountClass(columnSpliter[1],columnSpliter[2],convertCredits,convertIsActive);
+            MountClass mountClass = new MountClass(columnSpliter[1],columnSpliter[2],convertCredits,convertIsActive, columnSpliter[5]);
             mountClassService.addClass(mountClass);
         }
 

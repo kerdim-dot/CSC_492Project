@@ -33,6 +33,8 @@ function StudentManager(){
     const[students, setStudents] = useState([]);
     const[enrollment, setEnrollment] = useState([]);
 
+    const [isBeginning, setIsBeginning] = useState(true);
+
 
     useEffect(()=>{
         
@@ -191,7 +193,7 @@ useEffect(()=>{
 
        {showFilter && <FilterBlock startDate={startDate} setStartDate={setStartDate} endDate = {endDate} setEndDate={setEndDate} setShowFilter={setShowFilter} overview={overview} setOverview ={setOverview}/>}
 
-      <BodyPanel activeTab={activeTab} studentSearchList={studentSearchList} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry}/>
+      <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry}/>
       
     </div>
   );
@@ -311,10 +313,10 @@ function FilterBlock({ startDate, endDate, setStartDate, setEndDate, setShowFilt
 }
 
 
-function UpdateBlock({studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue}){
+function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue}){
 
     return(
-        <div className={studentUpdateEntry ? "update-student-panel" : "update-student-panel-hidden" }>
+        <div className={studentUpdateEntry?"update-student-panel-out":isBeginning?"update-student-panel":"update-student-panel-hidden" }>
             
 
             <img className="close-img-two" src={close} onClick={()=>{setStudentUpdateEntry(null)}}></img>
@@ -354,7 +356,7 @@ function UpdateBlock({studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameV
 }
 
 
-function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntry, updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, setStudentUpdateEntry, studentUpdateEntry}){
+function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, selectedEntry, setSelectedEntry, updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, setStudentUpdateEntry, studentUpdateEntry}){
     const [warning, setWarning] = useState(null);
     const [multipleStudentText, setMultipleStudentText] = useState(null);
     const [csvIsSelected, setcsvIsSelected] = useState(true);
@@ -419,6 +421,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
     }
 
     const clickOnEntry = (item) =>{
+        setIsBeginning(false);
         setStudentUpdateEntry(item.student_id);
         setUpdateFirstNameValue(item.firstName);
         setUpdateLastNameValue(item.lastName);
@@ -468,7 +471,7 @@ function BodyPanel({activeTab, studentSearchList, selectedEntry, setSelectedEntr
                             </div>)
                         })}
                     </div>
-                    {<UpdateBlock studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue}/>}
+                    {<UpdateBlock isBeginning={isBeginning} studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue}/>}
                 </div>}
             {activeTab === "delete" && 
                 <div className="placeholder">

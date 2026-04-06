@@ -8,6 +8,7 @@ import '@xyflow/react/dist/style.css';
 import { data } from "react-router-dom";
 import { findParams, findPreReqs } from "../tools/treeBuilder";
 import axios from 'axios';
+import { useRef } from "react";
 
 function ClassManager(){
     
@@ -30,6 +31,7 @@ function ClassManager(){
       const [updateClassCredits, setUpdateClassCredits] = useState(null);
 
       const [classes,setClasses] = useState([]);
+      const [isBeginning, setIsBeginning] = useState(true);
 
       useEffect(()=>{
         
@@ -202,7 +204,7 @@ function ClassManager(){
                 }
           </div>
           
-          <BodyPanel activeTab={activeTab} nodes = {nodes} classes={classes} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry}/>
+          <BodyPanel isBeginning = {isBeginning} setIsBeginning = {setIsBeginning} activeTab={activeTab} nodes = {nodes} classes={classes} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry}/>
           
         </div>
       );
@@ -260,13 +262,13 @@ function ClassManager(){
     }
 
 
-    function UpdateBlock({updateClassTitle, setUpdateClassTitle, updateClassHeader,setUpdateClassHeader,updateClassCredits, setUpdateClassCredits}){
-    
+    function UpdateBlock({isBeginning, classUpdateEntry, setClassUpdateEntry, updateClassTitle, setUpdateClassTitle, updateClassHeader,setUpdateClassHeader,updateClassCredits, setUpdateClassCredits}){
+      
         return(
-            <div className="update-student-panel">
+            <div className={classUpdateEntry?"update-student-panel-out":isBeginning?"update-student-panel":"update-student-panel-hidden"}>
                 
-    
-                <img className="close-img-two" src={close}></img>
+
+                <img className="close-img-two" src={close} onClick={()=>{setClassUpdateEntry(null)}}></img>
     
                 <p className="student-panel-title">Update Class Panel</p>
     
@@ -378,7 +380,7 @@ function ClassManager(){
         );
     }
     
-    function BodyPanel({activeTab, nodes, classes, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader, updateClassCredits, setUpdateClassCredits, selectedEntry, setSelectedEntry}){
+    function BodyPanel({isBeginning, setIsBeginning, activeTab, nodes, classes, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader, updateClassCredits, setUpdateClassCredits, selectedEntry, setSelectedEntry}){
        
         const [warning, setWarning] = useState(null);
         const [classPool, setClassPool] = useState(null);
@@ -428,6 +430,7 @@ function ClassManager(){
         // ];
 
         const clickOnEntry = (item) =>{
+            setIsBeginning(false);
             setClassUpdateEntry(item.class_id);
             setUpdateClassTitle(item.title);
             setUpdateClassHeader(item.header);
@@ -469,7 +472,7 @@ function ClassManager(){
                             })}
                             
                         </div>
-                            {classUpdateEntry && <UpdateBlock updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits}/>}
+                            <UpdateBlock isBeginning={isBeginning} setIsBeginning={setIsBeginning} classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits}/>
                     </div>}
                 {activeTab === "delete" && 
                     <div className="placeholder">
