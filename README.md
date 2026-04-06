@@ -11,4 +11,4 @@
 * Spring Boot
 
 ## Blog Website
-https://name-not-completed.netlify.app/about
+https://name-not-completed.netlify.app/
