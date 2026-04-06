@@ -110,29 +110,29 @@ function getMockRequirementData() {
             label: "Major",
             totalRequired: 19,
             courses: [
-                { id: 101, code: "CSC 120", name: "Intro to Programming", status: "completed" },
-                { id: 102, code: "CSC 145", name: "Data Structures", status: "completed" },
-                { id: 103, code: "CSC 220", name: "Computer Architecture", status: "completed" },
-                { id: 104, code: "CSC 250", name: "Algorithms", status: "completed" },
-                { id: 105, code: "CSC 260", name: "Operating Systems", status: "completed" },
-                { id: 106, code: "CSC 310", name: "Software Engineering", status: "in_progress" },
-                { id: 107, code: "CSC 320", name: "Database Systems", status: "in_progress" },
-                { id: 108, code: "CSC 330", name: "Networks", status: "in_progress" },
-                { id: 109, code: "CSC 340", name: "Theory of Computation", status: "warning" }
+                { id: 101, code: "CSC-120", name: "Intro to Programming", status: "completed" },
+                { id: 102, code: "CSC-145", name: "Data Structures", status: "completed" },
+                { id: 103, code: "CSC-220", name: "Computer Architecture", status: "completed" },
+                { id: 104, code: "CSC-250", name: "Algorithms", status: "completed" },
+                { id: 105, code: "CSC-260", name: "Operating Systems", status: "completed" },
+                { id: 106, code: "CSC-310", name: "Software Engineering", status: "in_progress" },
+                { id: 107, code: "CSC-320", name: "Database Systems", status: "in_progress" },
+                { id: 108, code: "CSC-330", name: "Networks", status: "in_progress" },
+                { id: 109, code: "CSC-340", name: "Theory of Computation", status: "warning" }
             ]
         },
         {
             label: "Minor",
             totalRequired: 19,
             courses: [
-                { id: 201, code: "MTH 120", name: "Calculus I", status: "completed" },
-                { id: 202, code: "MTH 121", name: "Calculus II", status: "completed" },
-                { id: 203, code: "MTH 220", name: "Linear Algebra", status: "completed" },
-                { id: 204, code: "MTH 230", name: "Discrete Math", status: "completed" },
-                { id: 205, code: "MTH 310", name: "Probability", status: "completed" },
-                { id: 206, code: "MTH 315", name: "Statistics", status: "in_progress" },
-                { id: 207, code: "MTH 340", name: "Numerical Methods", status: "in_progress" },
-                { id: 208, code: "MTH 350", name: "Abstract Algebra", status: "in_progress" }
+                { id: 201, code: "MTH-120", name: "Calculus I", status: "completed" },
+                { id: 202, code: "MTH-121", name: "Calculus II", status: "completed" },
+                { id: 203, code: "MTH-220", name: "Linear Algebra", status: "completed" },
+                { id: 204, code: "MTH-230", name: "Discrete Math", status: "completed" },
+                { id: 205, code: "MTH-310", name: "Probability", status: "completed" },
+                { id: 206, code: "MTH-315", name: "Statistics", status: "in_progress" },
+                { id: 207, code: "MTH-340", name: "Numerical Methods", status: "in_progress" },
+                { id: 208, code: "MTH-350", name: "Abstract Algebra", status: "in_progress" }
             ]
         }
     ];
@@ -296,7 +296,7 @@ function RequirementGridCell({ course }) {
             title={course ? `${course.code}: ${course.name}` : ""}
             onClick={() => {
                 if (course) {
-                    navigate(`/classzoom/${course.id}`);
+                    navigate(`/classes/${course.code}`);
                 }
             }}
         >
