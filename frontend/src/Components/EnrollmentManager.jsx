@@ -185,18 +185,20 @@ function StudentList({setIsBeginning, studentSearchList,selectedStudentId ,setSe
 
 
     return(
-        <div className="entry-list">
-            {studentSearchList && studentSearchList.map((item,index)=>{
-                return(
-                <div 
-                    className={selectedStudentId === item.student_id ? "entry highlighted": "entry"}
-                    onClick={() => selectEntry(item.student_id)}
-                >
-                    <p>{item.firstName} {item.lastName}</p>
-                    <p>{item.graduation}</p>
-                </div>
-                )
-            })}
+        <div className="placeholder">
+            <div className="entry-list">
+                {studentSearchList && studentSearchList.map((item,index)=>{
+                    return(
+                    <div 
+                        className={selectedStudentId === item.student_id ? "entry highlighted": "entry"}
+                        onClick={() => selectEntry(item.student_id)}
+                    >
+                        <p>{item.firstName} {item.lastName}</p>
+                        <p>{item.graduation}</p>
+                    </div>
+                    )
+                })}
+            </div>
         </div>
     )
 }

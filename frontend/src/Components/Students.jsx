@@ -288,15 +288,18 @@ function StudentList({studentSearchList}){
 
     return(
 
-        <div className="entry-list">
-            {studentSearchList && studentSearchList.map((item,index)=>{
-                return(
-                <div className= {item.isBehind? "entry behind" : "entry"} onClick={()=>{navigate(`/students/${item.student_id}`)}}>
-                    <p>{item.firstName} {item.lastName}</p>
-                    <p>{item.graduationDate}</p>
-                </div>
-                )
-            })}
+        <div className="placeholder">
+            <div className="entry-list">
+                {studentSearchList && studentSearchList.map((item,index)=>{
+                    return(
+                    <div className= {item.isBehind? "entry behind" : "entry"} onClick={()=>{navigate(`/students/${item.student_id}`)}}>
+                        <p>{item.firstName} {item.lastName}</p>
+                        <p>{item.graduationDate}</p>
+                    </div>
+                    )
+                })}
+            </div>
         </div>
+
     ) 
 }

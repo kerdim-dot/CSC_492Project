@@ -183,16 +183,17 @@ function ClassList({classSearchList}){
    
 
     return(
-
-        <div className="entry-list">
-            {classSearchList && classSearchList.map((item,index)=>{
-                return(
-                <div className="entry" onClick={()=>{navigate(`/classes/${item.header}`)}}>
-                    <p>{item.title} </p>
-                    <p>{item.header} </p>
-                </div>
-                )
-            })}
+        <div className="placeholder">
+             <div className="entry-list">
+                {classSearchList && classSearchList.map((item,index)=>{
+                    return(
+                    <div className="entry" onClick={()=>{navigate(`/classes/${item.header}`)}}>
+                        <p>{item.title} </p>
+                        <p>{item.header} </p>
+                    </div>
+                    )
+                })}
+            </div>
         </div>
     ) 
 }
