@@ -429,7 +429,7 @@ function RingSegment({
     ].join(" ");
 
     let fill = "#f4f4f4";
-    if (status === "completed") fill = "#10b84f";
+    if (status === "completed") fill = "#55ad2a";
     if (status === "in-progress") fill = "#f3ef00";
 
     return <path d={d} fill={fill} stroke="#0c2a3a" strokeWidth="1.6" />;
