@@ -1,20 +1,12 @@
 package com.example.backend.Controllers;
 
-import com.example.backend.Repositories.EnrollmentRepository;
-import com.example.backend.Repositories.ScheduleEntryRepository;
-import com.example.backend.Repositories.ScheduleRepository;
-import com.example.backend.Services.EnrollmentService;
-import com.example.backend.Services.MountClassEntryService;
-
 import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,14 +18,17 @@ import com.example.backend.Entities.PrerequisiteMapping;
 import com.example.backend.Entities.Schedule;
 import com.example.backend.Entities.ScheduleEntry;
 import com.example.backend.Entities.Student;
+import com.example.backend.Repositories.EnrollmentRepository;
 import com.example.backend.Repositories.MountClassRepository;
+import com.example.backend.Repositories.ScheduleRepository;
 import com.example.backend.Repositories.StudentRepository;
+import com.example.backend.Services.EnrollmentService;
+import com.example.backend.Services.MountClassEntryService;
 import com.example.backend.Services.MountClassService;
 import com.example.backend.Services.PrerequisiteMappingService;
 import com.example.backend.Services.ScheduleEntryService;
 import com.example.backend.Services.ScheduleService;
 import com.example.backend.Services.StudentService;
-import com.example.backend.Services.UserService;
 import com.example.backend.dtos.EnrollmentDTO;
 import com.example.backend.dtos.MountClassEntryDTO;
 import com.example.backend.dtos.PrerequisiteDTO;
@@ -79,6 +74,7 @@ public class TestController {
 
     @GetMapping("/data")
     public void generateTestData() throws Exception{
+
         BufferedReader brClass = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/class.csv")));
         BufferedReader brStudent = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/student.csv")));
         BufferedReader brEnrollment = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/enrollment.csv")));
