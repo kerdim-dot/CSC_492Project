@@ -30,7 +30,7 @@ body {
   padding: 8px 12px;
   background-color: rgb(119, 48, 151);
   position: sticky;
-  top: 0;
+  top: 0; 
   align-self: start;
   overflow: hidden;
   white-space: nowrap;
