@@ -46,6 +46,16 @@ function ClassZoom(){
         fetchAllData();
     }, []);
 
+    // fetches enrollments based on classId
+    useEffect(()=>{
+        const class_id = 1;
+        const fetchCertainClassEnrollments = async() =>{
+            const enrollmentData = await axios.get(`http://localhost:8080/test/get/class/enrollment?id=${class_id}`);
+            console.log("Enrollment Example for calss with id 1: ", enrollmentData.data)
+        }
+        fetchCertainClassEnrollments();
+    },[enrollmentData])
+
     useEffect(() => {
         if (!studentData.length || !classData.length || !enrollmentData.length) return;
 

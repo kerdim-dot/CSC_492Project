@@ -1,5 +1,6 @@
 package com.example.backend.Entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,10 +22,15 @@ public class ScheduleEntry {
     @JoinColumn(name = "class_id")
     private MountClass mountClass;
 
+    @Column(nullable = false)
     private boolean isMonday;
+    @Column(nullable = false)
     private boolean isTuesday;
+    @Column(nullable = false)
     private boolean isWednesDay;
+    @Column(nullable = false)
     private boolean isThursday;
+    @Column(nullable = false)
     private boolean isFriday;
 
     private String time;

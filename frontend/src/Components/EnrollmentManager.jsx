@@ -14,6 +14,14 @@ function EnrollmentManager(){
     const [students, setStudents] = useState([]);
     const [enrollment, setEnrollment] = useState([]);
 
+    /* Backend Needs
+    - Fetch students c
+    - Fetch classes c
+    - Fetch Enrollment c
+    - delete Enrollment
+    - update Enrollment
+    */
+
     useEffect(()=>{
         
         const retriveClassData = async() =>{

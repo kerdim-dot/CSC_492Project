@@ -22,6 +22,21 @@ function Schedule() {
         fetchSchedules();
     }, [])
 
+    const addScheduleEntry = async() => {
+        const entry = {
+            schedule_id:1,
+            mountClass_id:1,
+            isMonday:true,
+            isTuesday:false,
+            isWednesDay:true,
+            isThursday:false,
+            isFriday:true,
+            time:"730am-8:45am"
+        }
+        const addScheduleData = await axios.post('http://localhost:8080/test/add/schedule/Entry',entry)
+        console.log("scheduleData confirmation", addScheduleData)
+    }
+
     return (
         <div className="schedule-container">
             <RequiredCourseCarousel
@@ -34,6 +49,7 @@ function Schedule() {
             />
             <ScheduleBlock />
             <AdminControls />
+            <button onClick={addScheduleEntry}>click here to add ScheduleEntry</button>
         </div>
 
     );

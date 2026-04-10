@@ -6,12 +6,16 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.Entities.Enrollment;
+import com.example.backend.Entities.ImportantDate;
 import com.example.backend.Entities.MountClass;
 import com.example.backend.Entities.MountClassEntry;
 import com.example.backend.Entities.PrerequisiteMapping;
@@ -23,6 +27,7 @@ import com.example.backend.Repositories.MountClassRepository;
 import com.example.backend.Repositories.ScheduleRepository;
 import com.example.backend.Repositories.StudentRepository;
 import com.example.backend.Services.EnrollmentService;
+import com.example.backend.Services.ImportantDataService;
 import com.example.backend.Services.MountClassEntryService;
 import com.example.backend.Services.MountClassService;
 import com.example.backend.Services.PrerequisiteMappingService;
@@ -50,12 +55,14 @@ public class TestController {
     private final MountClassRepository mountClassRepository;
     private final MountClassEntryService mountClassEntryService;
     private final PrerequisiteMappingService prerequisiteMappingService;
+    private final ImportantDataService importantDataService;
 
     public TestController(MountClassService mountClassService, StudentService studentService,
             StudentRepository studentRepository, MountClassRepository mountClassRepository,
             EnrollmentRepository enrollmentRepository, EnrollmentService enrollmentService,
             ScheduleService scheduleService, ScheduleEntryService scheduleEntryService, ScheduleRepository scheduleRepository,
-            MountClassEntryService mountClassEntryService, PrerequisiteMappingService prerequisiteMappingService) {
+            MountClassEntryService mountClassEntryService, PrerequisiteMappingService prerequisiteMappingService,
+            ImportantDataService importantDataService) {
 
         this.mountClassService = mountClassService;
         this.studentService = studentService;
@@ -68,6 +75,7 @@ public class TestController {
         this.scheduleRepository = scheduleRepository;
         this.mountClassEntryService = mountClassEntryService;
         this.prerequisiteMappingService = prerequisiteMappingService;
+        this.importantDataService = importantDataService;
 
     }
 
@@ -81,6 +89,7 @@ public class TestController {
         BufferedReader brScheduleEntry = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/scheduleEntry.csv")));
         BufferedReader brClassEntry = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/classEntry.csv")));
         BufferedReader brPrerequisites = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/prerequisites.csv")));
+        BufferedReader brImportantDates = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/importantDate.csv")));
 
         brClass.readLine();
         brStudent.readLine();
@@ -89,6 +98,7 @@ public class TestController {
         brScheduleEntry.readLine();
         brClassEntry.readLine();
         brPrerequisites.readLine();
+        brImportantDates.readLine();
 
         String line;
         String[] columnSpliter = {};
@@ -132,8 +142,8 @@ public class TestController {
             for (int i = 0; i < columnSpliter.length; i++) {
                 columnSpliter[i] = columnSpliter[i].trim();
             }
-            Optional<Schedule> scheduleOptional = scheduleRepository.findById(Long.parseLong(columnSpliter[1]));
-            Optional<MountClass> mountClassOptional = mountClassRepository.findById(Long.parseLong(columnSpliter[2]));
+            Long scheduleId = Long.parseLong(columnSpliter[1]);
+            Long mountClassId = Long.parseLong(columnSpliter[2]);
             boolean isMonday = Boolean.parseBoolean(columnSpliter[3]);
             boolean isTuesday = Boolean.parseBoolean(columnSpliter[4]);
             boolean isWednesday = Boolean.parseBoolean(columnSpliter[5]);
@@ -141,12 +151,9 @@ public class TestController {
             boolean isFriday = Boolean.parseBoolean(columnSpliter[7]);
             String time = columnSpliter[8];
 
-            if (scheduleOptional.isPresent() && mountClassOptional.isPresent()) {
-                Schedule schedule = scheduleOptional.get();
-                MountClass mountClass = mountClassOptional.get();
-                ScheduleEntry scheduleEntry = new ScheduleEntry(schedule, mountClass, isMonday, isTuesday, isWednesday, isThursday, isFriday, time);
-                scheduleEntryService.addScheduleEntry(scheduleEntry);
-            }
+            ScheduleEntryDTO scheduleEntryDTO = new ScheduleEntryDTO(scheduleId, mountClassId, isMonday, isTuesday, isWednesday, isThursday, isFriday, time);
+            scheduleEntryService.addScheduleEntry(scheduleEntryDTO);
+            
         }
 
         while ((line = brClassEntry.readLine()) != null) {
@@ -186,6 +193,21 @@ public class TestController {
                 PrerequisiteMapping prerequisiteMapping = new PrerequisiteMapping(mountClass, mountClassPrequisite);
                 prerequisiteMappingService.addPrerequisiteMapping(prerequisiteMapping);
             }
+        }
+
+        while((line = brImportantDates.readLine()) != null){
+            columnSpliter = line.split(",");
+            for (int i = 0; i < columnSpliter.length; i++) {
+                columnSpliter[i] = columnSpliter[i].trim();
+            }
+            //header,description,dateOfEvent,timeOfEvent
+            String header = columnSpliter[0];
+            String description = columnSpliter[1];
+            LocalDate dateOfEvent = LocalDate.parse(columnSpliter[2]);
+            String timeOfEvent = columnSpliter[3];
+            ImportantDate importantDate = new ImportantDate(header,description,dateOfEvent, timeOfEvent);
+            importantDataService.addImportantDate(importantDate);
+
         }
 
         while ((line = brEnrollment.readLine()) != null) {
@@ -242,4 +264,37 @@ public class TestController {
         return prerequisiteMappingService.getAllPrerequisiteMapping();
     }
 
+    @GetMapping("/get/important")
+    public List<ImportantDate> getAllImportantDates(){
+        return importantDataService.getAllImportantDates();
+    }
+
+
+    @GetMapping("/get/student/enrollment")
+    public List <EnrollmentDTO> getCertainStudentEnrollment(@RequestParam Long id){
+        return enrollmentService.findAllEnrollmentsByStudentId(id);
+    }
+
+    @GetMapping(("/get/class/enrollment"))
+    public List <EnrollmentDTO> getCertainClassEnrollment(@RequestParam Long id){
+        return enrollmentService.findAllEnrollmentsByClassId(id);
+    }
+
+    @DeleteMapping("/delete/class/enrollment")
+    public void deleteCertainClassEnrollment(@RequestParam Long id){
+        enrollmentService.deleteAllEnrollmentsByClassId(id);
+    }
+
+    @DeleteMapping("/delete/student/enrollment")
+    public void deleteCertainStudentEnrollment(@RequestParam Long id){
+        enrollmentService.deleteAllEnrollmentsByStudentId(id);
+    }
+
+
+    @PostMapping("/add/schedule/Entry")
+    public void addScheduleEntry(@RequestBody ScheduleEntryDTO scheduleEntryDTO){
+        scheduleEntryService.addScheduleEntry(scheduleEntryDTO);
+    }
+
+    
 }

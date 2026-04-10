@@ -16,13 +16,17 @@ public class EnrollmentDTO {
     private long student_id;
     private int status;
 
-
+    // this is used to fetch all possible enrollments
+    // all enrollments for a certain student
+    // all enrollments for a certain class
+    
     public EnrollmentDTO(long enrollment_id, long mountClass_id, long student_id, int status){
         this.enrollment_id = enrollment_id;
         this.mountClass_id = mountClass_id;
         this.student_id = student_id;
         this.status = status;
     } 
+
     public EnrollmentDTO(){
         
     }

@@ -55,6 +55,17 @@ function StudentZoom(){
     fetchAllData();
     },[])
 
+    // this is necessary for the user type, where only they can see their certain enrollments
+    // fetches enrollments based on studentId
+    useEffect(()=>{
+        const student_id = 1;
+        const fetchCertainStudentEnrollments = async() =>{
+            const enrollmentData = await axios.get(`http://localhost:8080/test/get/student/enrollment?id=${student_id}`);
+            console.log("Enrollment Example for student with id 1: ", enrollmentData.data)
+        }
+        fetchCertainStudentEnrollments();
+    },[enrollmentData])
+
 
     // time to grab our student.. beautiful student number :{id}
     useEffect(() => {

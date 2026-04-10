@@ -1,6 +1,7 @@
 package com.example.backend.Services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -24,4 +25,28 @@ public class EnrollmentService {
     public List<EnrollmentDTO> getAllEnrollments(){
         return enrollmentRepository.findAllEnrollmentDTOs();
     }
+
+    public void deleteEnrollment(Long id){
+        Optional <Enrollment> enrollmentOptional = enrollmentRepository.findById(id);
+        if(enrollmentOptional.isPresent()){
+            enrollmentRepository.delete(enrollmentOptional.get());
+        }
+    }
+
+    public List <EnrollmentDTO> findAllEnrollmentsByClassId(Long classId){
+        return enrollmentRepository.findEnrollmentPerClassDTOs(classId);
+    }
+
+    public List<EnrollmentDTO> findAllEnrollmentsByStudentId(Long studentId){
+        return enrollmentRepository.findEnrollmentPerStudentDTOs(studentId);
+    }
+
+    public void deleteAllEnrollmentsByStudentId(Long studentId){
+        enrollmentRepository.deleteByStudentId(studentId);
+    }
+
+    public void deleteAllEnrollmentsByClassId(Long classId){
+        enrollmentRepository.deleteByClassId(classId);
+    }
+    
 }

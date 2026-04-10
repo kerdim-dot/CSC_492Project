@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,13 +14,18 @@ import jakarta.persistence.OneToMany;
 
 @Entity
 public class MountClass {
-@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long class_id;
+    @Column(nullable = false)
     private String title;
+    @Column(nullable = false, unique = true)
     private String header;
+    @Column(nullable = false)
     private Integer credits;
+    @Column(nullable = false)
     private boolean isActive;
+    @Column(nullable = false)
     private String description; 
 
     @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)

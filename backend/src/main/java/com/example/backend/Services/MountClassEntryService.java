@@ -1,6 +1,7 @@
 package com.example.backend.Services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -26,5 +27,12 @@ public class MountClassEntryService {
         return mountClassEntryRepository.findAllMountClassEntryDTOs();
     }
 
+    public void deleteMountClassEntry(long id){
+        Optional <MountClassEntry> mountClassEntryOptional = mountClassEntryRepository.findById(id);
+
+        if(mountClassEntryOptional.isPresent()){
+            mountClassEntryRepository.delete(mountClassEntryOptional.get());
+        }
+    }
     
 }

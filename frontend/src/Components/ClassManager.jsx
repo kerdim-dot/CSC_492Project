@@ -10,6 +10,15 @@ import { findParams, findPreReqs } from "../tools/treeBuilder";
 import axios from 'axios';
 import { useRef } from "react";
 
+
+/* Backend Needs
+- Fetch classes c
+- Update classes
+- Delete classes
+- add prerequisites
+- delete prerequisities
+*/
+
 function ClassManager(){
     
       const [activeTab, setActiveTab] = useState("update");

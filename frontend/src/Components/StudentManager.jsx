@@ -4,9 +4,16 @@ import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
 import close from "./../assets/close.svg"
 import axios from 'axios'
-import { GraduationConverter
+import { GraduationConverter} from "../tools/GraduationConverter";
 
- } from "../tools/GraduationConverter";
+/* Backend Needs
+- Fetch students c
+- Fetch classes c
+- Fetch Enrollment c
+- Add Student
+- Update Student 
+- Delete Student - > might have to delete all the students schedules and other entries before this can occur
+*/
 function StudentManager(){
   const [activeTab, setActiveTab] = useState("update");
   const [selectedEntry, setSelectedEntry] = useState(null);

@@ -1,9 +1,11 @@
 package com.example.backend.Services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
+import com.example.backend.Entities.MountClass;
 import com.example.backend.Entities.Student;
 import com.example.backend.Repositories.StudentRepository;
 
@@ -24,4 +26,13 @@ public class StudentService {
     public List<Student> getAllStudents(){
         return studentRepository.findAll();
     }
+
+    public void deleteStudent(Long id){
+        Optional <Student> studentOptional = studentRepository.findById(id);
+
+        if(studentOptional.isPresent()){
+            studentRepository.delete(studentOptional.get());
+        }
+    }
+
 }
