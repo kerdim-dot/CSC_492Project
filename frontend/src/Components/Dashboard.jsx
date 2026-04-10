@@ -212,7 +212,8 @@ function Dashboard() {
                     behindCount={dashboardStats.behindCount}
                     onTimeCount={dashboardStats.onTimeCount}
                 />
-                <CreditRingWidget/>
+                <CreditRingWidget />
+                <GradeMeterWidget />
             </div>
         </div>
     );
@@ -350,6 +351,8 @@ function CreditRingWidget({
     inProgressCredits = 12,
     size = 520
 }) {
+    const [hoveredIndex, setHoveredIndex] = useState(null);
+
     const center = size / 2;
     const outerRadius = size * 0.42;
     const innerRadius = size * 0.30;
@@ -372,6 +375,8 @@ function CreditRingWidget({
                         outerRadius={outerRadius}
                         innerRadius={innerRadius}
                         status={status}
+                        hoveredIndex={hoveredIndex}
+                        setHoveredIndex={setHoveredIndex}
                     />
                 ))}
             </svg>
@@ -397,13 +402,12 @@ function RingSegment({
     center,
     outerRadius,
     innerRadius,
-    status
+    status,
+    hoveredIndex,
+    setHoveredIndex
 }) {
     const anglePerSegment = 360 / total;
     const gapDegrees = 0.8;
-
-    const startAngle = -90 + index * anglePerSegment + gapDegrees / 2;
-    const endAngle = -90 + (index + 1) * anglePerSegment - gapDegrees / 2;
 
     const polarToCartesian = (cx, cy, radius, angleDeg) => {
         const angleRad = (angleDeg * Math.PI) / 180;
@@ -413,18 +417,39 @@ function RingSegment({
         };
     };
 
-    const p1 = polarToCartesian(center, center, outerRadius, startAngle);
-    const p2 = polarToCartesian(center, center, outerRadius, endAngle);
-    const p3 = polarToCartesian(center, center, innerRadius, endAngle);
-    const p4 = polarToCartesian(center, center, innerRadius, startAngle);
+
+
+    const getCircularDistance = (a, b, totalCount) => {
+        const direct = Math.abs(a - b);
+        return Math.min(direct, totalCount - direct);
+    };
+
+    let radialOffset = 0;
+
+    if (hoveredIndex !== null) {
+        const distance = getCircularDistance(index, hoveredIndex, total);
+        radialOffset = Math.max(0, 18 - distance * 4);
+    }
+
+
+    const adjustedOuterRadius = outerRadius + radialOffset;
+    const adjustedInnerRadius = innerRadius + radialOffset;
+
+    const startAngle = -90 + index * anglePerSegment + gapDegrees / 2;
+    const endAngle = -90 + (index + 1) * anglePerSegment - gapDegrees / 2;
+
+    const p1 = polarToCartesian(center, center, adjustedOuterRadius, startAngle);
+    const p2 = polarToCartesian(center, center, adjustedOuterRadius, endAngle);
+    const p3 = polarToCartesian(center, center, adjustedInnerRadius, endAngle);
+    const p4 = polarToCartesian(center, center, adjustedInnerRadius, startAngle);
 
     const largeArcFlag = endAngle - startAngle > 180 ? 1 : 0;
 
     const d = [
         `M ${p1.x} ${p1.y}`,
-        `A ${outerRadius} ${outerRadius} 0 ${largeArcFlag} 1 ${p2.x} ${p2.y}`,
+        `A ${adjustedOuterRadius} ${adjustedOuterRadius} 0 ${largeArcFlag} 1 ${p2.x} ${p2.y}`,
         `L ${p3.x} ${p3.y}`,
-        `A ${innerRadius} ${innerRadius} 0 ${largeArcFlag} 0 ${p4.x} ${p4.y}`,
+        `A ${adjustedInnerRadius} ${adjustedInnerRadius} 0 ${largeArcFlag} 0 ${p4.x} ${p4.y}`,
         "Z"
     ].join(" ");
 
@@ -432,5 +457,133 @@ function RingSegment({
     if (status === "completed") fill = "#55ad2a";
     if (status === "in-progress") fill = "#f3ef00";
 
-    return <path d={d} fill={fill} stroke="#0c2a3a" strokeWidth="1.6" />;
+    return (
+        <path
+            d={d}
+            fill={fill}
+            stroke="#0c2a3a"
+            strokeWidth="1.6"
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+            style={{
+                transition: "all 0.18s ease",
+                cursor: "pointer"
+            }}
+        />
+    );
+}
+
+const GRADE_LINES = [
+    { label: "A", fill: 80 },
+    { label: "B", fill: 60 },
+    { label: "C", fill: 40 },
+    { label: "D", fill: 20 },
+];
+
+function toFillHeight(grade) {
+    const g = Math.max(0, Math.min(grade, 100));
+    if (g <= 50) return 0;
+    if (g <= 60) return ((g - 50) / 10) * 20;
+    if (g <= 70) return 20 + ((g - 60) / 10) * 20;
+    if (g <= 80) return 40 + ((g - 70) / 10) * 20;
+    if (g <= 90) return 60 + ((g - 80) / 10) * 20;
+    return 80 + ((g - 90) / 10) * 20;
+}
+
+function getGradeColor(grade) {
+    if (grade >= 90) return "#55ad2a";
+    if (grade >= 80) return "#9cdc52";
+    if (grade >= 70) return "#f1df00";
+    if (grade >= 60) return "#f6bf00";
+    return "#ff1a0a";
+}
+
+function GradeMeterCard({ course, isLast }) {
+    const grade = Math.max(0, Math.min(course.grade ?? 0, 100));
+    const isLow = grade <= 50;
+    const fillPct = toFillHeight(grade);
+    const color = getGradeColor(grade);
+    const threshPct = course.requiredMinimum != null ? toFillHeight(course.requiredMinimum) : null;
+
+    return (
+        <div className={`grade-meter-card${isLast ? " last" : ""}`}>
+            <div className="grade-meter-body">
+                <div className="grade-visual">
+
+                    {/* Label track — same height as tube, aligned by matching bottom % */}
+                    <div className="grade-label-track">
+                        {GRADE_LINES.map(({ label, fill }) => (
+                            <div
+                                key={label}
+                                className="grade-label"
+                                style={{ bottom: `calc(${fill}% - 0.3rem)` }}
+                            >
+                                {label}
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Tube — lines and fill both use bottom %, so they always align */}
+                    <div className="grade-tube">
+                        {GRADE_LINES.map(({ label, fill }) => (
+                            <div
+                                key={label}
+                                className="grade-tube-line"
+                                style={{ bottom: `${fill}%` }}
+                            />
+                        ))}
+
+                        {threshPct !== null && (
+                            <div
+                                className="grade-threshold-line"
+                                style={{ bottom: `${threshPct}%` }}
+                            />
+                        )}
+
+                        {!isLow && (
+                            <div
+                                className="grade-fill"
+                                style={{ height: `${fillPct}%`, backgroundColor: color }}
+                            >
+                                <div className="grade-badge">{grade}%</div>
+                            </div>
+                        )}
+
+                        {isLow && (
+                            <div className="grade-badge-zero">
+                                <span>{grade}%</span>
+                            </div>
+                        )}
+                    </div>
+
+                </div>
+            </div>
+
+            <button className="grade-meter-label">{course.name}</button>
+        </div>
+    );
+}
+
+function GradeMeterWidget({ classes }) {
+    const classGradeData = [
+        { id: 1, name: "CSC120", grade: 90, requiredMinimum: 70, category: "major" },
+        { id: 2, name: "CSC130", grade: 80, requiredMinimum: 70, category: "major" },
+        { id: 3, name: "CSC140", grade: 70, requiredMinimum: 70, category: "major" },
+        { id: 4, name: "CSC150", grade: 60, requiredMinimum: null, category: "other" },
+        { id: 5, name: "CSC160", grade: 58, requiredMinimum: null, category: "other" },
+    ];
+
+    const displayClasses = classes ?? classGradeData;
+
+    return (
+        <div className="grade-meter-widget">
+            {displayClasses.map((course, index) => (
+                <GradeMeterCard
+                    key={course.id ?? index}
+                    course={course}
+                    isLast={index === displayClasses.length - 1}
+                />
+            ))}
+        </div>
+    );
 }
