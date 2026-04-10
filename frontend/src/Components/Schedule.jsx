@@ -37,6 +37,20 @@ function Schedule() {
         console.log("scheduleData confirmation", addScheduleData)
     }
 
+
+    const addSchedule = async() => {
+        const student_id = 1
+        const startDate = "2025-11-25"
+        const endDate = "2026-11-25"
+        const entry = {
+            student_id :student_id,
+            scheduleStartDate: startDate,
+            scheduleEndDate: endDate
+        }
+        const addScheduleData = await axios.post('http://localhost:8080/test/add/schedule',entry)
+        console.log("scheduleData confirmation", addScheduleData)
+    }
+
     return (
         <div className="schedule-container">
             <RequiredCourseCarousel
@@ -50,6 +64,7 @@ function Schedule() {
             <ScheduleBlock />
             <AdminControls />
             <button onClick={addScheduleEntry}>click here to add ScheduleEntry</button>
+            <button onClick={addSchedule}>click here to add Schedule</button>
         </div>
 
     );

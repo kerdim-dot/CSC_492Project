@@ -129,13 +129,16 @@ public class TestController {
             for (int i = 0; i < columnSpliter.length; i++) {
                 columnSpliter[i] = columnSpliter[i].trim();
             }
-            Optional<Student> studentOptional = studentRepository.findById(Long.parseLong(columnSpliter[1]));
-            if (studentOptional.isPresent()) {
-                Student student = studentOptional.get();
-                Schedule schedule = new Schedule(student, LocalDate.parse(columnSpliter[2]));
-                scheduleService.addSchedule(schedule);
-            }
+
+            Long student_id = Long.parseLong(columnSpliter[1]);
+            LocalDate startDate = LocalDate.parse(columnSpliter[2]);
+            LocalDate endDate = LocalDate.parse(columnSpliter[3]);
+
+            ScheduleDTO scheduleDTO = new ScheduleDTO(student_id,startDate,endDate);
+            scheduleService.addSchedule(scheduleDTO);
+
         }
+        
 
         while ((line = brScheduleEntry.readLine()) != null) {
             columnSpliter = line.split(",");
@@ -296,5 +299,8 @@ public class TestController {
         scheduleEntryService.addScheduleEntry(scheduleEntryDTO);
     }
 
-    
+    @PostMapping("/add/schedule")
+    public void addSchedule(@RequestBody ScheduleDTO scheduleDTO){
+        scheduleService.addSchedule(scheduleDTO);
+    }    
 }

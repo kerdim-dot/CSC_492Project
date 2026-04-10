@@ -29,14 +29,18 @@ public class Schedule {
     @Column(nullable = false)
     private LocalDate scheduleStartDate;
 
+    @Column(nullable = false)
+    private LocalDate scheduleEndDate;
+
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ScheduleEntry> scheduleEntries = new ArrayList<>();
 
     public Schedule() {}
 
-    public Schedule(Student student, LocalDate scheduleStartDate){
+    public Schedule(Student student, LocalDate scheduleStartDate, LocalDate scheduleEndDate){
         this.student = student;
         this.scheduleStartDate = scheduleStartDate;
+        this.scheduleEndDate = scheduleEndDate;
     }
 
     public Long getScheduleId() {
@@ -51,6 +55,10 @@ public class Schedule {
         return scheduleStartDate;
     }
 
+     public LocalDate getScheduleEndDate() {
+        return scheduleEndDate;
+    }
+
     public List<ScheduleEntry> getScheduleEntries() {
         return scheduleEntries;
     }
@@ -62,4 +70,9 @@ public class Schedule {
     public void setScheduleStartDate(LocalDate scheduleStartDate) {
         this.scheduleStartDate = scheduleStartDate;
     }
+
+    public void setScheduleEndDate(LocalDate scheduleEndDate) {
+        this.scheduleEndDate = scheduleEndDate;
+    }
+    
 }

@@ -7,20 +7,33 @@ import org.springframework.stereotype.Service;
 
 import com.example.backend.Entities.MountClass;
 import com.example.backend.Entities.Schedule;
-
+import com.example.backend.Entities.Student;
 import com.example.backend.Repositories.ScheduleRepository;
+import com.example.backend.Repositories.StudentRepository;
 import com.example.backend.dtos.ScheduleDTO;
 
 @Service
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
+    private final StudentRepository studentRepository;
     
-    public ScheduleService(ScheduleRepository scheduleRepository){
+    public ScheduleService(ScheduleRepository scheduleRepository,StudentRepository studentRepository){
         this.scheduleRepository = scheduleRepository;
+        this.studentRepository = studentRepository;
     }
 
-    public void addSchedule(Schedule schedule){
-        scheduleRepository.save(schedule);
+    public void addSchedule(ScheduleDTO scheduleDTO){
+
+        long student_id = scheduleDTO.getStudent_id();
+
+        Optional <Student> studentOptional = studentRepository.findById(student_id);
+
+        if(studentOptional.isPresent()){
+            Student student = studentOptional.get();
+            Schedule schedule = new Schedule(student,scheduleDTO.getScheduleStartDate(),scheduleDTO.getScheduleEndDate());
+            scheduleRepository.save(schedule);
+        }
+
     }
 
 
@@ -35,5 +48,8 @@ public class ScheduleService {
             scheduleRepository.delete(scheduleOptional.get());
         }
     }
+
+
+
 
 }

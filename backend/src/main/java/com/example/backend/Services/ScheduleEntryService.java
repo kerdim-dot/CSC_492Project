@@ -39,7 +39,7 @@ public class ScheduleEntryService {
             boolean isWednesday = scheduleEntryDTO.getIsWednesDay();
             boolean isThursday = scheduleEntryDTO.getIsThursday();
             boolean isFriday = scheduleEntryDTO.getIsFriday();
-            String time = scheduleEntryDTO.getIsTime();
+            String time = scheduleEntryDTO.getTime();
 
             ScheduleEntry scheduleEntry = new ScheduleEntry(schedule,mountClass,isMonday,isTuesday,isWednesday,isThursday,isFriday,time);
 
