@@ -53,6 +53,10 @@ public class ScheduleEntryService {
         return scheduleEntryRepository.findAllScheduleEntryDTOs(scheduleId);
     }
 
+    public void deleteAllStudentSchduleEntries(Long scheduleId){
+        scheduleEntryRepository.deleteByScheduleId(scheduleId);
+    }
+
     public void deleteScheduleEntry(Long id){
         Optional <ScheduleEntry> scheduleEntryOptional = scheduleEntryRepository.findById(id);
 

@@ -16,7 +16,11 @@ import { GraduationConverter} from "../tools/GraduationConverter";
 */
 function StudentManager(){
   const [activeTab, setActiveTab] = useState("update");
-  const [selectedEntry, setSelectedEntry] = useState(null);
+  const [selectedDeleteEntry, setSelectedDeleteEntry] = useState(null);
+  const [selectedDeleteEntries, setSelectedDeleteEntries] = useState([]);
+
+  const [selectDeleteMultiple, setSelectDeleteMultiple] = useState(false);
+
   const [studentUpdateEntry, setStudentUpdateEntry] = useState(null);
   const [studentSearchList,setStudentSearchList] = useState(null);
 
@@ -41,7 +45,9 @@ function StudentManager(){
     const[enrollment, setEnrollment] = useState([]);
 
     const [isBeginning, setIsBeginning] = useState(true);
+    const [deleteConfirmationScreen, setDeleteConfirmationScreen] = useState(false);
 
+    const [updateList, setUpdateList] = useState(false);
 
     useEffect(()=>{
         
@@ -71,7 +77,7 @@ function StudentManager(){
         retriveStudentData();
         retriveEnrollmentData();
 
-    },[])
+    },[updateList])
 
 //   const classes = [
 //         {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true,isRequired:true}, 
@@ -193,32 +199,33 @@ useEffect(()=>{
   
   return (
     <div className="tab-pane-container">
+      {deleteConfirmationScreen && <DeleteConfirmation setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} selectedDeleteEntries={selectedDeleteEntries} selectedDeleteEntry={selectedDeleteEntry} setSelectedDeleteEntries={setSelectedDeleteEntries} setSelectedDeleteEntry={setSelectedDeleteEntry}/>}
       <div className="top-container">
-            <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setSelectedEntry={setSelectedEntry} setStudentUpdateEntry={setStudentUpdateEntry} studentUpdateEntry={studentUpdateEntry}/>
+            <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setSelectedDeleteEntry={setSelectedDeleteEntry} setStudentUpdateEntry={setStudentUpdateEntry} studentUpdateEntry={studentUpdateEntry}/>
             {(activeTab === "delete" || activeTab === "update") && <SearchBar searchInput={searchInput} setSearchInput={setSearchInput} setShowFilter={setShowFilter}/>}
       </div>
 
        {showFilter && <FilterBlock startDate={startDate} setStartDate={setStartDate} endDate = {endDate} setEndDate={setEndDate} setShowFilter={setShowFilter} overview={overview} setOverview ={setOverview}/>}
-
-      <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry}/>
       
+      <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedDeleteEntry={selectedDeleteEntry} setSelectedDeleteEntry={setSelectedDeleteEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry} setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} setSelectDeleteMultiple={setSelectDeleteMultiple} selectedDeleteEntries = {selectedDeleteEntries} setSelectedDeleteEntries={setSelectedDeleteEntries}/>
+
     </div>
   );
 }
 
 export default StudentManager;
 
-function HeaderPanel({activeTab, setActiveTab, setSelectedEntry, setStudentUpdateEntry, studentUpdateEntry}){
+function HeaderPanel({activeTab, setActiveTab, setSelectedDeleteEntry, setStudentUpdateEntry}){
 
     const makeAddTab = () =>{
         setActiveTab("add");
-        setSelectedEntry(null);  
+        setSelectedDeleteEntry(null);  
         setStudentUpdateEntry(null);
     }
 
     const makeUpdateTab = () =>{
         setActiveTab("update");
-        setSelectedEntry(null);
+        setSelectedDeleteEntry(null);
         setStudentUpdateEntry(null);  
     }
 
@@ -362,29 +369,92 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
     )
 }
 
+function DeleteConfirmation({setDeleteConfirmationScreen,selectDeleteMultiple, selectedDeleteEntry, selectedDeleteEntries,setSelectedDeleteEntry,setSelectedDeleteEntries , setUpdateList}){
 
-function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, selectedEntry, setSelectedEntry, updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, setStudentUpdateEntry, studentUpdateEntry}){
+    const [isProcessing, setIsProcessing] = useState(null);
+    const [inputConfirm, setInputConfirm] = useState(null);
+
+    const deleteStudent= async() =>{
+        setIsProcessing(true);
+        if(selectDeleteMultiple){
+            for(let i = 0; i<selectedDeleteEntries.length; i++){
+                const currentStudentId = selectedDeleteEntries[i];
+                const deleteStudentEnrollment = await axios.delete(`http://localhost:8080/delete/student/enrollment?id=${currentStudentId}`);
+                console.log(deleteStudentEnrollment);
+                const fetchSchedules = await axios.get(`http://localhost:8080/get/schedules?studentId=${currentStudentId}`);
+                const scheduleIds = fetchSchedules.data;
+                console.log(scheduleIds);
+                for (let j = 0 ; j<scheduleIds.length; j++){
+                    const deleteStudentScheduleEntries = await axios.delete(`http://localhost:8080/delete/schedule/entries?scheduleId=${scheduleIds[j]}`);
+                }
+                const deleteStudent = await axios.delete(`http://localhost:8080/delete/student?id=${currentStudentId}`);
+                console.log(deleteStudent.status);
+            }
+        }
+        else{
+            const currentStudentId = selectedDeleteEntry;
+            const deleteStudentEnrollment = await axios.delete(`http://localhost:8080/test/delete/student/enrollment?id=${currentStudentId}`);
+            console.log(deleteStudentEnrollment);
+            const fetchSchedules = await axios.get(`http://localhost:8080/test/get/schedules?studentId=${currentStudentId}`);
+            const scheduleIds = fetchSchedules.data;
+            console.log(scheduleIds);
+            for (let j = 0 ; j<scheduleIds.length; j++){
+                const deleteStudentScheduleEntries = await axios.delete(`http://localhost:8080/test/delete/schedule/entries?scheduleId=${scheduleIds[j]}`);
+            }
+            const deleteStudent = await axios.delete(`http://localhost:8080/test/delete/student?id=${currentStudentId}`);
+            console.log(deleteStudent.status);
+
+        }
+        setUpdateList(prev => !prev)
+        setIsProcessing(false);
+    }
+
+    const onCloseConfirmation = () =>{
+        setDeleteConfirmationScreen(false);
+        setSelectedDeleteEntries([]);
+        setSelectedDeleteEntry(null);
+    }
+
+    return(
+        <div className="student-delete-confirmation-overlay">
+            <div className="student-delete-confirmation">
+                <img className="close-img" onClick={onCloseConfirmation} src={close}></img>
+                <p>Confirm Student Deletion</p>
+                <p>type 'confirm' to delete Student</p>
+                <p>*warning this will delete all their schedule and enrollment data</p>
+                <input value={inputConfirm} onChange={(e)=>{setInputConfirm(e.target.value)}}></input>
+                <button onClick={deleteStudent} disabled={inputConfirm !== "confirm"}>{isProcessing ? "processing...":"Confirm Deletion"}</button>
+            </div>
+        </div>
+        
+    )
+}
+
+function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, selectedDeleteEntry, setSelectedDeleteEntry, updateFirstNameValue, updateLastNameValue, 
+    updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, setStudentUpdateEntry, studentUpdateEntry,
+    setDeleteConfirmationScreen, selectDeleteMultiple, setSelectDeleteMultiple,selectedDeleteEntries, setSelectedDeleteEntries}){
     const [warning, setWarning] = useState(null);
     const [multipleStudentText, setMultipleStudentText] = useState(null);
     const [csvIsSelected, setcsvIsSelected] = useState(true);
     
-    const makeSelectedEntry = (id) =>{
-        setSelectedEntry(id);
-    }
+    const makeSelectedDeleteEntry = (id) => {
+        if (selectDeleteMultiple) {
+            setSelectedDeleteEntries(prev => {
+                if (prev.includes(id)) {
+                    return prev.filter(entryId => entryId !== id);
+                } else {
+                    return [...prev, id];
+                }
+            });
+        } 
+        else {
+            setSelectedDeleteEntry(id);
+        }
+    };
 
     const deleteEntry = () =>{
-        if(!selectedEntry){
-            setWarning("No Entry Selected")
-            setTimeout(()=>{
-                setWarning("");
-            },2000)
-        }
-        else{
-            console.log("This is the student id that needs to be deleted: "+selectedEntry)
-        }
+        setDeleteConfirmationScreen(true);
     }
-
-   
 
     const structureStudentData = (text) =>{
         // csv data
@@ -402,7 +472,6 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                         firstName: values[0],
                         lastName: values[1],
                         graduation: values[2],
-                        classes:null
                     })
                 }
             }
@@ -434,6 +503,14 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         setUpdateLastNameValue(item.lastName);
         setUpdateGraduationValue(item.graduationDate);
     }
+
+    useEffect(() => {
+        if (selectDeleteMultiple) {
+            setSelectedDeleteEntry(null);
+        } else {
+            setSelectedDeleteEntries([]);
+        }
+    }, [selectDeleteMultiple]);
 
     return(
         <div className="tab-content">
@@ -488,19 +565,30 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                 <div className="placeholder">
                     <p>Delete Student</p>
 
+                    <div>
+                        <p>Mass Select</p>
+                        <input checked={selectDeleteMultiple} onChange={(e) => setSelectDeleteMultiple(e.target.checked)} type="checkbox"/>
+                    </div>
+                    
                     <div className="entry-list">
                         {studentSearchList && studentSearchList.map((item,index)=> {
                             return (
                                 <div 
                                     key={index}
                                     className={
-                                        item.student_id == selectedEntry
-                                        ? "entry highlighted"
-                                        : item.isBehind
-                                        ? "entry behind"
-                                        : "entry"
+                                        selectDeleteMultiple
+                                            ? selectedDeleteEntries.includes(item.student_id)
+                                                ? "entry highlighted"
+                                                : item.isBehind
+                                                ? "entry behind"
+                                                : "entry"
+                                            : item.student_id == selectedDeleteEntry
+                                            ? "entry highlighted"
+                                            : item.isBehind
+                                            ? "entry behind"
+                                            : "entry"
                                     }
-                                    onClick={() => makeSelectedEntry(item.student_id)}
+                                    onClick={() => makeSelectedDeleteEntry(item.student_id)}
                                 >
                                     <p>{item.firstName} {item.lastName}</p>
                                     <p>{item.graduation}</p>
@@ -514,7 +602,11 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                         <button 
                             onClick={deleteEntry} 
                             className="btn-delete-student"
-                            disabled={!selectedEntry}
+                            disabled={
+                                selectDeleteMultiple
+                                    ? selectedDeleteEntries.length === 0
+                                    : !selectedDeleteEntry
+                            }
                         >
                             Delete Student
                         </button>

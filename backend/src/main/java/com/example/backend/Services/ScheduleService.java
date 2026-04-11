@@ -41,6 +41,10 @@ public class ScheduleService {
         return scheduleRepository.findSchedulesByStudentId(studentId);
     }
 
+    public void deleteAllCertainStudentSchedule(long studentId){
+        scheduleRepository.deleteByStudentId(studentId);
+    }
+
     public void deleteSchedule(Long id){
         Optional <Schedule> scheduleOptional = scheduleRepository.findById(id);
 

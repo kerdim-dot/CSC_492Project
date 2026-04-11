@@ -467,3 +467,27 @@
   gap: 20px;
 }
 
+.student-delete-confirmation-overlay{
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  height: 100vh;
+  width: 100vw;
+  background-color: transparent;
+  z-index: 1001;
+}
+
+.student-delete-confirmation {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  height: 500px;
+  width: 500px;
+  border: 1px solid;
+  top: 50%;
+  left: 50%;
+  transform: translate(-125px, -50%); 
+  z-index: 1002;
+  background-color: #f3f3f3;
+  align-items: center;
+}

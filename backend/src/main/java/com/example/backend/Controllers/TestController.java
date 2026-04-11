@@ -252,7 +252,7 @@ public class TestController {
         return scheduleService.getAllStudentSchedules(studentId);
     }
 
-    @GetMapping("/get/scheduleEntries")
+    @GetMapping("/get/schedule/entries")
     public List<ScheduleEntryDTO> getAllPersonalScheduleEntries(@RequestParam long scheduleId) {
         return scheduleEntryService.getAllStudentScheduleEntries(scheduleId);
     }
@@ -291,6 +291,22 @@ public class TestController {
     @DeleteMapping("/delete/student/enrollment")
     public void deleteCertainStudentEnrollment(@RequestParam Long id){
         enrollmentService.deleteAllEnrollmentsByStudentId(id);
+    }
+
+    @DeleteMapping("/delete/student/schedules")
+    public void deleteCertainStudentSchedules(@RequestParam long id){
+        scheduleService.deleteAllCertainStudentSchedule(id);
+    }
+
+
+    @DeleteMapping("/delete/schedule/entries")
+    public void deleteCertainScheduleEntries(@RequestParam long id){
+        scheduleEntryService.deleteAllStudentSchduleEntries(id);
+    }
+
+    @DeleteMapping("/delete/student")
+    public void deleteStudent(@RequestParam long id){
+        studentService.deleteStudent(id);
     }
 
 
