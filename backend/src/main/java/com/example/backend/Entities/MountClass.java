@@ -24,8 +24,6 @@ public class MountClass {
     @Column(nullable = false)
     private Integer credits;
     @Column(nullable = false)
-    private boolean isActive;
-    @Column(nullable = false)
     private String description; 
 
     @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -47,11 +45,10 @@ public class MountClass {
     public MountClass() {
     }
 
-    public MountClass(String title, String header, Integer credits, boolean isActive, String description) {
+    public MountClass(String title, String header, Integer credits, String description) {
         this.title = title;
         this.header = header;
         this.credits = credits;
-        this.isActive = isActive;
         this.description = description;
     }
 
@@ -85,14 +82,6 @@ public class MountClass {
 
     public void setCredits(Integer credits) {
         this.credits = credits;
-    }
-
-    public boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
     }
 
     public String getDescription() {

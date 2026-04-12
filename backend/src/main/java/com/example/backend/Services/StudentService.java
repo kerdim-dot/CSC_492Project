@@ -35,4 +35,27 @@ public class StudentService {
         }
     }
 
+    public void updateStudent(Student studentInfo,long student_id){
+        Optional <Student> studentOptional = studentRepository.findById(student_id);
+        if(studentOptional.isPresent()){
+            Student student = studentOptional.get();
+
+            if(studentInfo.getIsMajor() != student.getIsMajor()){
+                student.setIsMajor(studentInfo.getIsMajor());
+            }
+
+            if(studentInfo.getGraduationDate() != studentInfo.getGraduationDate()){
+                student.setGraduationDate(studentInfo.getGraduationDate());
+            }
+
+            if(studentInfo.getFirstName().equals(studentInfo.getFirstName())){
+                student.setFirstName(studentInfo.getFirstName());
+            }
+            if(studentInfo.getLastName().equals(studentInfo.getFirstName())){
+                student.setLastName(studentInfo.getLastName());
+            }     
+            studentRepository.save(student);
+        }
+    }
+
 }

@@ -51,6 +51,13 @@ function Schedule() {
         console.log("scheduleData confirmation", addScheduleData)
     }
 
+    // connor, in order to delete a schedule, you have to delete the scheduleEntries first bc of foriegn key restrictions
+    const deleteSchedule = async() =>{
+        const schedule_id = 1;
+        const deleteStudentScheduleEntries = await axios.delete(`http://localhost:8080/test/delete/schedule/entries?id=${schedule_id}`);
+        const deleteSchedule = await axios.delete(`http://localhost:8080/test/delete/schedule?id=${schedule_id}`);
+    }
+
     return (
         <div className="schedule-container">
             <RequiredCourseCarousel
@@ -65,6 +72,7 @@ function Schedule() {
             <AdminControls />
             <button onClick={addScheduleEntry}>click here to add ScheduleEntry</button>
             <button onClick={addSchedule}>click here to add Schedule</button>
+            <button onClick={deleteSchedule}>click here to delete Schedule/its entries</button>
         </div>
 
     );

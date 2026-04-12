@@ -9,6 +9,7 @@ import java.util.Optional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -107,9 +108,9 @@ public class TestController {
             for (int i = 0; i < columnSpliter.length; i++) {
                 columnSpliter[i] = columnSpliter[i].trim();
             }
-            boolean convertIsActive = Boolean.parseBoolean(columnSpliter[4]);
+            
             int convertCredits = Integer.parseInt(columnSpliter[3]);
-            MountClass mountClass = new MountClass(columnSpliter[1], columnSpliter[2], convertCredits, convertIsActive, columnSpliter[5]);
+            MountClass mountClass = new MountClass(columnSpliter[1], columnSpliter[2], convertCredits, columnSpliter[4]);
             mountClassService.addClass(mountClass);
         }
 
@@ -319,4 +320,21 @@ public class TestController {
     public void addSchedule(@RequestBody ScheduleDTO scheduleDTO){
         scheduleService.addSchedule(scheduleDTO);
     }    
+
+    @PutMapping("/update/student")
+    public void updateStudent(@RequestBody Student student, @RequestParam long id){
+        studentService.updateStudent(student, id);
+    }
+
+    @PutMapping("/update/class")
+    public void updateStudent(@RequestBody MountClass mountClass, @RequestParam long id){
+        mountClassService.updateMountClass(mountClass, id);
+    }
+
+
+    @DeleteMapping("/delete/schedule")
+    public void deleteSchedule(@RequestParam long id){
+        scheduleService.deleteSchedule(id);
+    }
 }
+
