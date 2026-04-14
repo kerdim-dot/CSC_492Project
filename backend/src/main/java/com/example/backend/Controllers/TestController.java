@@ -1,6 +1,7 @@
 package com.example.backend.Controllers;
 
 import java.io.BufferedReader;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.time.LocalDate;
 import java.util.List;
@@ -28,7 +29,7 @@ import com.example.backend.Repositories.MountClassRepository;
 import com.example.backend.Repositories.ScheduleRepository;
 import com.example.backend.Repositories.StudentRepository;
 import com.example.backend.Services.EnrollmentService;
-import com.example.backend.Services.ImportantDataService;
+import com.example.backend.Services.ImportantDateService;
 import com.example.backend.Services.MountClassEntryService;
 import com.example.backend.Services.MountClassService;
 import com.example.backend.Services.PrerequisiteMappingService;
@@ -56,14 +57,14 @@ public class TestController {
     private final MountClassRepository mountClassRepository;
     private final MountClassEntryService mountClassEntryService;
     private final PrerequisiteMappingService prerequisiteMappingService;
-    private final ImportantDataService importantDataService;
+    private final ImportantDateService importantDataService;
 
     public TestController(MountClassService mountClassService, StudentService studentService,
             StudentRepository studentRepository, MountClassRepository mountClassRepository,
             EnrollmentRepository enrollmentRepository, EnrollmentService enrollmentService,
             ScheduleService scheduleService, ScheduleEntryService scheduleEntryService, ScheduleRepository scheduleRepository,
             MountClassEntryService mountClassEntryService, PrerequisiteMappingService prerequisiteMappingService,
-            ImportantDataService importantDataService) {
+            ImportantDateService importantDataService) {
 
         this.mountClassService = mountClassService;
         this.studentService = studentService;
@@ -83,7 +84,11 @@ public class TestController {
     @GetMapping("/data")
     public void generateTestData() throws Exception {
 
-        BufferedReader brClass = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/class.csv")));
+        InputStream is = getClass().getClassLoader().getResourceAsStream("testingCSVs/class.csv");
+        if (is == null) {
+            throw new RuntimeException("File not found: class.csv");
+        }
+        BufferedReader brClass = new BufferedReader(new InputStreamReader(is));
         BufferedReader brStudent = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/student.csv")));
         BufferedReader brEnrollment = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/enrollment.csv")));
         BufferedReader brSchedule = new BufferedReader(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("testingCSVs/schedule.csv")));

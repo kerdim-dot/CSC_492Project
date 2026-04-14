@@ -10,7 +10,7 @@ import com.example.backend.Entities.Student;
 import com.example.backend.Services.StudentService;
 
 @RestController
-@RequestMapping("student")
+@RequestMapping("/student")
 public class StudentController {
     private final StudentService studentService;
 

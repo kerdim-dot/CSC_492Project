@@ -11,11 +11,11 @@ import com.example.backend.Repositories.EnrollmentRepository;
 import com.example.backend.Repositories.ImportantDateRepository;
 
 @Service
-public class ImportantDataService {
+public class ImportantDateService {
 
     private final ImportantDateRepository importantDateRepository;
 
-    public ImportantDataService(ImportantDateRepository importantDateRepository){
+    public ImportantDateService(ImportantDateRepository importantDateRepository){
         this.importantDateRepository = importantDateRepository;
     }
 

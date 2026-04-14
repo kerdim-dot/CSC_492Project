@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import axios from 'axios'
 import { GraduationConverter } from "../tools/GraduationConverter";
 import { computerScienceMajorRequirements,computerScienceMinorRequirements,multiPlatformMajorRequirements } from "../tools/FlagFormula";
+import { DisplayDate } from "../tools/DisplayDate";
 
 function Students(){
 
@@ -36,11 +37,11 @@ function Students(){
 
         const retriveStudentData = async() =>{
             const studentData = await axios.get('http://localhost:8080/test/get/students');
-            const updatedStudents = studentData.data.map((item) => ({
-                ...item,
-                graduationFormula: GraduationConverter(item.graduationDate)
-            }));
-            setStudents(updatedStudents);
+            // const updatedStudents = studentData.data.map((item) => ({
+            //     ...item,
+            //     graduationFormula: GraduationConverter(item.graduationDate)
+            // }));
+            setStudents(studentData.data);
             //console.log("student fetch:", updatedStudents)
         }
 
@@ -290,7 +291,7 @@ function StudentList({studentSearchList}){
                     return(
                     <div className= {item.isBehind? "entry behind" : "entry"} onClick={()=>{navigate(`/students/${item.student_id}`)}}>
                         <p>{item.firstName} {item.lastName}</p>
-                        <p>{item.graduationDate}</p>
+                        <p>{DisplayDate(item.graduationDate)}</p>
                     </div>
                     )
                 })}

@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.backend.Services.UserService;
 
 @RestController
-@RequestMapping("user")
+@RequestMapping("/user")
 
 public class UserController {
 

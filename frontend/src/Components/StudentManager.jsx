@@ -5,6 +5,8 @@ import filter from "./../assets/filter.svg"
 import close from "./../assets/close.svg"
 import axios from 'axios'
 import { GraduationConverter} from "../tools/GraduationConverter";
+import { computerScienceMajorRequirements,computerScienceMinorRequirements,multiPlatformMajorRequirements } from "../tools/FlagFormula";
+import { DisplayDate } from "../tools/DisplayDate";
 
 /* Backend Needs
 - Fetch students c
@@ -28,10 +30,9 @@ function StudentManager(){
     const [updateFirstNameValue, setUpdateFirstNameValue] = useState(null);
     const [updateLastNameValue, setUpdateLastNameValue] = useState(null);
     const [updateGraduationValue, setUpdateGraduationValue] = useState(null);
-    const [updateIsComputerScienceMajor, setUpdateComputerScienceMajor] = useState(null);
+    const [updateIsComputerScienceMajor, setUpdateIsComputerScienceMajor] = useState(null);
     const [updateIsComputerScienceMinor, setUpdateIsComputerScienceMinor] = useState(null);
-    const [updateIsOtherMajor, setUpdateIsOtherMajor] = useState(null);
-    const [updateIsOtherMinor, setUpdateIsOtherMinor] = useState(null);
+    const [updateIsMultiPlatformMajor, setUpdateIsMultiPlatformMajor] = useState(null);
 
     const [addFirstName, setAddFirstName] = useState(null);
     const [addLastName, setAddLastName] = useState(null);
@@ -40,8 +41,7 @@ function StudentManager(){
     const [addGraduationYear, setAddGraduationYear] = useState(null);
     const [addIsComputerScienceMajor, setAddIsComputerScienceMajor] = useState(false);
     const [addIsComputerScienceMinor, setAddIsComputerScienceMinor] = useState(false);
-    const [addIsOtherMajor, setAddIsOtherMajor] = useState(false);
-    const [addIsOtherMinor, setAddIsOtherMinor] = useState(false);
+    const [addIsMultiPlatformMajor, setAddIsMultiPlatformMajor] = useState(false);
 
 
     const [startDate, setStartDate]= useState(null);
@@ -74,11 +74,11 @@ function StudentManager(){
 
         const retriveStudentData = async() =>{
             const studentData = await axios.get('http://localhost:8080/test/get/students');
-            const updatedStudents = studentData.data.map((item) => ({
-                ...item,
-                graduationFormula: GraduationConverter(item.graduationDate)
-            }));
-            setStudents(updatedStudents);
+            // const updatedStudents = studentData.data.map((item) => ({
+            //     ...item,
+            //     graduationFormula: GraduationConverter(item.graduationDate)
+            // }));
+            setStudents(studentData.data);
             console.log("student fetch:", studentData.data)
         }
 
@@ -153,18 +153,20 @@ useEffect(()=>{
             */
             students.map((studentItem)=>{
                 let isBehind = false;
-                const studentSemestersLeft = timeCalculator(studentItem);
-                classes.forEach((classItem)=>{
-                    const headerNumber = Number(classItem.header.substring(classItem.header.indexOf("-")+1,classItem.header.indexOf("-")+2));
-                    const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
-                    const classSemesters = 8-(headerNumber*2)
-                    if(!hasTakenClass && studentSemestersLeft<=classSemesters){
-                        //console.log(classItem.header,classSemesters,studentSemestersLeft);
-                        isBehind = true;
-                    }
-                })
+                if(studentItem.isComputerScienceMajor){
+                    isBehind = isBehind || computerScienceMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                }
+
+                if(studentItem.isComputerScienceMinor){
+                    isBehind = isBehind || computerScienceMinorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                }
+
+                if(studentItem.isMultiPlatformMajor){
+                    isBehind = isBehind || multiPlatformMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                }
                 studentItem.isBehind = isBehind;
             })
+
 
             setStudentsActive(students);
         }
@@ -222,7 +224,7 @@ useEffect(()=>{
 
        {showFilter && <FilterBlock startDate={startDate} setStartDate={setStartDate} endDate = {endDate} setEndDate={setEndDate} setShowFilter={setShowFilter} overview={overview} setOverview ={setOverview}/>}
       
-      <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedDeleteEntry={selectedDeleteEntry} setSelectedDeleteEntry={setSelectedDeleteEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} addFirstName = {addFirstName} addLastName = {addLastName} addGraduationDay={addGraduationDay} addGraduationMonth={addGraduationMonth} addGraduationYear={addGraduationYear} addIsComputerScienceMajor = {addIsComputerScienceMajor} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry} setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} setSelectDeleteMultiple={setSelectDeleteMultiple} selectedDeleteEntries = {selectedDeleteEntries} setSelectedDeleteEntries={setSelectedDeleteEntries} updateIsComputerScienceMajor={updateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} setUpdateComputerScienceMajor={setUpdateComputerScienceMajor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor}/>
+      <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedDeleteEntry={selectedDeleteEntry} setSelectedDeleteEntry={setSelectedDeleteEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} addFirstName = {addFirstName} addLastName = {addLastName} addGraduationDay={addGraduationDay} addGraduationMonth={addGraduationMonth} addGraduationYear={addGraduationYear} addIsComputerScienceMajor = {addIsComputerScienceMajor} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry} setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} setSelectDeleteMultiple={setSelectDeleteMultiple} selectedDeleteEntries = {selectedDeleteEntries} setSelectedDeleteEntries={setSelectedDeleteEntries} updateIsComputerScienceMajor={updateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor}/>
 
     </div>
   );
@@ -342,7 +344,7 @@ function FilterBlock({ startDate, endDate, setStartDate, setEndDate, setShowFilt
 }
 
 
-function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, updateIsComputerScienceMajor, setUpdateIsComputerScienceMajor, updateIsComputerScienceMinor, setUpdateIsComputerScienceMinor, updateIsOtherMajor, setUpdateIsOtherMajor, updateIsOtherMinor, setUpdateIsOtherMinor}){
+function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, updateIsComputerScienceMajor, setUpdateIsComputerScienceMajor, updateIsComputerScienceMinor, setUpdateIsComputerScienceMinor, updateIsMultiPlatformMajor, setUpdateIsMultiPlatformMajor}){
     const [processingStudentUpate, setProcessingStudentUpdate] = useState(false);
 
     const updateStudentEntry = async() =>{
@@ -353,8 +355,7 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
             graduationDate:updateGraduationValue.trim(),
             isComputerScienceMajor:updateIsComputerScienceMajor.trim(),
             isComputerScienceMinor: updateIsComputerScienceMinor.trim(),
-            isOtherMajor: Boolean(updateIsOtherMajor.trim()),
-            isOtherMinor: Boolean(updateIsOtherMinor.trim())
+            isMultiPlatformMajor: Boolean(updateIsMultiPlatformMajor.trim()),
         }
 
         const impossibleFirstName = !student.firstName;
@@ -362,11 +363,10 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
         const impossibleGraduationDate = !student.graduationDate && !Date(student.graduationDate);
         const impossibleComputerScienceMajor = student.isComputerScienceMajor!==true && student.isComputerScienceMajor!==false;
         const impossibleComputerScienceMinor = student.isComputerScienceMinor!==true && student.isComputerScienceMinor!==false
-        const impossibleOtherMajor = student.isOtherMajor!==true && student.isOtherMajor!==false
-        const impossibleOtherMinor = student.isComputerOtherMajor!==true && student.isComputerOtherMajor!==false
+        const impossibleMultiPlatformMajor = student.isMultiPlatformMajor!==true && student.isMajor!==false
 
         const impossibleValues = impossibleFirstName || impossibleLastName || impossibleGraduationDate || impossibleComputerScienceMajor || impossibleComputerScienceMinor ||
-        impossibleOtherMajor || impossibleOtherMinor
+        impossibleMultiPlatformMajor
 
         if(impossibleValues){
             const impossibleValueList = [];
@@ -385,17 +385,15 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
             if(impossibleComputerScienceMinor){
                 impossibleValueList.push("computer science minor");
             }
-            if(impossibleOtherMajor){
-                impossibleValueList.push("other major");
+            if(impossibleMultiPlatformMajor){
+                impossibleValueList.push("multiplatform major");
             }
-            if(impossibleOtherMinor){
-                impossibleValueList.push("other minor");
-            }
+
             setTimeout(()=>{
                 console.log(`the following fields are incorrectly filled out: ${impossibleValueList}`)
             },2000)
         }
-        else if(student.isComputerScienceMajor && student.isComputerScienceMinor || student.isOtherMajor && student.isOtherMinor){
+        else if(student.isComputerScienceMajor && student.isComputerScienceMinor || student.isMultiPlatformMajor){
             setTimeout(()=>{
                 console.log("You cannot have both a major and a minor in the same classes")
             },2000)
@@ -460,19 +458,11 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
                 />
             </div>
             <div className="panel-entry">
-                <p>Is Other Major</p>
+                <p>Is Multiplatorm Major</p>
                 <input 
                     className="panel-input" 
-                    value={updateIsOtherMajor} 
-                    onChange={(e)=>{setUpdateIsOtherMajor(e.target.value)}}
-                />
-            </div>
-            <div className="panel-entry">
-                <p>Is Other Minor</p>
-                <input 
-                    className="panel-input" 
-                    value={updateIsOtherMinor} 
-                    onChange={(e)=>{setUpdateIsOtherMinor(e.target.value)}}
+                    value={updateIsMultiPlatformMajor} 
+                    onChange={(e)=>{setUpdateIsMultiPlatformMajor(e.target.value)}}
                 />
             </div>
 
@@ -548,11 +538,10 @@ function DeleteConfirmation({setDeleteConfirmationScreen,selectDeleteMultiple, s
 function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, selectedDeleteEntry, setSelectedDeleteEntry, updateFirstNameValue, 
     updateLastNameValue,updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, setStudentUpdateEntry, 
     studentUpdateEntry,addGraduationDay,addGraduationMonth,addGraduationYear,setAddGraduationDay,setAddGraduationMonth,setAddGraduationYear,
-    addIsComputerScienceMajor,setAddIsComputerScienceMajor,addIsComputerScienceMinor,setAddIsComputerScienceMinor,addIsOtherMajor,setAddIsOtherMajor,
-    addIsOtherMinor,setAddIsOtherMinor,
+    addIsComputerScienceMajor,setAddIsComputerScienceMajor,addIsComputerScienceMinor,setAddIsComputerScienceMinor,addIsMultiPlatformMajor,setAddIsMultiPlatformMajor,
     setDeleteConfirmationScreen, selectDeleteMultiple, setSelectDeleteMultiple,selectedDeleteEntries, setSelectedDeleteEntries,
     updateIsComputerScienceMajor,setUpdateIsComputerScienceMajor,updateIsComputerScienceMinor,setUpdateIsComputerScienceMinor,
-    updateIsOtherMajor,setUpdateIsOtherMajor,updateIsOtherMinor, setUpdateIsOtherMinor
+    updateIsMultiPlatformMajor,setUpdateIsMultiPlatformMajor
     }){
     const [warning, setWarning] = useState(null);
     const [multipleStudentText, setMultipleStudentText] = useState(null);
@@ -595,8 +584,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                         graduation: values[2],
                         isComputerScienceMajor: values[3],
                         isComputerScienceMinor: values[4],
-                        isOtherMajor:values[5],
-                        isOtherMinor:values[6]
+                        isMultiPlatformMajor:values[5],
                     })
                 }
             }
@@ -629,8 +617,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         setUpdateGraduationValue(item.graduationDate);
         setUpdateIsComputerScienceMajor(item.isComputerScienceMajor);
         setUpdateIsComputerScienceMinor(item.isComputerScienceMinor);
-        setUpdateIsOtherMajor(item.isOtherMajor);
-        setUpdateIsOtherMinor(item.isOtherMinor);
+        setUpdateIsMultiPlatformMajor(item.isMultiPlatformMajor);
     }
 
     useEffect(() => {
@@ -649,8 +636,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
             graduationDate:(addGraduationYear+"-"+addGraduationMonth+"-"+addGraduationDay) ,
             isComputerScienceMajor: addIsComputerScienceMajor, 
             isComputerScienceMinor: addIsComputerScienceMinor,
-            isOtherMajor: addIsOtherMajor,
-            isOtherMinor: addIsOtherMinor
+            isMultiPlatformMajor: addIsMultiPlatformMajor,
         }
 
         const impossibleFirstName = !student.firstName;
@@ -658,11 +644,11 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         const impossibleGraduationDate = !student.graduationDate && !Date(student.graduationDate);
         const impossibleComputerScienceMajor = student.isComputerScienceMajor!==true && student.isComputerScienceMajor!==false;
         const impossibleComputerScienceMinor = student.isComputerScienceMinor!==true && student.isComputerScienceMinor!==false
-        const impossibleOtherMajor = student.isOtherMajor!==true && student.isOtherMajor!==false
-        const impossibleOtherMinor = student.isComputerOtherMajor!==true && student.isComputerOtherMajor!==false
+        const impossibleMultiPlatformMajor = student.isMultiPlatformMajor!==true && student.isMultiPlatformMajor!==false
+
 
         const impossibleValues = impossibleFirstName || impossibleLastName || impossibleGraduationDate || impossibleComputerScienceMajor || impossibleComputerScienceMinor ||
-        impossibleOtherMajor || impossibleOtherMinor
+        impossibleMultiPlatformMajor
 
         if(impossibleValues){
             const impossibleValueList = [];
@@ -681,17 +667,14 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
             if(impossibleComputerScienceMinor){
                 impossibleValueList.push("computer science minor");
             }
-            if(impossibleOtherMajor){
-                impossibleValueList.push("other major");
-            }
-            if(impossibleOtherMinor){
-                impossibleValueList.push("other minor");
+            if(impossibleMultiPlatformMajor){
+                impossibleValueList.push("multiplatform major");
             }
             setTimeout(()=>{
                 console.log(`the following fields are incorrectly filled out: ${impossibleValueList}`)
             },2000)
         }
-        else if(student.isComputerScienceMajor && student.isComputerScienceMinor || student.isOtherMajor && student.isOtherMinor){
+        else if(student.isComputerScienceMajor && student.isComputerScienceMinor){
             setTimeout(()=>{
                 console.log("You cannot have both a major and a minor in the same classes")
             },2000)
@@ -759,7 +742,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                             </div>)
                         })}
                     </div>
-                    {<UpdateBlock isBeginning={isBeginning} studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue}/>}
+                    {<UpdateBlock isBeginning={isBeginning} studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue} updateIsComputerScienceMajor={updateIsComputerScienceMajor} setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor}/>}
                 </div>}
             {activeTab === "delete" && 
                 <div className="placeholder">
@@ -791,7 +774,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                                     onClick={() => makeSelectedDeleteEntry(item.student_id)}
                                 >
                                     <p>{item.firstName} {item.lastName}</p>
-                                    <p>{item.graduation}</p>
+                                    <p>{DisplayDate(item.graduationDate)}</p>
                                 </div>
                             )
                         })}
