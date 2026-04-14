@@ -121,7 +121,10 @@ public class TestController {
             }
             LocalDate graduationDateConverter = LocalDate.parse(columnSpliter[3]);
             Boolean isCSMajorConverter = Boolean.parseBoolean(columnSpliter[4]);
-            Student student = new Student(columnSpliter[1], columnSpliter[2], graduationDateConverter, isCSMajorConverter);
+            Boolean isCSMinorConverter = Boolean.parseBoolean(columnSpliter[5]);
+            Boolean isOtherMajorConverter = Boolean.parseBoolean(columnSpliter[6]);
+
+            Student student = new Student(columnSpliter[1], columnSpliter[2], graduationDateConverter, isCSMajorConverter,isCSMinorConverter,isOtherMajorConverter);
             studentService.addStudent(student);
         }
 
@@ -336,5 +339,18 @@ public class TestController {
     public void deleteSchedule(@RequestParam long id){
         scheduleService.deleteSchedule(id);
     }
+
+
+    @PostMapping("/add/student")
+    public void addStudent(@RequestBody Student student){
+        studentService.addStudent(student);
+    }
+
+    @PostMapping("/add/class")
+    public void addStudent(@RequestBody MountClass mountClass){
+        mountClassService.addClass(mountClass);
+    }
+
+
 }
 

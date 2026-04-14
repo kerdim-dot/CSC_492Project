@@ -28,7 +28,21 @@ function StudentManager(){
     const [updateFirstNameValue, setUpdateFirstNameValue] = useState(null);
     const [updateLastNameValue, setUpdateLastNameValue] = useState(null);
     const [updateGraduationValue, setUpdateGraduationValue] = useState(null);
-    const [updateIsMajor, setUpdateIsMajor] = useState(null);
+    const [updateIsComputerScienceMajor, setUpdateComputerScienceMajor] = useState(null);
+    const [updateIsComputerScienceMinor, setUpdateIsComputerScienceMinor] = useState(null);
+    const [updateIsOtherMajor, setUpdateIsOtherMajor] = useState(null);
+    const [updateIsOtherMinor, setUpdateIsOtherMinor] = useState(null);
+
+    const [addFirstName, setAddFirstName] = useState(null);
+    const [addLastName, setAddLastName] = useState(null);
+    const [addGraduationDay, setAddGraduationDay] = useState(null);
+    const [addGraduationMonth, setAddGraduationMonth] = useState(null);
+    const [addGraduationYear, setAddGraduationYear] = useState(null);
+    const [addIsComputerScienceMajor, setAddIsComputerScienceMajor] = useState(false);
+    const [addIsComputerScienceMinor, setAddIsComputerScienceMinor] = useState(false);
+    const [addIsOtherMajor, setAddIsOtherMajor] = useState(false);
+    const [addIsOtherMinor, setAddIsOtherMinor] = useState(false);
+
 
     const [startDate, setStartDate]= useState(null);
     const [endDate, setEndDate]= useState(null);
@@ -208,7 +222,7 @@ useEffect(()=>{
 
        {showFilter && <FilterBlock startDate={startDate} setStartDate={setStartDate} endDate = {endDate} setEndDate={setEndDate} setShowFilter={setShowFilter} overview={overview} setOverview ={setOverview}/>}
       
-      <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedDeleteEntry={selectedDeleteEntry} setSelectedDeleteEntry={setSelectedDeleteEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry} setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} setSelectDeleteMultiple={setSelectDeleteMultiple} selectedDeleteEntries = {selectedDeleteEntries} setSelectedDeleteEntries={setSelectedDeleteEntries} updateIsMajor={updateIsMajor} setUpdateIsMajor= {setUpdateIsMajor}/>
+      <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedDeleteEntry={selectedDeleteEntry} setSelectedDeleteEntry={setSelectedDeleteEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} addFirstName = {addFirstName} addLastName = {addLastName} addGraduationDay={addGraduationDay} addGraduationMonth={addGraduationMonth} addGraduationYear={addGraduationYear} addIsComputerScienceMajor = {addIsComputerScienceMajor} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry} setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} setSelectDeleteMultiple={setSelectDeleteMultiple} selectedDeleteEntries = {selectedDeleteEntries} setSelectedDeleteEntries={setSelectedDeleteEntries} updateIsComputerScienceMajor={updateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} setUpdateComputerScienceMajor={setUpdateComputerScienceMajor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor}/>
 
     </div>
   );
@@ -328,19 +342,69 @@ function FilterBlock({ startDate, endDate, setStartDate, setEndDate, setShowFilt
 }
 
 
-function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, updateIsMajor, setUpdateIsMajor}){
+function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, updateIsComputerScienceMajor, setUpdateIsComputerScienceMajor, updateIsComputerScienceMinor, setUpdateIsComputerScienceMinor, updateIsOtherMajor, setUpdateIsOtherMajor, updateIsOtherMinor, setUpdateIsOtherMinor}){
     const [processingStudentUpate, setProcessingStudentUpdate] = useState(false);
 
     const updateStudentEntry = async() =>{
         setProcessingStudentUpdate(true);
         const student = {
-            firstName: updateFirstNameValue,
-            lastName: updateLastNameValue,
-            graduationDate:updateGraduationValue,
-            isMajor:updateIsMajor
+            firstName: updateFirstNameValue.trim(),
+            lastName: updateLastNameValue.trim(),
+            graduationDate:updateGraduationValue.trim(),
+            isComputerScienceMajor:updateIsComputerScienceMajor.trim(),
+            isComputerScienceMinor: updateIsComputerScienceMinor.trim(),
+            isOtherMajor: Boolean(updateIsOtherMajor.trim()),
+            isOtherMinor: Boolean(updateIsOtherMinor.trim())
         }
-        const updateStudent = await axios.put(`http://localhost:8080/test/update/student?id=${studentUpdateEntry}`,student);
+
+        const impossibleFirstName = !student.firstName;
+        const impossibleLastName = !student.lastName;
+        const impossibleGraduationDate = !student.graduationDate && !Date(student.graduationDate);
+        const impossibleComputerScienceMajor = student.isComputerScienceMajor!==true && student.isComputerScienceMajor!==false;
+        const impossibleComputerScienceMinor = student.isComputerScienceMinor!==true && student.isComputerScienceMinor!==false
+        const impossibleOtherMajor = student.isOtherMajor!==true && student.isOtherMajor!==false
+        const impossibleOtherMinor = student.isComputerOtherMajor!==true && student.isComputerOtherMajor!==false
+
+        const impossibleValues = impossibleFirstName || impossibleLastName || impossibleGraduationDate || impossibleComputerScienceMajor || impossibleComputerScienceMinor ||
+        impossibleOtherMajor || impossibleOtherMinor
+
+        if(impossibleValues){
+            const impossibleValueList = [];
+            if(impossibleFirstName){
+                impossibleValueList.push("first name");
+            }
+            if(impossibleLastName){
+                impossibleValueList.push("last name");
+            }
+            if(impossibleGraduationDate){
+                impossibleValueList.push("graduation date");
+            }
+            if(impossibleComputerScienceMajor){
+                impossibleValueList.push("computer science major");
+            }
+            if(impossibleComputerScienceMinor){
+                impossibleValueList.push("computer science minor");
+            }
+            if(impossibleOtherMajor){
+                impossibleValueList.push("other major");
+            }
+            if(impossibleOtherMinor){
+                impossibleValueList.push("other minor");
+            }
+            setTimeout(()=>{
+                console.log(`the following fields are incorrectly filled out: ${impossibleValueList}`)
+            },2000)
+        }
+        else if(student.isComputerScienceMajor && student.isComputerScienceMinor || student.isOtherMajor && student.isOtherMinor){
+            setTimeout(()=>{
+                console.log("You cannot have both a major and a minor in the same classes")
+            },2000)
+        }
+        else{
+            const updateStudent = await axios.put(`http://localhost:8080/test/update/student?id=${studentUpdateEntry}`,student);
+        }
         setProcessingStudentUpdate(false);
+        
     }
 
     return(
@@ -382,8 +446,33 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
                 <p>Is a Computer Science Major</p>
                 <input 
                     className="panel-input" 
-                    value={updateIsMajor} 
-                    onChange={(e)=>{setUpdateIsMajor(e.target.value)}}
+                    value={updateIsComputerScienceMajor} 
+                    onChange={(e)=>{setUpdateIsComputerScienceMajor(e.target.value)}}
+                />
+            </div>
+
+            <div className="panel-entry">
+                <p>Is a Computer Science Minor</p>
+                <input 
+                    className="panel-input" 
+                    value={updateIsComputerScienceMinor} 
+                    onChange={(e)=>{setUpdateIsComputerScienceMinor(e.target.value)}}
+                />
+            </div>
+            <div className="panel-entry">
+                <p>Is Other Major</p>
+                <input 
+                    className="panel-input" 
+                    value={updateIsOtherMajor} 
+                    onChange={(e)=>{setUpdateIsOtherMajor(e.target.value)}}
+                />
+            </div>
+            <div className="panel-entry">
+                <p>Is Other Minor</p>
+                <input 
+                    className="panel-input" 
+                    value={updateIsOtherMinor} 
+                    onChange={(e)=>{setUpdateIsOtherMinor(e.target.value)}}
                 />
             </div>
 
@@ -456,9 +545,15 @@ function DeleteConfirmation({setDeleteConfirmationScreen,selectDeleteMultiple, s
     )
 }
 
-function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, selectedDeleteEntry, setSelectedDeleteEntry, updateFirstNameValue, updateLastNameValue, 
-    updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, setStudentUpdateEntry, studentUpdateEntry,
-    setDeleteConfirmationScreen, selectDeleteMultiple, setSelectDeleteMultiple,selectedDeleteEntries, setSelectedDeleteEntries, updateIsMajor,setUpdateIsMajor}){
+function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, selectedDeleteEntry, setSelectedDeleteEntry, updateFirstNameValue, 
+    updateLastNameValue,updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, setStudentUpdateEntry, 
+    studentUpdateEntry,addGraduationDay,addGraduationMonth,addGraduationYear,setAddGraduationDay,setAddGraduationMonth,setAddGraduationYear,
+    addIsComputerScienceMajor,setAddIsComputerScienceMajor,addIsComputerScienceMinor,setAddIsComputerScienceMinor,addIsOtherMajor,setAddIsOtherMajor,
+    addIsOtherMinor,setAddIsOtherMinor,
+    setDeleteConfirmationScreen, selectDeleteMultiple, setSelectDeleteMultiple,selectedDeleteEntries, setSelectedDeleteEntries,
+    updateIsComputerScienceMajor,setUpdateIsComputerScienceMajor,updateIsComputerScienceMinor,setUpdateIsComputerScienceMinor,
+    updateIsOtherMajor,setUpdateIsOtherMajor,updateIsOtherMinor, setUpdateIsOtherMinor
+    }){
     const [warning, setWarning] = useState(null);
     const [multipleStudentText, setMultipleStudentText] = useState(null);
     const [csvIsSelected, setcsvIsSelected] = useState(true);
@@ -498,7 +593,10 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                         firstName: values[0],
                         lastName: values[1],
                         graduation: values[2],
-                        isMajor: values[3]
+                        isComputerScienceMajor: values[3],
+                        isComputerScienceMinor: values[4],
+                        isOtherMajor:values[5],
+                        isOtherMinor:values[6]
                     })
                 }
             }
@@ -529,7 +627,10 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         setUpdateFirstNameValue(item.firstName);
         setUpdateLastNameValue(item.lastName);
         setUpdateGraduationValue(item.graduationDate);
-        setUpdateIsMajor(item.isMajor)
+        setUpdateIsComputerScienceMajor(item.isComputerScienceMajor);
+        setUpdateIsComputerScienceMinor(item.isComputerScienceMinor);
+        setUpdateIsOtherMajor(item.isOtherMajor);
+        setUpdateIsOtherMinor(item.isOtherMinor);
     }
 
     useEffect(() => {
@@ -540,7 +641,66 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         }
     }, [selectDeleteMultiple]);
 
-    
+
+    const addStudent = async() =>{
+        const student = {
+            firstName: addFirstName,
+            lastName: addLastName,
+            graduationDate:(addGraduationYear+"-"+addGraduationMonth+"-"+addGraduationDay) ,
+            isComputerScienceMajor: addIsComputerScienceMajor, 
+            isComputerScienceMinor: addIsComputerScienceMinor,
+            isOtherMajor: addIsOtherMajor,
+            isOtherMinor: addIsOtherMinor
+        }
+
+        const impossibleFirstName = !student.firstName;
+        const impossibleLastName = !student.lastName;
+        const impossibleGraduationDate = !student.graduationDate && !Date(student.graduationDate);
+        const impossibleComputerScienceMajor = student.isComputerScienceMajor!==true && student.isComputerScienceMajor!==false;
+        const impossibleComputerScienceMinor = student.isComputerScienceMinor!==true && student.isComputerScienceMinor!==false
+        const impossibleOtherMajor = student.isOtherMajor!==true && student.isOtherMajor!==false
+        const impossibleOtherMinor = student.isComputerOtherMajor!==true && student.isComputerOtherMajor!==false
+
+        const impossibleValues = impossibleFirstName || impossibleLastName || impossibleGraduationDate || impossibleComputerScienceMajor || impossibleComputerScienceMinor ||
+        impossibleOtherMajor || impossibleOtherMinor
+
+        if(impossibleValues){
+            const impossibleValueList = [];
+            if(impossibleFirstName){
+                impossibleValueList.push("first name");
+            }
+            if(impossibleLastName){
+                impossibleValueList.push("last name");
+            }
+            if(impossibleGraduationDate){
+                impossibleValueList.push("graduation date");
+            }
+            if(impossibleComputerScienceMajor){
+                impossibleValueList.push("computer science major");
+            }
+            if(impossibleComputerScienceMinor){
+                impossibleValueList.push("computer science minor");
+            }
+            if(impossibleOtherMajor){
+                impossibleValueList.push("other major");
+            }
+            if(impossibleOtherMinor){
+                impossibleValueList.push("other minor");
+            }
+            setTimeout(()=>{
+                console.log(`the following fields are incorrectly filled out: ${impossibleValueList}`)
+            },2000)
+        }
+        else if(student.isComputerScienceMajor && student.isComputerScienceMinor || student.isOtherMajor && student.isOtherMinor){
+            setTimeout(()=>{
+                console.log("You cannot have both a major and a minor in the same classes")
+            },2000)
+        }
+        else{
+            const addStudent = await axios.put(`http://localhost:8080/test/add/student}`,student);
+        }
+        setProcessingStudentUpdate(false);
+    }
 
     return(
         <div className="tab-content">
@@ -550,19 +710,29 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                     <p>Add Student</p>
                     <div className="name-container">
                         <p>Student Name:</p>
-                        <input type= "text" className="name-input" placeholder="first name"/>
-                        <input type= "text" className="name-input" placeholder="last name"/>
+                        <input type= "text" className="name-input" placeholder="first name" onClick={(e)=>{setUpdateFirstNameValue(e.target.value)}}/>
+                        <input type= "text" className="name-input" placeholder="last name" onClick={(e)=>{setUpdateLastNameValue(e.target.value)}}/>
                     </div>
                     <div className="graduation-container">
                         <p>Grduation Date:</p>
-                        <input type="text" className = "graduation-input" placeholder="DD"></input>
+                        <input type="text" className = "graduation-input" placeholder="DD" onClick={(e)=>{setAddGraduationDay(e.target.value)}}></input>
                         <p>-</p>
-                        <input type="text" className = "graduation-input" placeholder="MM"></input>
+                        <input type="text" className = "graduation-input" placeholder="MM" onClick={(e)=>{setAddGraduationMonth(e.target.value)}}></input>
                         <p>-</p>
-                        <input type="text" className = "graduation-input year" placeholder="YYYY"></input>
-                    </div>  
+                        <input type="text" className = "graduation-input year" placeholder="YYYY" onClick={(e)=>{setAddGraduationYear(e.target.value)}}></input>
+                    </div> 
                     <div className="graduation-container">
-                        <button>Add Student</button>
+                        <p>Computer Science Major:</p>
+                        <input checked={addIsComputerScienceMajor} name="comp-sci-major" type="radio"/>
+                        <input checked={!addIsComputerScienceMajor} name = "comp-sci-major" type="radio"/>
+                    </div> 
+                    <div className="graduation-container">
+                        <p>Computer Science Minor:</p>
+                        <input name="comp-sci-minor" type="radio"/>
+                        <input name="comp-sci-minor" type="radio"/>
+                    </div> 
+                    <div className="graduation-container">
+                        <button onClick={addStudent}>Add Student</button>
                     </div>
                 </div>
                 <div className="mass-add">
@@ -589,7 +759,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                             </div>)
                         })}
                     </div>
-                    {<UpdateBlock isBeginning={isBeginning} studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue} updateIsMajor={updateIsMajor} setUpdateIsMajor={setUpdateIsMajor}/>}
+                    {<UpdateBlock isBeginning={isBeginning} studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue}/>}
                 </div>}
             {activeTab === "delete" && 
                 <div className="placeholder">

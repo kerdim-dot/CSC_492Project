@@ -284,8 +284,36 @@ function ClassManager(){
                 description:updateClassDescription,
                 credits:updateClassCredits
             }
-            const updateStudent = await axios.put(`http://localhost:8080/test/update/class?id=${classUpdateEntry}`,mountClass);
-            console.log(updateStudent.status)
+            
+            const impossibleTitle= !updateClassTitle;
+            const impossibleHeader= !updateClassHeader;
+            const impossibleDescription=!updateClassDescription;
+            const creditsNum = Number(updateClassCredits);
+            const impossibleCredits =
+            updateClassCredits === "" || Number.isNaN(creditsNum) || creditsNum <= 0;
+
+            const isImpossibleClass = impossibleTitle || impossibleHeader || impossibleDescription || impossibleCredits
+
+            if(isImpossibleClass){
+                const impossibleList = [];
+                if(impossibleTitle){
+                    impossibleList.push("Impossible List");
+                }
+                if(impossibleHeader){
+                    impossibleList.push("Impossible Header");
+                }
+                if(impossibleDescription){
+                    impossibleList.push("Impossible Description");
+                }
+                if(impossibleCredits){
+                    impossibleList.push("Impossible Credits")
+                }
+                console.log("The following is not valid to add to the class: ",impossibleList);
+            }
+            else{
+                const updateClass = await axios.put(`http://localhost:8080/test/update/class?id=${classUpdateEntry}`,mountClass);
+                console.log(updateClass.status)
+            }
             setProcessingClassUpdate(false);
         }
 

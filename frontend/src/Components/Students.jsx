@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from 'axios'
 import { GraduationConverter } from "../tools/GraduationConverter";
+import { computerScienceMajorRequirements,computerScienceMinorRequirements,multiPlatformMajorRequirements } from "../tools/FlagFormula";
 
 function Students(){
 
@@ -99,13 +100,6 @@ function Students(){
 
             students.sort((a,b)=>{return a.lastName.localeCompare(b.lastName)})
 
-            // checks how many semesters a student has, not including the current semester
-            function timeCalculator(student){
-                const graduationSemester = student.graduationFormula.substring(0,student.graduationFormula.indexOf("/"));
-                const graduationYear = student.graduationFormula.substring(1+student.graduationFormula.indexOf("/"));
-                const timerFormula =  ((graduationYear - currentYear)*2) + (graduationSemester - currentSemester)
-                return timerFormula;
-            }
 
             // checks if the student is behind in any classes and adds the isBehind field to the student object
             // used to flag if a student is behind on any classes
@@ -113,18 +107,20 @@ function Students(){
             */
             students.map((studentItem)=>{
                 let isBehind = false;
-                const studentSemestersLeft = timeCalculator(studentItem);
-                classes.forEach((classItem)=>{
-                    const headerNumber = Number(classItem.header.substring(classItem.header.indexOf("-")+1,classItem.header.indexOf("-")+2));
-                    const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
-                    const classSemesters = 8-(headerNumber*2)
-                    if(!hasTakenClass && studentSemestersLeft<=classSemesters){
-                        //console.log(classItem.header,classSemesters,studentSemestersLeft);
-                        isBehind = true;
-                    }
-                })
+                if(studentItem.isComputerScienceMajor){
+                    isBehind = isBehind || computerScienceMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                }
+
+                if(studentItem.isComputerScienceMinor){
+                    isBehind = isBehind || computerScienceMinorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                }
+
+                if(studentItem.isMultiPlatformMajor){
+                    isBehind = isBehind || multiPlatformMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                }
                 studentItem.isBehind = isBehind;
             })
+
             setStudentsActive(students);
         }
          // replace this with a fetch students method

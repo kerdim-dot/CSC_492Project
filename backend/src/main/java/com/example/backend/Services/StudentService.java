@@ -40,8 +40,16 @@ public class StudentService {
         if(studentOptional.isPresent()){
             Student student = studentOptional.get();
 
-            if(studentInfo.getIsMajor() != student.getIsMajor()){
-                student.setIsMajor(studentInfo.getIsMajor());
+            if(studentInfo.getIsComputerScienceMajor() != student.getIsComputerScienceMajor()){
+                student.setIsComputerScienceMajor(studentInfo.getIsComputerScienceMajor());
+            }
+
+            if(studentInfo.getIsComputerScienceMinor() != student.getIsComputerScienceMinor()){
+                student.setIsComputerScienceMinor(studentInfo.getIsComputerScienceMinor());
+            }
+
+            if(studentInfo.getIsMultiPlatformMajor() != student.getIsMultiPlatformMajor()){
+                student.setIsOtherMajor(studentInfo.getIsMultiPlatformMajor());
             }
 
             if(studentInfo.getGraduationDate() != studentInfo.getGraduationDate()){
