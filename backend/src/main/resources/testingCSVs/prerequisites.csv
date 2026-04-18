@@ -8,20 +8,3 @@ classId, prequisiteId
 6,2
 6,3
 8,7
-
-
-
- 1, Programming Problem Solving I,CSC-120,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 2, Programming Problem Solving II,CSC-220,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 3, Computer Organization,CSC-270,4,Introduction to programming fundamentals\; structured problem solving; and basic software development practices.
- 4, Database Theory Implementation,CSC-310,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 5, Algorithms and Data Structures,CSC-320,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 6, Computer Networks,CSC-360,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 7, Software Engineer Fundamentals,CSC-491,2,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 8, Practice Software Engineering,CSC-492,2,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 9, Elementary Statistics,MTH-123,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 10,Elementary Discrete Mathematics,MTH-125,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 11,Calculus I,MTH-141,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 12,Web Development Fundamentals,CSW-123,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 13,Programming for Interactive Media,CSW-223,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 14,Interaction Design,CSW-423,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.

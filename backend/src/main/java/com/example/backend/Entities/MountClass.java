@@ -24,7 +24,13 @@ public class MountClass {
     @Column(nullable = false)
     private Integer credits;
     @Column(nullable = false)
-    private String description; 
+    private String description;
+    @Column(nullable = false) 
+    private Boolean isRequiredComputerScienceMajor;
+    @Column(nullable = false) 
+    private Boolean isRequiredComputerScienceMinor;
+    @Column(nullable = false) 
+    private Boolean isRequiredMultiPlatformMajor;
 
     @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <Enrollment> enrollments = new ArrayList<>();
@@ -45,11 +51,14 @@ public class MountClass {
     public MountClass() {
     }
 
-    public MountClass(String title, String header, Integer credits, String description) {
+    public MountClass(String title, String header, Integer credits, String description,Boolean isRequiredComputerScienceMajor,Boolean isRequiredComputerScienceMinor,Boolean isRequiredMultiPlatformMajor) {
         this.title = title;
         this.header = header;
         this.credits = credits;
         this.description = description;
+        this.isRequiredComputerScienceMajor = isRequiredComputerScienceMajor;
+        this.isRequiredComputerScienceMinor = isRequiredComputerScienceMinor;
+        this.isRequiredMultiPlatformMajor = isRequiredMultiPlatformMajor;
     }
 
     public Long getClass_id() {
@@ -92,6 +101,27 @@ public class MountClass {
         this.description = description;
     }
 
+    public void setIsRequiredComputerScienceMajor(Boolean isRequiredComputerScienceMajor){
+        this.isRequiredComputerScienceMajor = isRequiredComputerScienceMajor;
+    }
 
+    public Boolean getIsRequiredComputerScienceMajor(){
+        return this.isRequiredComputerScienceMajor;
+    }
 
+    public void setIsRequiredComputerScienceMinor(Boolean isRequiredComputerScienceMinor){
+        this.isRequiredComputerScienceMajor = isRequiredComputerScienceMinor;
+    }
+
+    public Boolean getIsRequiredComputerScienceMinor(){
+        return this.isRequiredComputerScienceMinor;
+    }
+
+    public void setIsRequiredMultiPlatformMajor(Boolean isRequiredMutliPlatformMajor){
+        this.isRequiredMultiPlatformMajor = isRequiredMutliPlatformMajor;
+    }
+
+    public Boolean getIsRequiredComputerMultiPlatformMajor(){
+        return this.isRequiredComputerScienceMajor;
+    }
 }

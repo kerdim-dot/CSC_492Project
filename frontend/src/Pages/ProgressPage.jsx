@@ -3,7 +3,7 @@ import TestPage from "./TestPage";
 import { useEffect, useState } from "react";
 import { ReactFlow } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { findParams } from "../tools/treeBuilder";
+//import { findParams } from "../tools/treeBuilder";
 
 function ProgressPage({ requiredClasses }) {
     const [nodes, setNodes] = useState([]);

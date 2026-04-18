@@ -1,15 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import '../adminPanel.css'
 import search from "./../assets/search.svg"
 import filter from "./../assets/filter.svg"
 import close from "./../assets/close.svg"
-import { ReactFlow, Background, Controls, Position,applyEdgeChanges } from '@xyflow/react';
+import ReactFlow, { Background, Controls, Handle, Position } from 'reactflow';
 import '@xyflow/react/dist/style.css';
 import { data } from "react-router-dom";
-import { findParams, findPreReqs } from "../tools/treeBuilder";
 import axios from 'axios';
 import { useRef } from "react";
+import dagre from 'dagre';
 
+const nodeTypes = { course: CourseNode };
 
 /* Backend Needs
 - Fetch classes c
@@ -19,39 +20,55 @@ import { useRef } from "react";
 - delete prerequisities
 */
 
+
 function ClassManager(){
     
-      const [activeTab, setActiveTab] = useState("update");
-      const [edges, setEdges] = useState([]);
-      const [nodes, setNodes] = useState(null);
-      const [searchInput, setSearchInput] = useState("");
-      const [showFilter, setShowFilter] = useState(false);
+    const [activeTab, setActiveTab] = useState("update");
+    const [searchInput, setSearchInput] = useState("");
+    const [showFilter, setShowFilter] = useState(false);
 
-      const [year, setYear] = useState("All");
-      const [requirement, setRequirement] = useState("All");
-      const [credits, setCredits] = useState("");
+    const [year, setYear] = useState("All");
+    const [requirement, setRequirement] = useState("All");
+    const [credits, setCredits] = useState("");
 
-      const [filteredClasses, setFilteredClasses] = useState([]);
+    const [filteredClasses, setFilteredClasses] = useState([]);
 
-      const [selectedEntry, setSelectedEntry] = useState(null);
-      const [classUpdateEntry,setClassUpdateEntry] = useState(null);
-      const [updateClassTitle, setUpdateClassTitle] = useState(null);
-      const [updateClassHeader, setUpdateClassHeader] = useState(null);
-      const [updateClassDescription, setUpdateClassDescription] = useState(null);
-      const [updateClassCredits, setUpdateClassCredits] = useState(null);
+    const [selectedEntry, setSelectedEntry] = useState(null);
+    const [classUpdateEntry,setClassUpdateEntry] = useState(null);
 
-      const [classes,setClasses] = useState([]);
-      const [isBeginning, setIsBeginning] = useState(true);
+    const [addClassTitle, setAddClassTitle] = useState(null);
+    const [addClassHeader, setAddClassHeader] = useState(null);
+    const [addClassDescription, setAddClassDescription] = useState(null);
+    const [addClassCredits, setAddClassCredits] = useState(null);
+    const [addIsRequiredComputerScienceMajor, setAddIsRequiredComputerScienceMajor] = useState(null);
+    const [addIsRequiredComputerScienceMinor, setAddIsRequiredComputerScienceMinor] = useState(null);
+    const [addIsRequiredMultiPlatformMajor, setAddIsRequiredMultiPlatformMajor] = useState(null);
 
-      useEffect(()=>{
-        
-        const retriveClassData = async() =>{
-            const classData = await axios.get('http://localhost:8080/test/get/classes');
-            setClasses(classData.data);
-            console.log("class fetch:", classData.data)
-        }
-        retriveClassData();
-    },[])
+    const [updateClassTitle, setUpdateClassTitle] = useState(null);
+    const [updateClassHeader, setUpdateClassHeader] = useState(null);
+    const [updateClassDescription, setUpdateClassDescription] = useState(null);
+    const [updateClassCredits, setUpdateClassCredits] = useState(null);
+    const [updateIsRequiredComputerScienceMajor, setUpdateIsRequiredComputerScienceMajor] = useState(null);
+    const [updateIsRequiredComputerScienceMinor, setUpdateIsRequiredComputerScienceMinor] = useState(null);
+    const [updateIsRequiredMultiPlatformMajor, setUpdateIsRequiredMultiPlatformMajor] = useState(null);
+
+
+    const [classes,setClasses] = useState([]);
+    const [prerequisiteMapping, setPrerequisiteMapping] = useState([]);  
+
+    const [isBeginning, setIsBeginning] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+        const [classData, prereqData] = await Promise.all([
+            axios.get('http://localhost:8080/test/get/classes'),
+            axios.get('http://localhost:8080/test/get/prequisiteMapping'),
+        ]);
+        setClasses(classData.data);
+        setPrerequisiteMapping(prereqData.data);
+        };
+        fetchData();
+    }, []);
 
     //   const [requiredClasses, setRequiredClasses ]= useState ([
     //     {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true}, 
@@ -64,88 +81,7 @@ function ClassManager(){
     //     {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false}
     //  ]);
 
-     const tree = [{
-        value: "CSC-120",
-        children: [{
-            value: "CSC-220",
-            children: [{
-                value: "CSC-270",
-                children:[{
-                    value:"CSC-310"
-                },
-                {
-                    value:"CSC-320"
-                }]
-            }]
-        }]
-     }]
-
      
-     
-    const classess = ["csc-120","csc-220","csc-270","csc-310","csc-320","csc-410"];
-
-    const data = [
-        {
-            current: "csc-120",
-            postreq: "csc-220"
-        },
-
-        {
-            current: "csc-220",
-            postreq: "csc-270"
-        },
-
-        {
-            current: "csc-270",
-            postreq: "csc-310"
-        },
-
-
-        {
-            current: "csc-270",
-            postreq: "csc-320"
-        },
-    ]
-
-    useEffect(()=>{
-        const nodes = [];
-        const edges = [];
-        const tree = findParams(data,classess)
-
-        let count = 1;
-        tree.map((item)=>{
-            nodes.push({
-                id: item.val,
-                data: {label:item.val},
-                position: {x:item.width * 100,y: item.height*100},
-                style: { width: 50, backgroundColor: '#f0f0f0' },
-            })
-            count +=1 ;
-        })
-        
-                        
-        // edges.push({
-        //                 id: "e1-" + count,
-        //                 source: String(parent),
-        //                 target: String(count),
-        //             });
-        setNodes(nodes);
-
-        let edgeCount = 1;
-        tree.map((item)=>{
-            for (let i = 0; i<item.children ; i++)
-            edges.push({
-                id: edgeCount
-                
-            })
-            edgeCount++;
-        })
-
-    },[])
-
-   
-
-
 
     useEffect(() => {
         let filtered = [...classes];
@@ -204,7 +140,7 @@ function ClassManager(){
                 />
             }
           <div className="top-container">
-                <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setClassUpdateEntry={setClassUpdateEntry} setSelectedEntry = {setSelectedEntry}/>
+                <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setClassUpdateEntry={setClassUpdateEntry} setSelectedEntry = {setSelectedEntry} setIsBeginning={setIsBeginning}/>
                 {(activeTab === "delete" || activeTab === "update") && 
                     <SearchBar 
                         searchInput={searchInput}
@@ -214,7 +150,12 @@ function ClassManager(){
                 }
           </div>
           
-          <BodyPanel isBeginning = {isBeginning} setIsBeginning = {setIsBeginning} activeTab={activeTab} nodes = {nodes} classes={classes} filteredClasses= {filteredClasses} edges={edges}classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassDescription = {updateClassDescription} setUpdateClassDescription = {setUpdateClassDescription} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry}/>
+          <BodyPanel isBeginning = {isBeginning} setIsBeginning = {setIsBeginning} activeTab={activeTab} classes={classes} filteredClasses= {filteredClasses} classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassDescription = {updateClassDescription} setUpdateClassDescription = {setUpdateClassDescription} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} setUpdateIsRequiredComputerScienceMajor={setUpdateIsRequiredComputerScienceMajor} updateIsRequiredComputerScienceMajor={updateIsRequiredComputerScienceMajor} setUpdateIsRequiredComputerScienceMinor={setUpdateIsRequiredComputerScienceMinor} updateIsRequiredComputerScienceMinor={updateIsRequiredComputerScienceMinor} setUpdateIsRequiredMultiPlatformMajor={setUpdateIsRequiredMultiPlatformMajor} updateIsRequiredMultiPlatformMajor={updateIsRequiredMultiPlatformMajor} selectedEntry={selectedEntry} setSelectedEntry={setSelectedEntry} prerequisiteMapping={prerequisiteMapping}
+          addClassTitle={addClassTitle} addClassHeader={addClassHeader} addClassDescription={addClassDescription} addClassCredits={addClassCredits} 
+          addIsRequiredComputerScienceMajor={addIsRequiredComputerScienceMajor} addIsRequiredComputerScienceMinor={addIsRequiredComputerScienceMinor} 
+          addIsRequiredMultiPlatformMajor={addIsRequiredMultiPlatformMajor} setAddClassTitle={setAddClassTitle} setAddClassHeader={setAddClassHeader}
+          setAddClassDescription={setAddClassDescription} setAddClassCredits={setAddClassCredits} setAddIsRequiredComputerScienceMajor={setAddIsRequiredComputerScienceMajor} 
+          setAddIsRequiredComputerScienceMinor={setAddIsRequiredComputerScienceMinor} setAddIsRequiredMultiPlatformMajor={setAddIsRequiredMultiPlatformMajor}/>
           
         </div>
       );
@@ -222,12 +163,13 @@ function ClassManager(){
     
     export default ClassManager;
     
-    function HeaderPanel({activeTab, setActiveTab, setClassUpdateEntry, setSelectedEntry}){
+    function HeaderPanel({activeTab, setActiveTab, setClassUpdateEntry, setSelectedEntry ,setIsBeginning}){
 
         const onClickAdd = () =>{
             setClassUpdateEntry(null);
             setSelectedEntry(null);
             setActiveTab("add");
+            setIsBeginning(true);
         }
 
         const onClickUpdate = () =>{
@@ -237,12 +179,14 @@ function ClassManager(){
         const onClickDelete = () =>{
             setClassUpdateEntry(null);
             setActiveTab("delete");
+            setIsBeginning(true);
         }
 
         const onClickTree = () =>{
             setClassUpdateEntry(null);
             setSelectedEntry(null);
             setActiveTab("tree");
+            setIsBeginning(true);
         }
 
         return(
@@ -272,27 +216,32 @@ function ClassManager(){
     }
 
 
-    function UpdateBlock({isBeginning, classUpdateEntry, setClassUpdateEntry, updateClassTitle, setUpdateClassTitle, updateClassHeader,setUpdateClassHeader, updateClassDescription, setUpdateClassDescription, updateClassCredits, setUpdateClassCredits}){
+    function UpdateBlock({isBeginning, classUpdateEntry, setClassUpdateEntry, updateClassTitle, setUpdateClassTitle, updateClassHeader,setUpdateClassHeader, updateClassDescription, setUpdateClassDescription, updateClassCredits, setUpdateClassCredits, updateIsRequiredComputerScienceMajor, setUpdateIsRequiredComputerScienceMajor, updateIsRequiredComputerScienceMinor, setUpdateIsRequiredComputerScienceMinor, updateIsRequiredMultiPlatformMajor, setUpdateIsRequiredMultiPlatformMajor}){
       
         const [processingClassUpate, setProcessingClassUpdate] = useState(false);
 
         const updateClassEntry = async() =>{
             setProcessingClassUpdate(true);
             const mountClass = {
-                title:updateClassTitle,
-                header:updateClassHeader,
-                description:updateClassDescription,
-                credits:updateClassCredits
+                title:updateClassTitle.trim(),
+                header:updateClassHeader.trim(),
+                description:updateClassDescription.trim(),
+                credits:updateClassCredits.trim(),
+                isRequiredComputerScienceMajor: updateIsRequiredComputerScienceMajor.trim(),
+                isRequiredComputerScienceMinor:updateIsRequiredComputerScienceMinor.trim(),
+                isRequiredMultiPlatformMajor: updateIsRequiredMultiPlatformMajor.trim()
             }
             
             const impossibleTitle= !updateClassTitle;
             const impossibleHeader= !updateClassHeader;
             const impossibleDescription=!updateClassDescription;
             const creditsNum = Number(updateClassCredits);
-            const impossibleCredits =
-            updateClassCredits === "" || Number.isNaN(creditsNum) || creditsNum <= 0;
+            const impossibleCredits = updateClassCredits === "" || Number.isNaN(creditsNum) || creditsNum <= 0;
+            const impossibleRequiredComputerScienceMajor = updateIsRequiredComputerScienceMajor === "" || (updateIsRequired !== true && updateIsRequired !== false);
+            const impossibleRequiredComputerScienceMinor = updateIsRequiredComputerScienceMinor === "" || (updateIsRequired !== true && updateIsRequired !== false);
+            const impossibleRequiredMultiPlatformMajor = updateIsRequiredMultiPlatformMajor === "" || (updateIsRequired !== true && updateIsRequired !== false);
 
-            const isImpossibleClass = impossibleTitle || impossibleHeader || impossibleDescription || impossibleCredits
+            const isImpossibleClass = impossibleTitle || impossibleHeader || impossibleDescription || impossibleCredits || impossibleRequiredComputerScienceMajor || impossibleRequiredComputerScienceMinor || impossibleRequiredMultiPlatformMajor
 
             if(isImpossibleClass){
                 const impossibleList = [];
@@ -307,6 +256,15 @@ function ClassManager(){
                 }
                 if(impossibleCredits){
                     impossibleList.push("Impossible Credits")
+                }
+                if(impossibleRequiredComputerScienceMajor){
+                    impossibleList.push("Impossible isRequired Computer Science Major")
+                }
+                if(impossibleRequiredComputerScienceMinor){
+                    impossibleList.push("Impossible isRequired Computer Science Minor")
+                }
+                if(impossibleRequiredMultiPlatformMajor){
+                    impossibleList.push("Impossible isRequired MultiPlatform Major")
                 }
                 console.log("The following is not valid to add to the class: ",impossibleList);
             }
@@ -360,11 +318,71 @@ function ClassManager(){
                         onChange={(e)=>{setUpdateClassCredits(e.target.value)}}
                     />
                 </div>
+
+                <div className="panel-entry">
+                    <p>Is Required for Computer Science Majors</p>
+                    <input type = "text"
+                        className="panel-input" 
+                        value={updateIsRequiredComputerScienceMajor} 
+                        onChange={(e)=>{setUpdateIsRequiredComputerScienceMajor(e.target.value)}}
+                    />
+                </div>
+
+                <div className="panel-entry">
+                    <p>Is Required for Computer Science Minors</p>
+                    <input type = "text"
+                        className="panel-input" 
+                        value={updateIsRequiredComputerScienceMinor} 
+                        onChange={(e)=>{setUpdateIsRequiredComputerScienceMinor(e.target.value)}}
+                    />
+                </div>
+                
+                <div className="panel-entry">
+                    <p>Is Required for Multiplatform Minors</p>
+                    <input type = "text"
+                        className="panel-input" 
+                        value={updateIsRequiredMultiPlatformMajor} 
+                        onChange={(e)=>{setUpdateIsRequiredMultiPlatformMajor(e.target.value)}}
+                    />
+                </div>
     
                 <button className="panel-button" onClick={updateClassEntry}>{processingClassUpate?"Processing...":"Confirm Update"}</button>
             </div>
         )
     }
+
+    function getLayoutedElements(nodes, edges) {
+        const g = new dagre.graphlib.Graph();
+        g.setGraph({ rankdir: 'TB', nodesep: 60, ranksep: 80 });
+        g.setDefaultEdgeLabel(() => ({}));
+        nodes.forEach(n => g.setNode(n.id, { width: 120, height: 40 }));
+        edges.forEach(e => g.setEdge(e.source, e.target));
+        dagre.layout(g);
+        return {
+            nodes: nodes.map(n => {
+            const { x, y } = g.node(n.id);
+            return { ...n, position: { x: x - 60, y: y - 20 } };
+            }),
+            edges,
+        };
+    }
+
+    function CourseNode({ data }) {
+        return (
+            <div style={{
+            padding: 10,
+            borderRadius: 6,
+            border: '1px solid #333',
+            backgroundColor: data.color,
+            color: 'white',
+            }}>
+            <Handle type="target" position={Position.Top} />
+            <div>{data.label}</div>
+            <Handle type="source" position={Position.Bottom} />
+            </div>
+        );
+    }
+
     
 
     function FilterBlock({ year, setYear, requirement, setRequirement,credits,setCredits, setShowFilter}) {
@@ -442,7 +460,12 @@ function ClassManager(){
         );
     }
     
-    function BodyPanel({isBeginning, setIsBeginning, activeTab, nodes, classes, filteredClasses, edges,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, setUpdateClassHeader,updateClassDescription,setUpdateClassDescription, updateClassCredits, setUpdateClassCredits, selectedEntry, setSelectedEntry}){
+    function BodyPanel({isBeginning, setIsBeginning, activeTab, classes, filteredClasses,classUpdateEntry,setClassUpdateEntry,updateClassTitle, setUpdateClassTitle, updateClassHeader, 
+        setUpdateClassHeader,updateClassDescription,setUpdateClassDescription, updateClassCredits, setUpdateClassCredits,updateIsRequiredComputerScienceMajor,setUpdateIsRequiredComputerScienceMajor, 
+        updateIsRequiredComputerScienceMinor, setUpdateIsRequiredComputerScienceMinor, updateIsRequiredMultiPlatformMajor, setUpdateIsRequiredMultiPlatformMajor, 
+        selectedEntry, setSelectedEntry,prerequisiteMapping, addClassTitle, addClassHeader, addClassDescription,addClassCredits, addIsRequiredComputerScienceMinor,
+        addIsRequiredComputerScienceMajor, addIsRequiredMultiPlatformMajor, setAddClassTitle, setAddClassHeader, setAddClassDescription, setAddClassCredits,
+        setAddIsRequiredComputerScienceMajor, setAddIsRequiredComputerScienceMinor, setAddIsRequiredMultiPlatformMajor}){
        
         const [warning, setWarning] = useState(null);
         const [classPool, setClassPool] = useState(null);
@@ -471,35 +494,48 @@ function ClassManager(){
                 classes.forEach((item,index)=>{
                     classPool.push(item.header);
                 })
-                
-                //console.log(nodes)
 
                 setClassPool(classPool);
                 
             }
         },[classes])
-        // const nodes = [
-        //     { id: "1", position: { x: 250, y: 0 }, data: { label: "CSC120" } },
-        //     { id: "2", position: { x: 250, y: 100 }, data: { label: "CSC220" } },
-        //     { id: "3", position: { x: 150, y: 200 }, data: { label: "CSC320" } },
-        //     { id: "4", position: { x: 350, y: 200 }, data: { label: "CSC310" } }
-        // ];
+    
 
-        // const edges = [
-        //     { id: "e1-2", source: "1", target: "2" },
-        //     { id: "e2-3", source: "2", target: "3" },
-        //     { id: "e2-4", source: "2", target: "4" }
-        // ];
-
-        const clickOnEntry = (item) =>{
+        const clickOnUpdateEntry = (item) =>{
             setIsBeginning(false);
             setClassUpdateEntry(item.class_id);
             setUpdateClassTitle(item.title);
             setUpdateClassHeader(item.header);
             setUpdateClassDescription(item.description);
             setUpdateClassCredits(item.credits);
+            setUpdateIsRequiredComputerScienceMajor(item.isRequiredComputerScienceMajor);
+            setUpdateIsRequiredComputerScienceMinor(item.isRequiredComputerScienceMinor);
+            setUpdateIsRequiredMultiPlatformMajor(item.isRequiredMultiPlatformMajor)
         }
+
+
+        const { nodes, edges } = useMemo(() => {
+            if (!classes || !prerequisiteMapping) return { nodes: [], edges: [] };
         
+            const rawNodes = classes.map(c => ({
+            id: String(c.class_id),
+            type: 'course',
+            data: { label: c.header, color: '#754913' },
+            }));
+        
+            const rawEdges = prerequisiteMapping.map((p, i) => ({
+            id: `e${i}`,
+            source: String(p.prerequisite_class_id),
+            target: String(p.class_id),
+            }));
+        
+            return getLayoutedElements(rawNodes, rawEdges);
+        }, [classes, prerequisiteMapping]);
+
+       
+        
+        if (!classes || !prerequisiteMapping) return <div>Loading...</div>;
+                
 
 
         return(
@@ -508,16 +544,26 @@ function ClassManager(){
                 <div className="class-add-container">
                     <p className="add-class-title">Add Class</p>
                     <div className="class-headers-container">
-                        <input type= "text" className="title-input" placeholder="Title"/>
-                        <input type= "text" className="header-input" placeholder="Header"/>
+                        <input type= "text" className="title-input" placeholder="Title" onChange={(e)=>{setAddClassTitle(e.target.value)}} value={addClassTitle}/>
+                        <input type= "text" className="header-input" placeholder="Header" onChange={(e)=>{setAddClassHeader(e.target.value)}} value={addClassHeader}/>
                     </div>
 
                     <div className="graduation-container">
-                        <input type="text" className="description-input" placeholder="Class Description"></input>
+                        <input type="text" className="description-input" placeholder="Class Description"  onChange={setAddClassDescription} value={addClassDescription}></input>
                     </div>
 
                     <div className="graduation-container">
-                        <input type="text" className="credits-input" placeholder="Credits"></input>
+                        <input type="text" className="credits-input" placeholder="Credits"  onChange={(e)=>{setAddClassCredits(e.target.value)}} value={addClassCredits}></input>
+                    </div>
+
+                    <div className="graduation-container">
+                        <input type="text" className="credits-input" placeholder="IsComputerScienceMajor"  onChange={(e)=>{setAddIsRequiredComputerScienceMajor(e.target.value)}} value={addIsRequiredComputerScienceMajor}></input>
+                    </div>
+                    <div className="graduation-container">
+                        <input type="text" className="credits-input" placeholder="IsComputerScienceMinor"  onChange={(e)=>{setAddIsRequiredComputerScienceMinor(e.target.value)}} value={addIsRequiredComputerScienceMinor}></input>
+                    </div>
+                      <div className="graduation-container">
+                        <input type="text" className="credits-input" placeholder="IsMultiPlatformMajor"  onChange={(e)=>{setAddIsRequiredMultiPlatformMajor(e.target.value)}} value={addIsRequiredMultiPlatformMajor}></input>
                     </div>
                     
                     <div className="graduation-container">
@@ -534,14 +580,14 @@ function ClassManager(){
                         <div className="entry-list">
                             {filteredClasses.map((item,index)=>{
                                 return(
-                                <div className={item.class_id == classUpdateEntry?"entry highlighted":"entry"} onClick={()=>{clickOnEntry(item)}}>
+                                <div className={item.class_id == classUpdateEntry?"entry highlighted":"entry"} onClick={()=>{clickOnUpdateEntry(item)}}>
                                         <p>{item.title} </p>
                                         <p>{item.header} </p>
                                 </div>)
                             })}
                             
                         </div>
-                            <UpdateBlock isBeginning={isBeginning} setIsBeginning={setIsBeginning} classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassDescription={updateClassDescription} setUpdateClassDescription={setUpdateClassDescription} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits}/>
+                            <UpdateBlock isBeginning={isBeginning} setIsBeginning={setIsBeginning} classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassDescription={updateClassDescription} setUpdateClassDescription={setUpdateClassDescription} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} updateIsRequiredComputerScienceMajor={updateIsRequiredComputerScienceMajor} setUpdateIsRequiredComputerScienceMajor={setUpdateIsRequiredMultiPlatformMajor} updateIsRequiredComputerScienceMinor = {updateIsRequiredComputerScienceMinor} setUpdateIsRequiredComputerScienceMinor={setUpdateIsRequiredComputerScienceMinor} updateIsRequiredMultiPlatformMajor={updateIsRequiredMultiPlatformMajor} setUpdateIsRequiredMultiPlatformMajor={setUpdateIsRequiredMultiPlatformMajor}/>
                     </div>}
                 {activeTab === "delete" && 
                     <div className="placeholder">
@@ -560,11 +606,14 @@ function ClassManager(){
                     </div>}
                 {activeTab === "tree" && 
                     <div className="graph-container">
-                        <div style={{ height: '80vh', width: '50vw' }}>
-                            {(nodes) && <ReactFlow nodes={nodes} edges={edges}fitView nodesDraggable={false}
-                            nodesConnectable={true}
-                            ></ReactFlow>}
+                         <div style={{ width: '80%', height: '500px' }}>
+                            <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView>
+                                <Background />
+                                <Controls />
+                            </ReactFlow>
                         </div>
+
+
                         <div className="class-pool">
                             <h3>Class Pool</h3>
 

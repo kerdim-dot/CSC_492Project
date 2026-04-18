@@ -47,7 +47,5 @@ public class PrerequisiteMapping {
     public void setMountClassPrerequisite(MountClass mountClassTwo) {
         this.mountClassPrerequisite = mountClassTwo;
     }
-
-
-
+    
 }

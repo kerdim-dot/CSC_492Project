@@ -115,7 +115,11 @@ public class TestController {
             }
             
             int convertCredits = Integer.parseInt(columnSpliter[3]);
-            MountClass mountClass = new MountClass(columnSpliter[1], columnSpliter[2], convertCredits, columnSpliter[4]);
+            boolean convertIsRequiredComputerScienceMajor = Boolean.parseBoolean(columnSpliter[5]);
+            boolean convertIsRequiredComputerScienceMinor = Boolean.parseBoolean(columnSpliter[6]);
+            boolean convertIsRequiredMultiPlatformMajor = Boolean.parseBoolean(columnSpliter[7]);
+
+            MountClass mountClass = new MountClass(columnSpliter[1], columnSpliter[2], convertCredits, columnSpliter[4],convertIsRequiredComputerScienceMajor,convertIsRequiredComputerScienceMinor,convertIsRequiredMultiPlatformMajor);
             mountClassService.addClass(mountClass);
         }
 

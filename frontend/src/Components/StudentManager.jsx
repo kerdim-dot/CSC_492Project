@@ -44,6 +44,11 @@ function StudentManager(){
     const [addIsMultiPlatformMajor, setAddIsMultiPlatformMajor] = useState(false);
 
 
+    const [requiredComputerScienceMajorHeaders, setRequiredComputerScienceMajorClasses] = useState(null);
+    const [requiredComputerScienceMinorHeaders, setRequiredComputerScienceMinorClasses] = useState(null);
+    const [requiredMultiPlatfromMajorHeaders, setRequiredMultiPlatfromMajorClasses] = useState(null);
+
+
     const [startDate, setStartDate]= useState(null);
     const [endDate, setEndDate]= useState(null);
     const [showFilter,setShowFilter] = useState(false);
@@ -218,7 +223,7 @@ useEffect(()=>{
     <div className="tab-pane-container">
       {deleteConfirmationScreen && <DeleteConfirmation setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} selectedDeleteEntries={selectedDeleteEntries} selectedDeleteEntry={selectedDeleteEntry} setSelectedDeleteEntries={setSelectedDeleteEntries} setSelectedDeleteEntry={setSelectedDeleteEntry} setUpdateList={setUpdateList}/>}
       <div className="top-container">
-            <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setSelectedDeleteEntry={setSelectedDeleteEntry} setStudentUpdateEntry={setStudentUpdateEntry} studentUpdateEntry={studentUpdateEntry}/>
+            <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setSelectedDeleteEntry={setSelectedDeleteEntry} setStudentUpdateEntry={setStudentUpdateEntry} studentUpdateEntry={studentUpdateEntry} setIsBeginning={setIsBeginning}/>
             {(activeTab === "delete" || activeTab === "update") && <SearchBar searchInput={searchInput} setSearchInput={setSearchInput} setShowFilter={setShowFilter}/>}
       </div>
 
@@ -232,18 +237,25 @@ useEffect(()=>{
 
 export default StudentManager;
 
-function HeaderPanel({activeTab, setActiveTab, setSelectedDeleteEntry, setStudentUpdateEntry}){
+function HeaderPanel({activeTab, setActiveTab, setSelectedDeleteEntry, setStudentUpdateEntry, setIsBeginning}){
 
     const makeAddTab = () =>{
         setActiveTab("add");
         setSelectedDeleteEntry(null);  
         setStudentUpdateEntry(null);
+        setIsBeginning(true);
     }
 
     const makeUpdateTab = () =>{
         setActiveTab("update");
         setSelectedDeleteEntry(null);
         setStudentUpdateEntry(null);  
+    }
+
+    const makeDeleteTab = () =>{
+        setActiveTab("delete")
+        setStudentUpdateEntry(null);  
+        setIsBeginning(true);
     }
 
     return(
@@ -261,7 +273,7 @@ function HeaderPanel({activeTab, setActiveTab, setSelectedDeleteEntry, setStuden
             </button>
 
             <button className={activeTab === "delete" ? "tab active" : "tab"}
-            onClick={() => setActiveTab("delete")}>
+            onClick={makeDeleteTab}>
             Delete
             </button>
         </div>
@@ -355,7 +367,7 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
             graduationDate:updateGraduationValue.trim(),
             isComputerScienceMajor:updateIsComputerScienceMajor.trim(),
             isComputerScienceMinor: updateIsComputerScienceMinor.trim(),
-            isMultiPlatformMajor: Boolean(updateIsMultiPlatformMajor.trim()),
+            isMultiPlatformMajor: (updateIsMultiPlatformMajor.trim()),
         }
 
         const impossibleFirstName = !student.firstName;
@@ -706,14 +718,31 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                     </div> 
                     <div className="graduation-container">
                         <p>Computer Science Major:</p>
-                        <input checked={addIsComputerScienceMajor} name="comp-sci-major" type="radio"/>
-                        <input checked={!addIsComputerScienceMajor} name = "comp-sci-major" type="radio"/>
+                        <input
+                            checked={addIsComputerScienceMajor === true}
+                            onChange={() => setAddIsComputerScienceMajor(true)}
+                            name="comp-sci-major"
+                            type="radio"
+                        />
+                        <input
+                            checked={addIsComputerScienceMajor === false}
+                            onChange={() => setAddIsComputerScienceMajor(false)}
+                            name="comp-sci-major"
+                            type="radio"
+                        />
                     </div> 
                     <div className="graduation-container">
                         <p>Computer Science Minor:</p>
-                        <input name="comp-sci-minor" type="radio"/>
-                        <input name="comp-sci-minor" type="radio"/>
+                        <input name="comp-sci-minor" type="radio" checked = {addIsComputerScienceMinor} onChange={() => setAddIsComputerScienceMinor(true)}/>
+                        <input name="comp-sci-minor" type="radio" checked = {!addIsComputerScienceMinor} onChange={() => setAddIsComputerScienceMinor(false)}/>
                     </div> 
+
+                     <div className="graduation-container">
+                        <p>Mutli Platform Major:</p>
+                        <input name="multi-platform-major" type="radio" checked = {!addIsMultiPlatformMajor} onChange={() => setAddIsComputerScienceMajor(false)}/>
+                        <input name="multi-platform-major" type="radio" checked = {!addIsMultiPlatformMajor} onChange={() => setAddIsComputerScienceMajor(false)}/>
+                    </div> 
+
                     <div className="graduation-container">
                         <button onClick={addStudent}>Add Student</button>
                     </div>

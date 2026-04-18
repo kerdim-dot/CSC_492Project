@@ -1,15 +1,15 @@
-id, title,header,credits,description
- 1, Programming Problem Solving I,CSC-120,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 2, Programming Problem Solving II,CSC-220,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 3, Computer Organization,CSC-270,4,Introduction to programming fundamentals\; structured problem solving; and basic software development practices.
- 4, Database Theory Implementation,CSC-310,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 5, Algorithms and Data Structures,CSC-320,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 6, Computer Networks,CSC-360,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 7, Software Engineer Fundamentals,CSC-491,2,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 8, Practice Software Engineering,CSC-492,2,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 9, Elementary Statistics,MTH-123,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 10,Elementary Discrete Mathematics,MTH-125,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 11,Calculus I,MTH-141,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 12,Web Development Fundamentals,CSW-123,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 13,Programming for Interactive Media,CSW-223,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
- 14,Interaction Design,CSW-423,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.
+id, title,header,credits,description,isCSMajor,isCSMinor,isMultiPlatformMajor
+ 1, Programming Problem Solving I,CSC-120,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,true,true
+ 2, Programming Problem Solving II,CSC-220,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,true,true
+ 3, Computer Organization,CSC-270,4,Introduction to programming fundamentals\; structured problem solving; and basic software development practices.,true,true,false
+ 4, Database Theory Implementation,CSC-310,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,false,true
+ 5, Algorithms and Data Structures,CSC-320,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,true,false
+ 6, Computer Networks,CSC-360,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,true,true
+ 7, Software Engineer Fundamentals,CSC-491,2,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,false,true
+ 8, Practice Software Engineering,CSC-492,2,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,false,true
+ 9, Elementary Statistics,MTH-123,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,false,true
+ 10,Elementary Discrete Mathematics,MTH-125,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,false,true
+ 11,Calculus I,MTH-141,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,true,false,false
+ 12,Web Development Fundamentals,CSW-123,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,false,false,true
+ 13,Programming for Interactive Media,CSW-223,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,false,false,true
+ 14,Interaction Design,CSW-423,4,Introduction to programming fundamentals\; structured problem solving\; and basic software development practices.,false,false,true

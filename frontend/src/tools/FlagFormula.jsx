@@ -19,13 +19,13 @@ function timeCalculator(student,currentYear,currentSemester){
     return timerFormula;
 }
 
-function computerScienceMajorRequirements(studentItem,enrollmentMap,currentYear,currentSemester){
+function computerScienceMajorRequirements(studentItem,enrollmentMap,currentYear,currentSemester,requiredClassHeaders){
     const requiredClasses = ["MTH-123","MTH-125","MTH-141","CSC-120","CSC-220","CSC-270","CSC-310","CSC-320","CSC-360","CSC-491","CSC-492"];
     const requiredCreditHours = 54;
     const aboveThreeHundredClasses = 4;
 
     let isBehindRequiredClasses = false;
-        const studentSemestersLeft = timeCalculator(studentItem,currentYear,currentSemester);
+        const studentSemestersLeft = timeCalculator(studentItem,currentYear,currentSemester,);
         requiredClasses.forEach((classItem)=>{
             const headerNumber = Number(classItem.substring(classItem.indexOf("-")+1,classItem.indexOf("-")+2));
             const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
@@ -39,7 +39,7 @@ function computerScienceMajorRequirements(studentItem,enrollmentMap,currentYear,
     //let isBehindCredits = false
 }
 
-function computerScienceMinorRequirements(studentItem,enrollmentMap,currentYear,currentSemester){
+function computerScienceMinorRequirements(studentItem,enrollmentMap,currentYear,currentSemester,requiredClassHeaders){
     const requiredClasses = ["CSC-120","CSC-220","CSC-270","CSC-320","CSC-370"];
     const requiredCreditHours = 54;
     const aboveThreeHundredClasses = 4;
@@ -59,7 +59,7 @@ function computerScienceMinorRequirements(studentItem,enrollmentMap,currentYear,
     //let isBehindCredits = false
 }
 
-function multiPlatformMajorRequirements(studentItem,enrollmentMap,currentYear,currentSemester){
+function multiPlatformMajorRequirements(studentItem,enrollmentMap,currentYear,currentSemester,requiredClassHeaders){
     const requiredClasses = ["MTH-123","MTH-125","CSW-123","CSW-223","CSW-423","CSC-120","CSC-220","CSC-310","CSC-360","CSC-491","CSC-492"];
     const requiredCreditHours = 50;
     const aboveThreeHundredClasses = 3;
