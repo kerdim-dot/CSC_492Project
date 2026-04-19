@@ -44,9 +44,9 @@ function StudentManager(){
     const [addIsMultiPlatformMajor, setAddIsMultiPlatformMajor] = useState(false);
 
 
-    const [requiredComputerScienceMajorHeaders, setRequiredComputerScienceMajorClasses] = useState(null);
-    const [requiredComputerScienceMinorHeaders, setRequiredComputerScienceMinorClasses] = useState(null);
-    const [requiredMultiPlatfromMajorHeaders, setRequiredMultiPlatfromMajorClasses] = useState(null);
+    const [requiredComputerScienceMajorHeaders, setRequiredComputerScienceMajorHeaders] = useState(null);
+    const [requiredComputerScienceMinorHeaders, setRequiredComputerScienceMinorHeaders] = useState(null);
+    const [requiredMultiPlatformMajorHeaders, setRequiredMultiPlatformMajorHeaders] = useState(null);
 
 
     const [startDate, setStartDate]= useState(null);
@@ -123,15 +123,44 @@ function StudentManager(){
 //     ]
 
 useEffect(()=>{
+        if(classes.length > 0){
+            const CSMajorRequirementMapping = []
+            const CSMinorRequirementMapping = []
+            const MPMajorRequirementMapping = []
 
-        if(enrollment.length != 0 && classes.length != 0 && students.length != 0){
+            classes.forEach((item)=>{
+                if(item.isRequiredComputerScienceMajor){
+                    CSMajorRequirementMapping.push(item.header);
+                }
+
+                if(item.isRequiredComputerScienceMinor){
+                    CSMinorRequirementMapping.push(item.header);
+                }
+
+                if(item.isRequiredMultiPlatformMajor){
+                    MPMajorRequirementMapping.push(item.header);
+                }
+            })
+
+            console.log(CSMajorRequirementMapping)
+            
+            setRequiredComputerScienceMajorHeaders(CSMajorRequirementMapping);
+            setRequiredComputerScienceMinorHeaders(CSMinorRequirementMapping);
+            setRequiredMultiPlatformMajorHeaders(MPMajorRequirementMapping);
+        }
+    },[classes])
+
+
+useEffect(()=>{
+
+        if(enrollment.length != 0 && classes.length != 0 && students.length != 0 && requiredComputerScienceMajorHeaders && requiredComputerScienceMinorHeaders && requiredMultiPlatformMajorHeaders){
             const enrollmentMap = {};
 
             enrollment.forEach((item, index)=>{
                 if(!enrollmentMap[item.student_id]){
                     enrollmentMap[item.student_id] = [];
                 }
-                enrollmentMap[item.student_id].push(item.class_id);
+                enrollmentMap[item.student_id].push(item.mountClass_id);
             })
 
             students.forEach((item)=>{
@@ -145,12 +174,6 @@ useEffect(()=>{
             students.sort((a,b)=>{return a.lastName.localeCompare(b.lastName)})
 
             // checks how many semesters a student has, not including the current semester
-            function timeCalculator(student){
-                const graduationSemester = student.graduationFormula.substring(0,student.graduationFormula.indexOf("/"));
-                const graduationYear = student.graduationFormula.substring(1+student.graduationFormula.indexOf("/"));
-                const timerFormula =  ((graduationYear - currentYear)*2) + (graduationSemester - currentSemester)
-                return timerFormula;
-            }
 
             // checks if the student is behind in any classes and adds the isBehind field to the student object
             // used to flag if a student is behind on any classes
@@ -159,17 +182,19 @@ useEffect(()=>{
             students.map((studentItem)=>{
                 let isBehind = false;
                 if(studentItem.isComputerScienceMajor){
-                    isBehind = isBehind || computerScienceMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                    isBehind = isBehind || computerScienceMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester,requiredComputerScienceMajorHeaders)
                 }
 
                 if(studentItem.isComputerScienceMinor){
-                    isBehind = isBehind || computerScienceMinorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                    isBehind = isBehind || computerScienceMinorRequirements(studentItem, enrollmentMap,currentYear,currentSemester,requiredComputerScienceMinorHeaders)
                 }
 
                 if(studentItem.isMultiPlatformMajor){
-                    isBehind = isBehind || multiPlatformMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                    isBehind = isBehind || multiPlatformMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester,requiredMultiPlatformMajorHeaders)
                 }
+
                 studentItem.isBehind = isBehind;
+                console.log(studentItem)
             })
 
 
@@ -181,7 +206,7 @@ useEffect(()=>{
 
         // key is studentsId, value is a list of classes they have taken
         
-    },[enrollment,students,classes])
+    },[enrollment,students,classes,requiredComputerScienceMajorHeaders,requiredComputerScienceMinorHeaders,requiredMultiPlatformMajorHeaders])
 
     useEffect(() => {
     if (!studentsActive) return;
@@ -229,7 +254,19 @@ useEffect(()=>{
 
        {showFilter && <FilterBlock startDate={startDate} setStartDate={setStartDate} endDate = {endDate} setEndDate={setEndDate} setShowFilter={setShowFilter} overview={overview} setOverview ={setOverview}/>}
       
-      <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedDeleteEntry={selectedDeleteEntry} setSelectedDeleteEntry={setSelectedDeleteEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} addFirstName = {addFirstName} addLastName = {addLastName} addGraduationDay={addGraduationDay} addGraduationMonth={addGraduationMonth} addGraduationYear={addGraduationYear} addIsComputerScienceMajor = {addIsComputerScienceMajor} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} studentUpdateEntry = {studentUpdateEntry} setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} setSelectDeleteMultiple={setSelectDeleteMultiple} selectedDeleteEntries = {selectedDeleteEntries} setSelectedDeleteEntries={setSelectedDeleteEntries} updateIsComputerScienceMajor={updateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor}/>
+      <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedDeleteEntry={selectedDeleteEntry} 
+      setSelectedDeleteEntry={setSelectedDeleteEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} addFirstName = {addFirstName} 
+      addLastName = {addLastName} addGraduationDay={addGraduationDay} addGraduationMonth={addGraduationMonth} addGraduationYear={addGraduationYear} 
+      addIsComputerScienceMajor = {addIsComputerScienceMajor} addIsComputerScienceMinor = {addIsComputerScienceMinor}
+      addIsMultiPlatformMajor = {addIsMultiPlatformMajor} setAddIsComputerScienceMajor={setAddIsComputerScienceMajor} 
+      setAddIsComputerScienceMinor={setAddIsComputerScienceMinor} setAddIsMultiPlatformMajor = {setAddIsMultiPlatformMajor}
+      updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue={setUpdateFirstNameValue} 
+      setUpdateLastNameValue={setUpdateLastNameValue} setUpdateGraduationValue={setUpdateGraduationValue} setStudentUpdateEntry = {setStudentUpdateEntry} 
+      studentUpdateEntry = {studentUpdateEntry} setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} 
+      setSelectDeleteMultiple={setSelectDeleteMultiple} selectedDeleteEntries = {selectedDeleteEntries} setSelectedDeleteEntries={setSelectedDeleteEntries} 
+      updateIsComputerScienceMajor={updateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} 
+      setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} 
+      updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor}/>
 
     </div>
   );
@@ -739,8 +776,8 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
 
                      <div className="graduation-container">
                         <p>Mutli Platform Major:</p>
-                        <input name="multi-platform-major" type="radio" checked = {!addIsMultiPlatformMajor} onChange={() => setAddIsComputerScienceMajor(false)}/>
-                        <input name="multi-platform-major" type="radio" checked = {!addIsMultiPlatformMajor} onChange={() => setAddIsComputerScienceMajor(false)}/>
+                        <input name="multi-platform-major" type="radio" checked = {!addIsMultiPlatformMajor} onChange={() => setAddIsMultiPlatformMajor(false)}/>
+                        <input name="multi-platform-major" type="radio" checked = {!addIsMultiPlatformMajor} onChange={() => setAddIsMultiPlatformMajor(false)}/>
                     </div> 
 
                     <div className="graduation-container">

@@ -3,6 +3,7 @@ import filter from "./../assets/filter.svg"
 import close from "./../assets/close.svg"
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { findPreReqs } from "../tools/treeBuilder";
 
 function EnrollmentManager(){
 
@@ -13,6 +14,7 @@ function EnrollmentManager(){
     const [classes, setClasses] = useState([]);
     const [students, setStudents] = useState([]);
     const [enrollment, setEnrollment] = useState([]);
+    const [prerequisiteMapping, setPrerequisiteMapping] = useState([]);
 
     /* Backend Needs
     - Fetch students c
@@ -42,9 +44,16 @@ function EnrollmentManager(){
             console.log("enrollment fetch:",enrollmentData.data)
         }
 
+        const retrivePrerequisiteMappingData = async() =>{
+            const prerequisiteMappingData = await axios.get('http://localhost:8080/test/get/prequisiteMapping');
+            setPrerequisiteMapping(prerequisiteMappingData.data)
+            console.log("prerequisite fetch:",prerequisiteMappingData.data)
+        }
+
         retriveClassData();
         retriveStudentData();
         retriveEnrollmentData();
+        retrivePrerequisiteMappingData();
 
     },[])
 
@@ -78,8 +87,8 @@ function EnrollmentManager(){
     return(
         <div>
             <SearchBar students = {students} setStudentSearchList={setStudentSearchList}/>
-            <StudentList setIsBeginning = {setIsBeginning} studentSearchList={studentSearchList} selectedStudentId = {selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
-            <UpdateBlock isBeginning = {isBeginning} classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
+            <StudentList setIsBeginning = {setIsBeginning} studentSearchList={studentSearchList} selectedStudentId = {selectedStudentId} setSelectedStudentId={setSelectedStudentId} prerequisiteMapping={prerequisiteMapping}/>
+            <UpdateBlock isBeginning = {isBeginning} classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId} prerequisiteMapping={prerequisiteMapping}/>
         </div>
     )
 }
@@ -126,7 +135,9 @@ function SearchBar({students, setStudentSearchList}){
     )
 }
 
-function UpdateBlock({isBeginning,classes, enrollment, selectedStudentId, setSelectedStudentId}){
+
+
+function UpdateBlock({isBeginning,classes, enrollment, selectedStudentId, setSelectedStudentId, prerequisiteMapping}){
     const [studentEnrollmentMap, setStudentEnrollmentMap] = useState({});
 
     useEffect(()=>{
@@ -160,6 +171,31 @@ function UpdateBlock({isBeginning,classes, enrollment, selectedStudentId, setSel
         }
     },[classes,enrollment]);
 
+    const codeClasses = (currentClass) => {
+        if(prerequisiteMapping){
+            const prereqs = findPreReqs(prerequisiteMapping, classes, currentClass.header);
+            const enrolledHeaders = (studentEnrollmentMap[selectedStudentId] || [])
+                .map(e => e.classHeader);
+
+            if (
+                selectedStudentId &&
+                studentEnrollmentMap[selectedStudentId] &&
+                studentEnrollmentMap[selectedStudentId].some(
+                    enrollment => enrollment.classHeader === currentClass.header
+                )
+            ) {
+                return "class-complete";
+            } else if (
+                selectedStudentId &&
+                prereqs.every(prereq => enrolledHeaders.includes(prereq))
+            ) {
+                return "class-available";
+            } else if (selectedStudentId) {
+                return "class-blocked";
+            }
+        }
+    }
+
     return(
         <div className= {selectedStudentId?"update-student-panel-out":isBeginning?"update-student-panel":"update-student-panel-hidden"}>
             <img className="close-img-two" src={close} onClick={()=>{setSelectedStudentId(null)}}></img>
@@ -167,13 +203,11 @@ function UpdateBlock({isBeginning,classes, enrollment, selectedStudentId, setSel
             <p className="student-panel-title">Update Enrollment Panel</p>
 
             {classes.map((item)=>{
-                const isEnrolled = 
-                    selectedStudentId &&
-                    studentEnrollmentMap[selectedStudentId] &&
-                    studentEnrollmentMap[selectedStudentId].some(enrollment => enrollment.classHeader === item.header);;
+
+                const status = codeClasses(item);
 
                 return(
-                    <button className={isEnrolled ? "class-pool completedClass" : "class-pool"}>
+                    <button className={status === "class-complete" ? "class-pool completedClass": status === "class-available" ? "class-pool availableClass" : status === "class-blocked" ? "class-pool blockedClass" :"class-pool"}>
                         {item.header}
                     </button>
                 )

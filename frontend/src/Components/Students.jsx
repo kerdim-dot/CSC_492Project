@@ -26,6 +26,10 @@ function Students(){
     const [enrollment, setEnrollment] = useState([]);
     const [students, setStudents] = useState([]);
 
+    const [requiredComputerScienceMajorHeaders, setRequiredComputerScienceMajorHeaders] = useState(null);
+    const [requiredComputerScienceMinorHeaders, setRequiredComputerScienceMinorHeaders] = useState(null);
+    const [requiredMultiPlatformMajorHeaders, setRequiredMultiPlatformMajorHeaders] = useState(null);
+
 
     useEffect(()=>{
         
@@ -80,9 +84,37 @@ function Students(){
     //         {studentId:2,firstName:"John" , lastName:"Doe", graduation: "2/2028", isMajor:true ,classes:null, credits:0}
     // ]
 
-     useEffect(()=>{
+    useEffect(()=>{
+        if(classes.length > 0){
+            const CSMajorRequirementMapping = []
+            const CSMinorRequirementMapping = []
+            const MPMajorRequirementMapping = []
 
-        if(enrollment.length > 0 && classes.length > 0 && students.length > 0){
+            classes.forEach((item)=>{
+                if(item.isRequiredComputerScienceMajor){
+                    CSMajorRequirementMapping.push(item.header);
+                }
+
+                if(item.isRequiredComputerScienceMinor){
+                    CSMinorRequirementMapping.push(item.header);
+                }
+
+                if(item.isRequiredMultiPlatformMajor){
+                    MPMajorRequirementMapping.push(item.header);
+                }
+            })
+
+            console.log(CSMajorRequirementMapping)
+            
+            setRequiredComputerScienceMajorHeaders(CSMajorRequirementMapping);
+            setRequiredComputerScienceMinorHeaders(CSMinorRequirementMapping);
+            setRequiredMultiPlatformMajorHeaders(MPMajorRequirementMapping);
+        }
+    },[classes])
+     
+    useEffect(()=>{
+
+        if(enrollment.length > 0 && classes.length > 0 && students.length > 0 && requiredComputerScienceMajorHeaders && requiredComputerScienceMinorHeaders && requiredMultiPlatformMajorHeaders){
 
             const enrollmentMap = {};
 
@@ -109,19 +141,20 @@ function Students(){
             students.map((studentItem)=>{
                 let isBehind = false;
                 if(studentItem.isComputerScienceMajor){
-                    isBehind = isBehind || computerScienceMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                    isBehind = isBehind || computerScienceMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester,requiredComputerScienceMajorHeaders)
                 }
 
                 if(studentItem.isComputerScienceMinor){
-                    isBehind = isBehind || computerScienceMinorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                    isBehind = isBehind || computerScienceMinorRequirements(studentItem, enrollmentMap,currentYear,currentSemester,requiredComputerScienceMinorHeaders)
                 }
 
                 if(studentItem.isMultiPlatformMajor){
-                    isBehind = isBehind || multiPlatformMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester)
+                    isBehind = isBehind || multiPlatformMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester,requiredMultiPlatformMajorHeaders)
                 }
                 studentItem.isBehind = isBehind;
+                console.log(studentItem)
             })
-
+            
             setStudentsActive(students);
         }
          // replace this with a fetch students method
@@ -130,7 +163,7 @@ function Students(){
 
         // key is studentsId, value is a list of classes they have taken
         
-    },[enrollment, students, classes])
+    },[enrollment, students, classes,requiredComputerScienceMajorHeaders,requiredComputerScienceMinorHeaders,requiredMultiPlatformMajorHeaders])
 
     useEffect(() => {
     if (!studentsActive) return;

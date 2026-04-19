@@ -20,13 +20,13 @@ function timeCalculator(student,currentYear,currentSemester){
 }
 
 function computerScienceMajorRequirements(studentItem,enrollmentMap,currentYear,currentSemester,requiredClassHeaders){
-    const requiredClasses = ["MTH-123","MTH-125","MTH-141","CSC-120","CSC-220","CSC-270","CSC-310","CSC-320","CSC-360","CSC-491","CSC-492"];
+    //const requiredClasses = ["MTH-123","MTH-125","MTH-141","CSC-120","CSC-220","CSC-270","CSC-310","CSC-320","CSC-360","CSC-491","CSC-492"];
     const requiredCreditHours = 54;
     const aboveThreeHundredClasses = 4;
 
     let isBehindRequiredClasses = false;
         const studentSemestersLeft = timeCalculator(studentItem,currentYear,currentSemester,);
-        requiredClasses.forEach((classItem)=>{
+        requiredClassHeaders.forEach((classItem)=>{
             const headerNumber = Number(classItem.substring(classItem.indexOf("-")+1,classItem.indexOf("-")+2));
             const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
             const classSemesters = 8-(headerNumber*2)
@@ -40,13 +40,13 @@ function computerScienceMajorRequirements(studentItem,enrollmentMap,currentYear,
 }
 
 function computerScienceMinorRequirements(studentItem,enrollmentMap,currentYear,currentSemester,requiredClassHeaders){
-    const requiredClasses = ["CSC-120","CSC-220","CSC-270","CSC-320","CSC-370"];
+    //const requiredClasses = ["CSC-120","CSC-220","CSC-270","CSC-320","CSC-370"];
     const requiredCreditHours = 54;
     const aboveThreeHundredClasses = 4;
 
     let isBehindRequiredClasses = false;
         const studentSemestersLeft = timeCalculator(studentItem,currentYear,currentSemester);
-        requiredClasses.forEach((classItem)=>{
+        requiredClassHeaders.forEach((classItem)=>{
             const headerNumber = Number(classItem.substring(classItem.indexOf("-")+1,classItem.indexOf("-")+2));
             const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
             const classSemesters = 8-(headerNumber*2)
@@ -60,13 +60,13 @@ function computerScienceMinorRequirements(studentItem,enrollmentMap,currentYear,
 }
 
 function multiPlatformMajorRequirements(studentItem,enrollmentMap,currentYear,currentSemester,requiredClassHeaders){
-    const requiredClasses = ["MTH-123","MTH-125","CSW-123","CSW-223","CSW-423","CSC-120","CSC-220","CSC-310","CSC-360","CSC-491","CSC-492"];
+    //const requiredClasses = ["MTH-123","MTH-125","CSW-123","CSW-223","CSW-423","CSC-120","CSC-220","CSC-310","CSC-360","CSC-491","CSC-492"];
     const requiredCreditHours = 50;
     const aboveThreeHundredClasses = 3;
 
     let isBehindRequiredClasses = false;
         const studentSemestersLeft = timeCalculator(studentItem,currentYear,currentSemester);
-        requiredClasses.forEach((classItem)=>{
+        requiredClassHeaders.forEach((classItem)=>{
             const headerNumber = Number(classItem.substring(classItem.indexOf("-")+1,classItem.indexOf("-")+2));
             const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
             const classSemesters = 8-(headerNumber*2)

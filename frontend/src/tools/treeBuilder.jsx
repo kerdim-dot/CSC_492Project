@@ -56,8 +56,8 @@
     const postRequisiteMapping = []
     prerequisiteMapping.forEach((item)=>{
         postRequisiteMapping.push({
-            current:item.prerequisite,
-            postrequisite:item.current
+            current:item.prerequisite_class_id,
+            postrequisite:item.class_id
         })
     })
     return postRequisiteMapping;
@@ -109,8 +109,7 @@ function buildRoots(postRequisiteHeaders, classes){
 
     return roots;
 }
-const postrequisites = findPostrequisites(prerequisiteMapping)
-const postrequisiteHeaders = convertPostrequisitesToHeaders(postrequisites,classes);
+
 //const roots = buildRoots(postrequisiteHeaders,classes)
 
 // console.log("postrequisites: ",postrequisites)
@@ -118,8 +117,10 @@ const postrequisiteHeaders = convertPostrequisitesToHeaders(postrequisites,class
 // console.log("roots: ",roots)
 
 
-function buildTree(postRequisiteHeaders,classes){
-    const roots = buildRoots(postRequisiteHeaders,classes)
+function buildTree(prerequisiteMapping,classes){
+    const postrequisites = findPostrequisites(prerequisiteMapping)
+    const postrequisiteHeaders = convertPostrequisitesToHeaders(postrequisites,classes);
+    const roots = buildRoots(postrequisiteHeaders,classes)
 
     // console.log("This is the datamap:",dataMap)
     // console.log("These are the roots:",roots)
@@ -150,12 +151,15 @@ function buildTree(postRequisiteHeaders,classes){
     return tree;
 }
 
-console.log(buildTree(postrequisiteHeaders,classes))
+//console.log(buildTree(postrequisiteHeaders,classes))
 
-function findPreReqs(postrequisiteHeaders,classes,value){
+function findPreReqs(prerequisiteMapping,classes,value){
+
+    const postrequisites = findPostrequisites(prerequisiteMapping)
+    const postrequisiteHeaders = convertPostrequisitesToHeaders(postrequisites,classes);
 
     const roots = buildRoots(postrequisiteHeaders,classes);
-    const tree = buildTree(postrequisiteHeaders,classes);
+    const tree = buildTree(prerequisiteMapping,classes);
 
     const visited = new Set();
     let q = [];

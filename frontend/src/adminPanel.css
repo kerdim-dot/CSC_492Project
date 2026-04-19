@@ -441,6 +441,16 @@
   background-color: rgb(60, 197, 42);
 }
 
+.availableClass{
+  background-color: rgb(255, 255, 255);
+  cursor: pointer;
+}
+
+.blockedClass{
+  background-color: rgb(54, 54, 54);
+}
+
+
 .action-bar {
   position: sticky;
   bottom: 0;
