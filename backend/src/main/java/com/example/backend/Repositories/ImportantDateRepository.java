@@ -8,4 +8,5 @@ import com.example.backend.Entities.ImportantDate;
 @Repository
 public interface ImportantDateRepository extends JpaRepository<ImportantDate, Long> {
     
+    
 } 

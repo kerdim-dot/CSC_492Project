@@ -1,5 +1,6 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
+import close from "./../assets/close.svg"
 
 function ScheduleManager() {
     const [activeTab, setActiveTab] = useState("important-dates");
@@ -15,6 +16,7 @@ function ScheduleManager() {
     const [updateDescription, setUpdateDescription] = useState("");
     const [updateDate, setUpdateDate] = useState("");
     const [updateTime, setUpdateTime] = useState("");
+    
 
     // Class entry update state
     const [selectedUpdateClassEntry, setSelectedUpdateClassEntry] = useState(null);
@@ -35,6 +37,7 @@ function ScheduleManager() {
             const classEntriesResp = await axios.get(`http://localhost:8080/test/get/class/entries`);
 
             setImportantDates(retrieveImportantDatesData.data);
+            console.log(retrieveImportantDatesData.data)
             setClasses(classesResp.data);
             setClassEntries(classEntriesResp.data);
         };
@@ -126,7 +129,6 @@ function UpdateImportantDateBlock({
     const updateImportantDateEntry = () => {
         setProcessingImportantDateUpdate(true);
     };
-
     return (
         <div className={
             selectedUpdateImportantDate
@@ -224,7 +226,7 @@ function DisplayImportantDates({
 }) {
     const clickOnUpdateEntry = (item) => {
         setIsBeginning(false);
-        setSelectedUpdateImportantDate(item.id);
+        setSelectedUpdateImportantDate(item.important_id);
         setUpdateHeader(item.header);
         setUpdateDescription(item.description);
         setUpdateDate(item.dateOfEvent);

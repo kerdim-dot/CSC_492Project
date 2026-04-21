@@ -13,7 +13,7 @@ public class ImportantDate {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long important_date_id;
+    private Long important_id;
 
     @Column(nullable = false)
     private String header;
@@ -39,12 +39,12 @@ public class ImportantDate {
     }
 
 
-    public Long get_important_date_id() {
-        return important_date_id;
+    public Long getImportant_id() {
+        return important_id;
     }
 
-    public void set_important_date_id(Long important_date_id) {
-        this.important_date_id = important_date_id;
+    public void setImportant_id(Long important_date_id) {
+        this.important_id = important_date_id;
     }
 
     public String getHeader() {
