@@ -17,7 +17,7 @@ import { DisplayDate } from "../tools/DisplayDate";
 - Delete Student - > might have to delete all the students schedules and other entries before this can occur
 */
 function StudentManager(){
-  const [activeTab, setActiveTab] = useState("update");
+  const [activeTab, setActiveTab] = useState("add");
   const [selectedDeleteEntry, setSelectedDeleteEntry] = useState(null);
   const [selectedDeleteEntries, setSelectedDeleteEntries] = useState([]);
 
@@ -595,6 +595,8 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
     const [warning, setWarning] = useState(null);
     const [multipleStudentText, setMultipleStudentText] = useState(null);
     const [csvIsSelected, setcsvIsSelected] = useState(true);
+    const [alreadyMajor, setAlreadyMajor] = useState(false);
+    const [alreadyMinor, setAlreadyMinor] = useState(false);
     
     const makeSelectedDeleteEntry = (id) => {
         if (selectDeleteMultiple) {
@@ -696,6 +698,8 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         const impossibleMultiPlatformMajor = student.isMultiPlatformMajor!==true && student.isMultiPlatformMajor!==false
 
 
+
+
         const impossibleValues = impossibleFirstName || impossibleLastName || impossibleGraduationDate || impossibleComputerScienceMajor || impossibleComputerScienceMinor ||
         impossibleMultiPlatformMajor
 
@@ -734,6 +738,36 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         setProcessingStudentUpdate(false);
     }
 
+    const changeIsCompMajor = () =>{
+
+        if(addIsComputerScienceMajor){
+            setAddIsComputerScienceMajor(false);
+        }
+        else if(!addIsComputerScienceMinor){
+            setAddIsComputerScienceMajor(true);
+        }
+        else{
+            setAlreadyMinor(true);
+            setTimeout(()=>{
+                setAlreadyMinor(false);
+            },1500)
+        }
+    }
+     const changeIsCompMinor = () =>{
+        if(addIsComputerScienceMinor){
+            setAddIsComputerScienceMinor(false);
+        }
+        else if(!addIsComputerScienceMajor){
+            setAddIsComputerScienceMinor(true);
+        }
+        else{
+            setAlreadyMajor(true);
+            setTimeout(()=>{
+                setAlreadyMajor(false);
+            },1500)
+        }
+    }
+
     return(
         <div className="tab-content">
             {activeTab === "add" && 
@@ -753,32 +787,41 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                         <p>-</p>
                         <input type="text" className = "graduation-input year" placeholder="YYYY" onClick={(e)=>{setAddGraduationYear(e.target.value)}}></input>
                     </div> 
-                    <div className="graduation-container">
-                        <p>Computer Science Major:</p>
-                        <input
-                            checked={addIsComputerScienceMajor === true}
-                            onChange={() => setAddIsComputerScienceMajor(true)}
-                            name="comp-sci-major"
-                            type="radio"
-                        />
-                        <input
-                            checked={addIsComputerScienceMajor === false}
-                            onChange={() => setAddIsComputerScienceMajor(false)}
-                            name="comp-sci-major"
-                            type="radio"
-                        />
-                    </div> 
-                    <div className="graduation-container">
-                        <p>Computer Science Minor:</p>
-                        <input name="comp-sci-minor" type="radio" checked = {addIsComputerScienceMinor} onChange={() => setAddIsComputerScienceMinor(true)}/>
-                        <input name="comp-sci-minor" type="radio" checked = {!addIsComputerScienceMinor} onChange={() => setAddIsComputerScienceMinor(false)}/>
-                    </div> 
+                    <div className= {alreadyMinor? "boolean-container red":"boolean-container"}>
+                        <label className="boolean-label">Is A Computer Science Major</label>
+                        <label className={"toggle"}>
+                            <input
+                                type="checkbox"
+                                checked={addIsComputerScienceMajor}
+                                onChange={changeIsCompMajor}
+                            />
+                            <span className="toggle-slider"></span>
+                        </label>
+                    </div>
 
-                     <div className="graduation-container">
-                        <p>Mutli Platform Major:</p>
-                        <input name="multi-platform-major" type="radio" checked = {!addIsMultiPlatformMajor} onChange={() => setAddIsMultiPlatformMajor(false)}/>
-                        <input name="multi-platform-major" type="radio" checked = {!addIsMultiPlatformMajor} onChange={() => setAddIsMultiPlatformMajor(false)}/>
-                    </div> 
+                    <div className={alreadyMajor ? "boolean-container red":"boolean-container"}>
+                        <label className="boolean-label">Is A Computer Science Minor</label>
+                        <label className={"toggle"}>
+                            <input
+                                type="checkbox"
+                                checked={addIsComputerScienceMinor}
+                                onChange={changeIsCompMinor}
+                            />
+                            <span className="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div className="boolean-container">
+                        <label className="boolean-label">Is A Multiplatform Major</label>
+                        <label className="toggle">
+                            <input
+                                type="checkbox"
+                                checked={addIsMultiPlatformMajor}
+                                onChange={(e) => { setAddIsMultiPlatformMajor(e.target.checked) }}
+                            />
+                            <span className="toggle-slider"></span>
+                        </label>
+                    </div>
 
                     <div className="graduation-container">
                         <button onClick={addStudent}>Add Student</button>

@@ -231,16 +231,15 @@ public class TestController {
             for (int i = 0; i < columnSpliter.length; i++) {
                 columnSpliter[i] = columnSpliter[i].trim();
             }
-            Optional<Student> studentOptional = studentRepository.findById(Long.parseLong(columnSpliter[1]));
-            Optional<MountClass> mountClassOptional = mountClassRepository.findById(Long.parseLong(columnSpliter[2]));
 
-            if (studentOptional.isPresent() && mountClassOptional.isPresent()) {
-                Student student = studentOptional.get();
-                MountClass mountClass = mountClassOptional.get();
-                int statusConverter = Integer.parseInt(columnSpliter[3]);
-                Enrollment enrollment = new Enrollment(mountClass, student, statusConverter);
-                enrollmentService.addEnrollment(enrollment);
-            }
+            Long studentId = Long.parseLong(columnSpliter[1]);
+            Long mountClassId = Long.parseLong(columnSpliter[2]);
+            int status = Integer.parseInt(columnSpliter[3]);
+
+            EnrollmentDTO enrollmentDTO = new EnrollmentDTO(mountClassId,studentId,status);
+
+            enrollmentService.addEnrollment(enrollmentDTO);
+            
         }
 
     }
@@ -270,7 +269,7 @@ public class TestController {
         return scheduleEntryService.getAllStudentScheduleEntries(scheduleId);
     }
 
-    @GetMapping("/get/classEntries")
+    @GetMapping("/get/class/entries")
     public List<MountClassEntryDTO> getAllClassEntries() {
         return mountClassEntryService.getAllMountClassEntries();
     }
@@ -280,7 +279,7 @@ public class TestController {
         return prerequisiteMappingService.getAllPrerequisiteMapping();
     }
 
-    @GetMapping("/get/important")
+    @GetMapping("/get/important/dates")
     public List<ImportantDate> getAllImportantDates(){
         return importantDataService.getAllImportantDates();
     }
@@ -360,6 +359,10 @@ public class TestController {
         mountClassService.addClass(mountClass);
     }
 
+    @PostMapping("/add/enrollment")
+    public void addEnrollment(@RequestBody EnrollmentDTO enrollmentDTO){
+
+    }
 
 }
 

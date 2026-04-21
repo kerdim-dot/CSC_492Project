@@ -195,6 +195,16 @@ function SideBar() {
                                         </NavLink>
                                     </li>
                                 )}
+
+                                {isSupervisor && (
+                                    <li>
+                                        <NavLink to="/schedule/manager" className="sidebar_link">
+                                            <img src={edit_admin} alt="" />
+                                            <span>Manage schedules</span>
+                                        </NavLink>
+                                    </li>
+                                )}
+
                             </ul>
                         </li>
                     </>

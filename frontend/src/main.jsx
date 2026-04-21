@@ -21,6 +21,7 @@ import EnrollementManagerPage from './Pages/Admin_Pages/EnrollmentManagerPage.js
 import StudentManager from './Pages/Admin_Pages/StudentManager.jsx'
 import ProgressPage from './Pages/ProgressPage.jsx'
 import DashboardPage from './Pages/DashboardPage.jsx'
+import ScheduleManagerPage from './Pages/Admin_Pages/ScheduleManagerPage.jsx'
 
 
 const router = createBrowserRouter([
@@ -36,8 +37,8 @@ const router = createBrowserRouter([
     {path:"/admin/manager", element:<AdminManager/>},
     {path:"/test", element:<TestPage/>},
     {path:"/students/:id/", element:<StudentZoomPage/>},
-    {path:"/classes/:header", element:<ClassZoomPage/>}
-
+    {path:"/classes/:header", element:<ClassZoomPage/>},
+    {path:"/schedule/manager", element: <ScheduleManagerPage/>}
     
 ])
 

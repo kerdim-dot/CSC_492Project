@@ -27,6 +27,13 @@ public class EnrollmentDTO {
         this.status = status;
     } 
 
+    // this is used to add enrollments
+    public EnrollmentDTO(long mountClass_id, long student_id, int status){
+        this.mountClass_id = mountClass_id;
+        this.student_id = student_id;
+        this.status = status;
+    } 
+
     public EnrollmentDTO(){
         
     }

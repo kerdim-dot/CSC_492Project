@@ -23,7 +23,7 @@ const nodeTypes = { course: CourseNode };
 
 function ClassManager(){
     
-    const [activeTab, setActiveTab] = useState("update");
+    const [activeTab, setActiveTab] = useState("add");
     const [searchInput, setSearchInput] = useState("");
     const [showFilter, setShowFilter] = useState(false);
 
@@ -552,18 +552,40 @@ function ClassManager(){
                         <input type="text" className="description-input" placeholder="Class Description"  onChange={setAddClassDescription} value={addClassDescription}></input>
                     </div>
 
-                    <div className="graduation-container">
-                        <input type="text" className="credits-input" placeholder="Credits"  onChange={(e)=>{setAddClassCredits(e.target.value)}} value={addClassCredits}></input>
+                    <div className="boolean-container">
+                        <label className="boolean-label">Required for Computer Science Major</label>
+                        <label className="toggle">
+                            <input
+                                type="checkbox"
+                                checked={!!addIsRequiredComputerScienceMajor}
+                                onChange={(e) => { setAddIsRequiredComputerScienceMajor(e.target.checked) }}
+                            />
+                            <span className="toggle-slider"></span>
+                        </label>
                     </div>
 
-                    <div className="graduation-container">
-                        <input type="text" className="credits-input" placeholder="IsComputerScienceMajor"  onChange={(e)=>{setAddIsRequiredComputerScienceMajor(e.target.value)}} value={addIsRequiredComputerScienceMajor}></input>
+                    <div className="boolean-container">
+                        <label className="boolean-label">Required for Computer Science Minor</label>
+                        <label className="toggle">
+                            <input
+                                type="checkbox"
+                                checked={!!addIsRequiredComputerScienceMinor}
+                                onChange={(e) => { setAddIsRequiredComputerScienceMinor(e.target.checked) }}
+                            />
+                            <span className="toggle-slider"></span>
+                        </label>
                     </div>
-                    <div className="graduation-container">
-                        <input type="text" className="credits-input" placeholder="IsComputerScienceMinor"  onChange={(e)=>{setAddIsRequiredComputerScienceMinor(e.target.value)}} value={addIsRequiredComputerScienceMinor}></input>
-                    </div>
-                      <div className="graduation-container">
-                        <input type="text" className="credits-input" placeholder="IsMultiPlatformMajor"  onChange={(e)=>{setAddIsRequiredMultiPlatformMajor(e.target.value)}} value={addIsRequiredMultiPlatformMajor}></input>
+
+                    <div className="boolean-container">
+                        <label className="boolean-label">Required for Multiplatform Major</label>
+                        <label className="toggle">
+                            <input
+                                type="checkbox"
+                                checked={!!addIsRequiredMultiPlatformMajor}
+                                onChange={(e) => { setAddIsRequiredMultiPlatformMajor(e.target.checked) }}
+                            />
+                            <span className="toggle-slider"></span>
+                        </label>
                     </div>
                     
                     <div className="graduation-container">
