@@ -45,6 +45,102 @@ function getSemestersLeft(student, currentYear, currentSemester) {
     return ((graduationYear - currentYear) * 2) + (graduationSemester - currentSemester);
 }
 
+
+
+function AdviseesBoard() {
+    const students = [
+        {
+            name: "Student 1",
+            classes: [
+                { label: "Class 1", grade: "A", colorClass: "status-good" },
+                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
+                { label: "Class 3", grade: "C", colorClass: "status-warn" },
+                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
+                { label: "Class 5", grade: "F", colorClass: "status-bad" },
+            ],
+        },
+        {
+            name: "Student 2",
+            classes: [
+                { label: "Class 1", grade: "A", colorClass: "status-good" },
+                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
+                { label: "Class 3", grade: "C", colorClass: "status-warn" },
+                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
+                { label: "Class 5", grade: "F", colorClass: "status-bad" },
+            ],
+        },
+        {
+            name: "Student 3",
+            classes: [
+                { label: "Class 1", grade: "A", colorClass: "status-good" },
+                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
+                { label: "Class 3", grade: "C", colorClass: "status-warn" },
+                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
+                { label: "Class 5", grade: "F", colorClass: "status-bad" },
+            ],
+        },
+        {
+            name: "Student 4",
+            classes: [
+                { label: "Class 1", grade: "A", colorClass: "status-good" },
+                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
+                { label: "Class 3", grade: "C", colorClass: "status-warn" },
+                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
+                { label: "Class 5", grade: "F", colorClass: "status-bad" },
+            ],
+        },
+        {
+            name: "Student 5",
+            classes: [
+                { label: "Class 1", grade: "A", colorClass: "status-good" },
+                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
+                { label: "Class 3", grade: "C", colorClass: "status-warn" },
+                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
+                { label: "Class 5", grade: "F", colorClass: "status-bad" },
+            ],
+        },
+    ];
+
+    return (
+        <section className="dashboard-surface advisees-board">
+            <div className="dashboard-surface-header">
+                <div>
+                    <h2 className="dashboard-surface-title">Advisees</h2>
+                    <p className="dashboard-surface-subtitle">
+                        Snapshot of current student standing
+                    </p>
+                </div>
+            </div>
+
+            <div className="advisees-grid">
+                {students.map((student) => (
+                    <article className="advisee-card polished-card" key={student.name}>
+                        <div className="advisee-card-body">
+                            <div className="segmented-stack">
+                                {student.classes.map((item) => (
+                                    <div
+                                        className="segmented-row advisee-row"
+                                        key={`${student.name}-${item.label}`}
+                                    >
+                                        <div className={`segmented-primary ${item.colorClass}`}>
+                                            {item.label}
+                                        </div>
+                                        <div className="segmented-cell advisee-grade-cell">
+                                            {item.grade}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        <div className="advisee-card-footer">{student.name}</div>
+                    </article>
+                ))}
+            </div>
+        </section>
+    );
+}
+
 function getStudentBehindStatus(student, classes, enrollmentMap, currentYear, currentSemester) {
     const studentSemestersLeft = getSemestersLeft(student, currentYear, currentSemester);
     const takenClasses = enrollmentMap[student.student_id] || [];
@@ -138,6 +234,180 @@ function getMockRequirementData() {
     ];
 }
 
+const semesterData = [
+    {
+        id: 1,
+        term: "Semester 1",
+        label: "Fall 2026",
+        courses: [
+            { code: "CSC120", credits: 4, points: 16, grade: "A", status: "good" },
+            { code: "MTH160", credits: 4, points: 16, grade: "A", status: "good" },
+            { code: "PHY151", credits: 4, points: 12, grade: "B", status: "warn" },
+        ],
+    },
+    {
+        id: 2,
+        term: "Semester 2",
+        label: "Spring 2027",
+        courses: [
+            { code: "CSC220", credits: 4, points: 16, grade: "A", status: "good" },
+            { code: "MTH170", credits: 4, points: 12, grade: "B", status: "warn" },
+            { code: "PHY152", credits: 4, points: 16, grade: "A", status: "good" },
+        ],
+    },
+    {
+        id: 3,
+        term: "Semester 3",
+        label: "Fall 2027",
+        courses: [
+            { code: "CSC270", credits: 4, points: 16, grade: "A", status: "good" },
+            { code: "CSC290", credits: 4, points: 12, grade: "B", status: "warn" },
+            { code: "MTH250", credits: 4, points: 12, grade: "B", status: "warn" },
+        ],
+    },
+    {
+        id: 4,
+        term: "Semester 4",
+        label: "Spring 2028",
+        courses: [
+            { code: "CSC310", credits: 4, points: 16, grade: "A", status: "good" },
+            { code: "CSC320", credits: 4, points: 12, grade: "B", status: "warn" },
+            { code: "PHY270", credits: 4, points: 0, grade: "F", status: "bad" },
+        ],
+    },
+    {
+        id: 5,
+        term: "Semester 5",
+        label: "Fall 2028",
+        courses: [
+            { code: "CSC410", credits: 4, points: null, grade: null, status: "planned" },
+            { code: "CSC420", credits: 4, points: null, grade: null, status: "planned" },
+            { code: "MTH300", credits: 4, points: null, grade: null, status: "planned" },
+        ],
+    },
+    {
+        id: 6,
+        term: "Semester 6",
+        label: "Spring 2029",
+        courses: [
+            { code: "CSC430", credits: 4, points: null, grade: null, status: "planned" },
+            { code: "PHY310", credits: 4, points: null, grade: null, status: "planned" },
+            { code: "GEN300", credits: 4, points: null, grade: null, status: "planned" },
+        ],
+    },
+    {
+        id: 7,
+        term: "Semester 7",
+        label: "Fall 2029",
+        courses: [
+            { code: "CSC450", credits: 4, points: null, grade: null, status: "planned" },
+            { code: "PHY350", credits: 4, points: null, grade: null, status: "planned" },
+            { code: "GEN350", credits: 4, points: null, grade: null, status: "planned" },
+        ],
+    },
+    {
+        id: 8,
+        term: "Semester 8",
+        label: "Spring 2030",
+        courses: [
+            { code: "CSC499", credits: 4, points: null, grade: null, status: "planned" },
+            { code: "PHY401", credits: 4, points: null, grade: null, status: "planned" },
+            { code: "GEN400", credits: 4, points: null, grade: null, status: "planned" },
+        ],
+    },
+];
+
+function SemesterPlanBoard() {
+    const getTotalCredits = (courses) =>
+        courses.reduce((sum, course) => sum + (course.credits || 0), 0);
+
+    const getTotalPoints = (courses) =>
+        courses.reduce((sum, course) => sum + (course.points || 0), 0);
+
+    return (
+        <section className="dashboard-surface semester-plan-board">
+            <div className="dashboard-surface-header">
+                <div>
+                    <h2 className="dashboard-surface-title">Course Plan</h2>
+                    <p className="dashboard-surface-subtitle">
+                        Semester-by-semester advising overview
+                    </p>
+                </div>
+
+                <div className="semester-plan-legend">
+                    <span className="legend-item">
+                        <span className="legend-dot status-good"></span>
+                        Completed
+                    </span>
+                    <span className="legend-item">
+                        <span className="legend-dot status-warn"></span>
+                        Mixed
+                    </span>
+                    <span className="legend-item">
+                        <span className="legend-dot status-bad"></span>
+                        At Risk
+                    </span>
+                    <span className="legend-item">
+                        <span className="legend-dot status-planned"></span>
+                        Planned
+                    </span>
+                </div>
+            </div>
+
+            <div className="semester-grid semester-grid-two-col">
+                {semesterData.map((semester) => {
+                    const totalCredits = getTotalCredits(semester.courses);
+                    const totalPoints = getTotalPoints(semester.courses);
+                    const yearNumber = Math.ceil(semester.id / 2);
+
+                    return (
+                        <article className="semester-card polished-card" key={semester.id}>
+                            <div className="semester-card-top">
+                                <div className="semester-card-heading">
+                                    <span className="semester-year-chip">Year {yearNumber}</span>
+                                    <h3>{semester.term}</h3>
+                                    <p>{semester.label}</p>
+                                </div>
+
+                                <div className="metric-chip">
+                                    <span className="metric-chip-label">Credits</span>
+                                    <span className="metric-chip-value">{totalCredits}</span>
+                                </div>
+                            </div>
+
+                            <div className="segmented-stack semester-course-list">
+                                {semester.courses.map((course, idx) => (
+                                    <div className="segmented-row" key={`${semester.id}-${idx}`}>
+                                        <div className={`segmented-primary status-${course.status}`}>
+                                            {course.code}
+                                        </div>
+                                        <div className="segmented-cell">{course.credits ?? "—"}</div>
+                                        <div className="segmented-cell">{course.points ?? "—"}</div>
+                                        <div className="segmented-cell">{course.grade ?? "—"}</div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="semester-summary">
+                                <div className="summary-block">
+                                    <span className="summary-label">Total Credits</span>
+                                    <span className="summary-value">{totalCredits}</span>
+                                </div>
+
+                                <div className="summary-block">
+                                    <span className="summary-label">Total Points</span>
+                                    <span className="summary-value">
+                                        {totalPoints > 0 ? totalPoints : "—"}
+                                    </span>
+                                </div>
+                            </div>
+                        </article>
+                    );
+                })}
+            </div>
+        </section>
+    );
+}
 /* -------------------------------- dashboard -------------------------------- */
 
 function Dashboard() {
@@ -214,6 +484,9 @@ function Dashboard() {
                 />
                 <CreditRingWidget />
                 <GradeMeterWidget />
+                <AdviseesBoard />
+                <SemesterPlanBoard />
+                <AdviseeStatusBoard />
             </div>
         </div>
     );
@@ -225,11 +498,22 @@ export default Dashboard;
 
 function RequirementProgressCard({ rows }) {
     return (
-        <div className="requirement-progress-card">
-            {rows.map((row) => (
-                <RequirementProgressRow key={row.label} row={row} />
-            ))}
-        </div>
+        <section className="dashboard-surface requirement-progress-card">
+            <div className="dashboard-surface-header">
+                <div>
+                    <h2 className="dashboard-surface-title">Requirements</h2>
+                    <p className="dashboard-surface-subtitle">
+                        Degree progress by requirement group
+                    </p>
+                </div>
+            </div>
+
+            <div className="requirement-progress-content">
+                {rows.map((row) => (
+                    <RequirementProgressRow key={row.label} row={row} />
+                ))}
+            </div>
+        </section>
     );
 }
 
@@ -251,42 +535,50 @@ function RequirementProgressRow({ row }) {
         (course) => course.status === "warning"
     ).length;
 
-    return (
-        <div className="requirement-progress-row">
-            <div className="requirement-progress-main">
-                <div className="requirement-progress-label">{row.label}:</div>
+    const completionPct = Math.round((completedCount / row.totalRequired) * 100);
 
-                <div
-                    className="requirement-progress-grid"
-                    style={{ gridTemplateColumns: `repeat(${row.totalRequired}, 1fr)` }}
-                >
-                    {filledCells.map((course, index) => (
-                        <RequirementGridCell
-                            key={course ? course.id : `${row.label}-${index}`}
-                            course={course}
-                        />
-                    ))}
+    return (
+        <div className="requirement-row-card polished-card">
+            <div className="requirement-row-top">
+                <div>
+                    <div className="requirement-progress-label">{row.label}</div>
+                    <div className="requirement-row-meta">
+                        {completedCount} complete, {inProgressCount} active
+                        {warningCount > 0 ? `, ${warningCount} warning` : ""}
+                    </div>
+                </div>
+
+                <div className="metric-chip">
+                    <span className="metric-chip-label">Complete</span>
+                    <span className="metric-chip-value">{completionPct}%</span>
                 </div>
             </div>
 
-            <div className="requirement-progress-summary">
-                {completedCount}/{row.totalRequired} Classes Complete
-                {inProgressCount > 0 ? `, ${inProgressCount} In Progress` : ""}
-                {warningCount > 0 ? `, ${warningCount} Warning` : ""}
+            <div
+                className="requirement-progress-grid requirement-progress-grid-polished"
+                style={{ gridTemplateColumns: `repeat(${row.totalRequired}, 1fr)` }}
+            >
+                {filledCells.map((course, index) => (
+                    <RequirementGridCell
+                        key={course ? course.id : `${row.label}-${index}`}
+                        course={course}
+                    />
+                ))}
             </div>
         </div>
     );
 }
 
+
 function RequirementGridCell({ course }) {
     const navigate = useNavigate();
 
     const getCellClass = () => {
-        if (!course) return "requirement-grid-cell empty";
-        if (course.status === "warning") return "requirement-grid-cell warning";
-        if (course.status === "in_progress") return "requirement-grid-cell in-progress";
-        if (course.status === "completed") return "requirement-grid-cell completed";
-        return "requirement-grid-cell empty";
+        if (!course) return "requirement-grid-cell polished empty";
+        if (course.status === "warning") return "requirement-grid-cell polished warning";
+        if (course.status === "in_progress") return "requirement-grid-cell polished in-progress";
+        if (course.status === "completed") return "requirement-grid-cell polished completed";
+        return "requirement-grid-cell polished empty";
     };
 
     return (
@@ -294,7 +586,6 @@ function RequirementGridCell({ course }) {
             type="button"
             className={getCellClass()}
             disabled={!course}
-            title={course ? `${course.code}: ${course.name}` : ""}
             onClick={() => {
                 if (course) {
                     navigate(`/classes/${course.code}`);
@@ -302,46 +593,72 @@ function RequirementGridCell({ course }) {
             }}
         >
             {course && (
-                <span className="requirement-grid-tooltip">
-                    {course.code}: {course.name}
-                </span>
+                <>
+                    <span className="requirement-grid-hover-label">
+                        {course.code}
+                    </span>
+                    <span className="requirement-grid-tooltip">
+                        {course.code}: {course.name}
+                    </span>
+                </>
             )}
         </button>
     );
 }
 
+
 /* ---------------------------------- chart --------------------------------- */
 
 function GraphComparison({ behindCount, onTimeCount }) {
-    const data = {
-        labels: ["Behind", "On Time"],
-        datasets: [
-            {
-                label: "Student Progress",
-                data: [behindCount || 0, onTimeCount || 0],
-                backgroundColor: ["#ff6384", "#36a2eb"],
-                borderColor: ["#ff6384", "#36a2eb"],
-                borderWidth: 1
-            }
-        ]
-    };
-
-    const options = {
-        responsive: true,
-        plugins: {
-            legend: {
-                position: "bottom"
-            }
-        }
-    };
+    const behind = behindCount ?? 0;
+    const onTime = onTimeCount ?? 0;
+    const total = behind + onTime;
+    const onTimePct = total > 0 ? Math.round((onTime / total) * 100) : 0;
+    const behindPct = total > 0 ? Math.round((behind / total) * 100) : 0;
 
     return (
-        <div className="dashboard-chart-card">
-            <h3>Student Progress</h3>
-            {behindCount !== null && onTimeCount !== null && (
-                <Doughnut data={data} options={options} />
-            )}
-        </div>
+        <section className="dashboard-surface progress-overview-card">
+            <div className="dashboard-surface-header compact-header">
+                <div>
+                    <h2 className="dashboard-surface-title">Student Progress</h2>
+                    <p className="dashboard-surface-subtitle">
+                        Overall advising status across students
+                    </p>
+                </div>
+            </div>
+
+            <div className="progress-stat-grid">
+                <div className="progress-stat-tile positive">
+                    <span className="progress-stat-label">On Time</span>
+                    <span className="progress-stat-value">{onTime}</span>
+                    <span className="progress-stat-subvalue">{onTimePct}%</span>
+                </div>
+
+                <div className="progress-stat-tile negative">
+                    <span className="progress-stat-label">Behind</span>
+                    <span className="progress-stat-value">{behind}</span>
+                    <span className="progress-stat-subvalue">{behindPct}%</span>
+                </div>
+            </div>
+
+            <div className="progress-balance-block">
+                <div className="progress-balance-label-row">
+                    <span>Overall balance</span>
+                    <span>{total} students</span>
+                </div>
+
+                <div className="progress-balance-bar">
+                    <div
+                        className="progress-balance-bar-ontrack"
+                        style={{ width: `${onTimePct}%` }}
+                    />
+                    <div
+                        className="progress-balance-bar-behind"
+                        style={{ width: `${behindPct}%` }}
+                    />
+                </div>
+            </div>
+        </section>
     );
 }
 
@@ -349,13 +666,19 @@ function CreditRingWidget({
     totalCredits = 60,
     completedCredits = 20,
     inProgressCredits = 12,
-    size = 520
+    size = 320
 }) {
+    const [viewMode, setViewMode] = useState("bar");
     const [hoveredIndex, setHoveredIndex] = useState(null);
 
-    const center = size / 2;
-    const outerRadius = size * 0.42;
-    const innerRadius = size * 0.30;
+    const remainingCredits = Math.max(
+        0,
+        totalCredits - completedCredits - inProgressCredits
+    );
+
+    const completedPct = Math.round((completedCredits / totalCredits) * 100);
+    const inProgressPct = Math.round((inProgressCredits / totalCredits) * 100);
+    const remainingPct = Math.max(0, 100 - completedPct - inProgressPct);
 
     const segments = Array.from({ length: totalCredits }, (_, i) => {
         if (i < completedCredits) return "completed";
@@ -363,51 +686,179 @@ function CreditRingWidget({
         return "remaining";
     });
 
-    return (
-        <div className="credit-ring-widget">
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-                {segments.map((status, index) => (
-                    <RingSegment
-                        key={index}
-                        index={index}
-                        total={totalCredits}
-                        center={center}
-                        outerRadius={outerRadius}
-                        innerRadius={innerRadius}
-                        status={status}
-                        hoveredIndex={hoveredIndex}
-                        setHoveredIndex={setHoveredIndex}
-                    />
-                ))}
-            </svg>
+    const center = size / 2;
+    const outerRadius = size * 0.42;
+    const innerRadius = size * 0.29;
 
-            <div className="credit-ring-center">
-                <div className="credit-pill credit-pill-complete">
-                    <span>Credits Complete</span>
-                    <span className="credit-pill-value">{completedCredits}</span>
+    const getSvgPoint = (svg, clientX, clientY) => {
+        const point = svg.createSVGPoint();
+        point.x = clientX;
+        point.y = clientY;
+        return point.matrixTransform(svg.getScreenCTM().inverse());
+    };
+
+    const handleRingMouseMove = (event) => {
+        const svg = event.currentTarget;
+        const point = getSvgPoint(svg, event.clientX, event.clientY);
+
+        const dx = point.x - center;
+        const dy = point.y - center;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        const hoverOuterRadius = outerRadius + 14;
+
+        if (distance < innerRadius || distance > hoverOuterRadius) {
+            setHoveredIndex(null);
+            return;
+        }
+
+        let angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+        angle = (angle + 90 + 360) % 360;
+
+        const index = Math.floor((angle / 360) * totalCredits);
+        setHoveredIndex(Math.max(0, Math.min(totalCredits - 1, index)));
+    };
+
+    return (
+        <section className="dashboard-surface credit-progress-card">
+            <div className="dashboard-surface-header compact-header">
+                <div>
+                    <h2 className="dashboard-surface-title">Credit Progress</h2>
+                    <p className="dashboard-surface-subtitle">
+                        Completed, active, and remaining credits
+                    </p>
                 </div>
 
-                <div className="credit-pill credit-pill-progress">
-                    <span>In Progress</span>
-                    <span className="credit-pill-value">{inProgressCredits}</span>
+                <div className="view-toggle">
+                    <div className="toggle-buttons">
+                        <button
+                            type="button"
+                            className={`view-toggle-button${viewMode === "bar" ? " active" : ""}`}
+                            onClick={() => setViewMode("bar")}
+                        >
+                            Bar
+                        </button>
+
+                        <button
+                            type="button"
+                            className={`view-toggle-button${viewMode === "ring" ? " active" : ""}`}
+                            onClick={() => setViewMode("ring")}
+                        >
+                            Ring
+                        </button>
+                    </div>
+
                 </div>
             </div>
-        </div>
+
+            {viewMode === "bar" ? (
+                <>
+                    <div className="credit-progress-total">
+                        <span className="credit-progress-total-value">
+                            {completedCredits + inProgressCredits}
+                        </span>
+                        <span className="credit-progress-total-label">
+                            of {totalCredits} credits accounted for
+                        </span>
+                    </div>
+
+                    <div className="credit-progress-bar">
+                        <div
+                            className="credit-progress-segment completed"
+                            style={{ width: `${completedPct}%` }}
+                        />
+                        <div
+                            className="credit-progress-segment in-progress"
+                            style={{ width: `${inProgressPct}%` }}
+                        />
+                        <div
+                            className="credit-progress-segment remaining"
+                            style={{ width: `${remainingPct}%` }}
+                        />
+                    </div>
+                </>
+            ) : (
+                <div className="credit-ring-widget polished-card">
+                    <svg
+                        width={size}
+                        height={size}
+                        viewBox={`0 0 ${size} ${size}`}
+                        onMouseMove={handleRingMouseMove}
+                        onMouseLeave={() => setHoveredIndex(null)}
+                    >
+                        {segments.map((status, index) => (
+                            <InteractiveRingSegment
+                                key={index}
+                                index={index}
+                                total={totalCredits}
+                                center={center}
+                                outerRadius={outerRadius}
+                                innerRadius={innerRadius}
+                                status={status}
+                                hoveredIndex={hoveredIndex}
+                            />
+                        ))}
+                    </svg>
+
+                    <div className="credit-ring-center">
+                        <div className="ring-center-total">
+                            <span className="ring-center-label">Total Credits</span>
+                            <span className="ring-center-value">{totalCredits}</span>
+                        </div>
+
+                        <div className="credit-pill credit-pill-complete">
+                            <span>Done</span>
+                            <span className="credit-pill-value">{completedCredits}</span>
+                        </div>
+
+                        <div className="credit-pill credit-pill-progress">
+                            <span>Active</span>
+                            <span className="credit-pill-value">{inProgressCredits}</span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className="credit-progress-legend-grid">
+                <div className="credit-legend-card">
+                    <span className="credit-legend-dot completed"></span>
+                    <div>
+                        <div className="credit-legend-title">Completed</div>
+                        <div className="credit-legend-value">{completedCredits} credits</div>
+                    </div>
+                </div>
+
+                <div className="credit-legend-card">
+                    <span className="credit-legend-dot in-progress"></span>
+                    <div>
+                        <div className="credit-legend-title">In Progress</div>
+                        <div className="credit-legend-value">{inProgressCredits} credits</div>
+                    </div>
+                </div>
+
+                <div className="credit-legend-card">
+                    <span className="credit-legend-dot remaining"></span>
+                    <div>
+                        <div className="credit-legend-title">Remaining</div>
+                        <div className="credit-legend-value">{remainingCredits} credits</div>
+                    </div>
+                </div>
+            </div>
+        </section>
     );
 }
 
-function RingSegment({
+function InteractiveRingSegment({
     index,
     total,
     center,
     outerRadius,
     innerRadius,
     status,
-    hoveredIndex,
-    setHoveredIndex
+    hoveredIndex
 }) {
     const anglePerSegment = 360 / total;
-    const gapDegrees = 0.8;
+    const gapDegrees = 1.4;
 
     const polarToCartesian = (cx, cy, radius, angleDeg) => {
         const angleRad = (angleDeg * Math.PI) / 180;
@@ -417,20 +868,16 @@ function RingSegment({
         };
     };
 
-
-
-    const getCircularDistance = (a, b, totalCount) => {
+    const circularDistance = (a, b, totalCount) => {
         const direct = Math.abs(a - b);
         return Math.min(direct, totalCount - direct);
     };
 
     let radialOffset = 0;
-
     if (hoveredIndex !== null) {
-        const distance = getCircularDistance(index, hoveredIndex, total);
-        radialOffset = Math.max(0, 18 - distance * 4);
+        const distance = circularDistance(index, hoveredIndex, total);
+        radialOffset = Math.max(0, 14 - distance * 4);
     }
-
 
     const adjustedOuterRadius = outerRadius + radialOffset;
     const adjustedInnerRadius = innerRadius + radialOffset;
@@ -453,22 +900,19 @@ function RingSegment({
         "Z"
     ].join(" ");
 
-    let fill = "#f4f4f4";
-    if (status === "completed") fill = "#55ad2a";
-    if (status === "in-progress") fill = "#f3ef00";
+    const fill =
+        status === "completed"
+            ? "#55ad2a"
+            : status === "in-progress"
+                ? "#f1ed00"
+                : "#e1e7ee";
 
     return (
         <path
             d={d}
             fill={fill}
-            stroke="#0c2a3a"
-            strokeWidth="1.6"
-            onMouseEnter={() => setHoveredIndex(index)}
-            onMouseLeave={() => setHoveredIndex(null)}
-            style={{
-                transition: "all 0.18s ease",
-                cursor: "pointer"
-            }}
+            strokeWidth="1.35"
+            className="credit-ring-segment"
         />
     );
 }
@@ -500,90 +944,172 @@ function getGradeColor(grade) {
 
 function GradeMeterCard({ course, isLast }) {
     const grade = Math.max(0, Math.min(course.grade ?? 0, 100));
-    const isLow = grade <= 50;
-    const fillPct = toFillHeight(grade);
-    const color = getGradeColor(grade);
-    const threshPct = course.requiredMinimum != null ? toFillHeight(course.requiredMinimum) : null;
+    const minimum = course.requiredMinimum ?? null;
+
+    let statusClass = "low";
+    if (grade >= 90) statusClass = "excellent";
+    else if (grade >= 80) statusClass = "strong";
+    else if (grade >= 70) statusClass = "warning";
+
+    const fillHeight = `${grade}%`;
+    const thresholdHeight =
+        minimum !== null ? `${Math.max(0, Math.min(minimum, 100))}%` : null;
 
     return (
-        <div className={`grade-meter-card${isLast ? " last" : ""}`}>
-            <div className="grade-meter-body">
-                <div className="grade-visual">
+        <div className={`grade-bar-card${isLast ? " last" : ""}`}>
+            <div className="grade-bar-header">
+                <span className="grade-course-name">{course.name}</span>
+                <span className={`grade-pill ${statusClass}`}>{grade}%</span>
+            </div>
 
-                    {/* Label track — same height as tube, aligned by matching bottom % */}
-                    <div className="grade-label-track">
-                        {GRADE_LINES.map(({ label, fill }) => (
-                            <div
-                                key={label}
-                                className="grade-label"
-                                style={{ bottom: `calc(${fill}% - 0.3rem)` }}
-                            >
-                                {label}
-                            </div>
-                        ))}
-                    </div>
+            <div className="grade-bar-visual">
+                <div className="grade-bar-scale">
+                    <span>100</span>
+                    <span>75</span>
+                    <span>50</span>
+                    <span>25</span>
+                    <span>0</span>
+                </div>
 
-                    {/* Tube — lines and fill both use bottom %, so they always align */}
-                    <div className="grade-tube">
-                        {GRADE_LINES.map(({ label, fill }) => (
-                            <div
-                                key={label}
-                                className="grade-tube-line"
-                                style={{ bottom: `${fill}%` }}
-                            />
-                        ))}
+                <div className="grade-bar-track">
+                    {thresholdHeight && (
+                        <div
+                            className="grade-threshold-marker"
+                            style={{ bottom: thresholdHeight }}
+                        />
+                    )}
 
-                        {threshPct !== null && (
-                            <div
-                                className="grade-threshold-line"
-                                style={{ bottom: `${threshPct}%` }}
-                            />
-                        )}
-
-                        {!isLow && (
-                            <div
-                                className="grade-fill"
-                                style={{ height: `${fillPct}%`, backgroundColor: color }}
-                            >
-                                <div className="grade-badge">{grade}%</div>
-                            </div>
-                        )}
-
-                        {isLow && (
-                            <div className="grade-badge-zero">
-                                <span>{grade}%</span>
-                            </div>
-                        )}
-                    </div>
-
+                    <div
+                        className={`grade-bar-fill ${statusClass}`}
+                        style={{ height: fillHeight }}
+                    />
                 </div>
             </div>
 
-            <button className="grade-meter-label">{course.name}</button>
+            <div className="grade-bar-footer">
+                <span>
+                    Minimum: {minimum !== null ? `${minimum}%` : "—"}
+                </span>
+            </div>
         </div>
     );
 }
 
 function GradeMeterWidget({ classes }) {
     const classGradeData = [
-        { id: 1, name: "CSC120", grade: 90, requiredMinimum: 70, category: "major" },
-        { id: 2, name: "CSC130", grade: 80, requiredMinimum: 70, category: "major" },
-        { id: 3, name: "CSC140", grade: 70, requiredMinimum: 70, category: "major" },
-        { id: 4, name: "CSC150", grade: 60, requiredMinimum: null, category: "other" },
-        { id: 5, name: "CSC160", grade: 58, requiredMinimum: null, category: "other" },
+        { id: 1, name: "CSC120", grade: 90, requiredMinimum: 70 },
+        { id: 2, name: "CSC130", grade: 80, requiredMinimum: 70 },
+        { id: 3, name: "CSC140", grade: 70, requiredMinimum: 70 },
+        { id: 4, name: "CSC150", grade: 60, requiredMinimum: null },
+        { id: 5, name: "CSC160", grade: 58, requiredMinimum: null },
     ];
 
     const displayClasses = classes ?? classGradeData;
 
     return (
-        <div className="grade-meter-widget">
-            {displayClasses.map((course, index) => (
-                <GradeMeterCard
-                    key={course.id ?? index}
-                    course={course}
-                    isLast={index === displayClasses.length - 1}
-                />
-            ))}
-        </div>
+        <section className="dashboard-surface grade-meter-panel">
+            <div className="dashboard-surface-header compact-header">
+                <div>
+                    <h2 className="dashboard-surface-title">Grade Snapshot</h2>
+                    <p className="dashboard-surface-subtitle">
+                        Current course standing against minimum thresholds
+                    </p>
+                </div>
+            </div>
+
+            <div className="grade-bars-grid">
+                {displayClasses.map((course, index) => (
+                    <GradeMeterCard
+                        key={course.id ?? index}
+                        course={course}
+                        isLast={index === displayClasses.length - 1}
+                    />
+                ))}
+            </div>
+        </section>
+    );
+}
+
+function AdviseeStatusBoard() {
+    const advisees = [
+        {
+            id: 1,
+            name: "Student 1",
+            yearLabel: "Year 3",
+            warningCourse: null,
+            summaryText: "No Warning Courses",
+            summaryStatus: "good",
+            inProgress: ["CSC220", "CSC320", "CSC360"],
+        },
+        {
+            id: 2,
+            name: "Student 2",
+            yearLabel: "Year 2",
+            warningCourse: "CSC120",
+            summaryText: null,
+            summaryStatus: "bad",
+            inProgress: ["CSC220", "CSC320", "CSC360"],
+        },
+    ];
+
+    return (
+        <section className="dashboard-surface advisee-status-board">
+            <div className="dashboard-surface-header">
+                <div>
+                    <h2 className="dashboard-surface-title">Advisees</h2>
+                    <p className="dashboard-surface-subtitle">
+                        Advising snapshot by student
+                    </p>
+                </div>
+            </div>
+
+            <div className="advisee-status-list">
+                {advisees.map((student) => (
+                    <article className="advisee-status-card polished-card" key={student.id}>
+                        <div className="advisee-status-top">
+                            <div className="advisee-identity-block">
+                                <div className="advisee-name">{student.name}</div>
+                                <div className="advisee-year">{student.yearLabel}</div>
+                            </div>
+
+                            <div
+                                className={`advisee-summary-block ${student.summaryStatus === "good"
+                                    ? "status-good"
+                                    : student.summaryStatus === "bad"
+                                        ? "status-bad"
+                                        : "status-planned"
+                                    }`}
+                            >
+                                {student.warningCourse ? (
+                                    <span className="advisee-warning-course">
+                                        {student.warningCourse}
+                                    </span>
+                                ) : (
+                                    <span className="advisee-summary-text">
+                                        {student.summaryText}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="advisee-status-bottom">
+                            <div className="advisee-section-label">In Progress</div>
+
+                            <div className="advisee-pill-row">
+                                {student.inProgress.map((course) => (
+                                    <button
+                                        type="button"
+                                        className="advisee-course-pill status-warn"
+                                        key={`${student.id}-${course}`}
+                                    >
+                                        {course}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </article>
+                ))}
+            </div>
+        </section>
     );
 }
