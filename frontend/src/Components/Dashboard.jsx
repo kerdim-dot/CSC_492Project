@@ -48,55 +48,17 @@ function getSemestersLeft(student, currentYear, currentSemester) {
 
 
 function AdviseesBoard() {
+    const navigate = useNavigate();
+
     const students = [
         {
             name: "Student 1",
             classes: [
-                { label: "Class 1", grade: "A", colorClass: "status-good" },
-                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
-                { label: "Class 3", grade: "C", colorClass: "status-warn" },
-                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
-                { label: "Class 5", grade: "F", colorClass: "status-bad" },
-            ],
-        },
-        {
-            name: "Student 2",
-            classes: [
-                { label: "Class 1", grade: "A", colorClass: "status-good" },
-                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
-                { label: "Class 3", grade: "C", colorClass: "status-warn" },
-                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
-                { label: "Class 5", grade: "F", colorClass: "status-bad" },
-            ],
-        },
-        {
-            name: "Student 3",
-            classes: [
-                { label: "Class 1", grade: "A", colorClass: "status-good" },
-                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
-                { label: "Class 3", grade: "C", colorClass: "status-warn" },
-                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
-                { label: "Class 5", grade: "F", colorClass: "status-bad" },
-            ],
-        },
-        {
-            name: "Student 4",
-            classes: [
-                { label: "Class 1", grade: "A", colorClass: "status-good" },
-                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
-                { label: "Class 3", grade: "C", colorClass: "status-warn" },
-                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
-                { label: "Class 5", grade: "F", colorClass: "status-bad" },
-            ],
-        },
-        {
-            name: "Student 5",
-            classes: [
-                { label: "Class 1", grade: "A", colorClass: "status-good" },
-                { label: "Class 2", grade: "B", colorClass: "status-good-soft" },
-                { label: "Class 3", grade: "C", colorClass: "status-warn" },
-                { label: "Class 4", grade: "D", colorClass: "status-warn-soft" },
-                { label: "Class 5", grade: "F", colorClass: "status-bad" },
+                { code: "CSC120", grade: "A", colorClass: "status-good" },
+                { code: "CSC220", grade: "B", colorClass: "status-good-soft" },
+                { code: "CSC320", grade: "C", colorClass: "status-warn" },
+                { code: "CSC330", grade: "D", colorClass: "status-warn-soft" },
+                { code: "CSC340", grade: "F", colorClass: "status-bad" },
             ],
         },
     ];
@@ -105,7 +67,14 @@ function AdviseesBoard() {
         <section className="dashboard-surface advisees-board">
             <div className="dashboard-surface-header">
                 <div>
-                    <h2 className="dashboard-surface-title">Advisees</h2>
+                    <button
+                        type="button"
+                        className="surface-title-link dashboard-surface-title2"
+                        onClick={() => navigate("/students")}
+                    >
+                        <span className="dashboard-surface-title2">Advisees</span>
+                    </button>
+
                     <p className="dashboard-surface-subtitle">
                         Snapshot of current student standing
                     </p>
@@ -118,22 +87,30 @@ function AdviseesBoard() {
                         <div className="advisee-card-body">
                             <div className="segmented-stack">
                                 {student.classes.map((item) => (
-                                    <div
-                                        className="segmented-row advisee-row"
-                                        key={`${student.name}-${item.label}`}
+                                    <button
+                                        type="button"
+                                        className="segmented-row advisee-row clickable-advisee-row"
+                                        key={`${student.name}-${item.code}`}
+                                        onClick={() => navigate(`/classes/${item.code}`)}
                                     >
-                                        <div className={`segmented-primary ${item.colorClass}`}>
-                                            {item.label}
-                                        </div>
-                                        <div className="segmented-cell advisee-grade-cell">
+                                        <span className={`segmented-primary ${item.colorClass}`}>
+                                            {item.code}
+                                        </span>
+                                        <span className="segmented-cell advisee-grade-cell">
                                             {item.grade}
-                                        </div>
-                                    </div>
+                                        </span>
+                                    </button>
                                 ))}
                             </div>
                         </div>
 
-                        <div className="advisee-card-footer">{student.name}</div>
+                        <button
+                            type="button"
+                            className="advisee-student-link"
+                            onClick={() => navigate(`/students/${student.id}`)}
+                        >
+                            {student.name}
+                        </button>
                     </article>
                 ))}
             </div>
@@ -318,6 +295,8 @@ const semesterData = [
 ];
 
 function SemesterPlanBoard() {
+    const navigate = useNavigate();
+
     const getTotalCredits = (courses) =>
         courses.reduce((sum, course) => sum + (course.credits || 0), 0);
 
@@ -377,14 +356,19 @@ function SemesterPlanBoard() {
 
                             <div className="segmented-stack semester-course-list">
                                 {semester.courses.map((course, idx) => (
-                                    <div className="segmented-row" key={`${semester.id}-${idx}`}>
-                                        <div className={`segmented-primary status-${course.status}`}>
+                                    <button
+                                        type="button"
+                                        className="segmented-row semester-course-row clickable-semester-row"
+                                        key={`${semester.id}-${idx}`}
+                                        onClick={() => navigate(`/classes/${course.code}`)}
+                                    >
+                                        <span className={`segmented-primary status-${course.status}`}>
                                             {course.code}
-                                        </div>
-                                        <div className="segmented-cell">{course.credits ?? "—"}</div>
-                                        <div className="segmented-cell">{course.points ?? "—"}</div>
-                                        <div className="segmented-cell">{course.grade ?? "—"}</div>
-                                    </div>
+                                        </span>
+                                        <span className="segmented-cell">{course.credits ?? "—"}</span>
+                                        <span className="segmented-cell">{course.points ?? "—"}</span>
+                                        <span className="segmented-cell">{course.grade ?? "—"}</span>
+                                    </button>
                                 ))}
                             </div>
 
@@ -904,7 +888,7 @@ function InteractiveRingSegment({
         status === "completed"
             ? "#55ad2a"
             : status === "in-progress"
-                ? "#f1ed00"
+                ? "#e4e004"
                 : "#e1e7ee";
 
     return (
@@ -924,39 +908,31 @@ const GRADE_LINES = [
     { label: "D", fill: 20 },
 ];
 
-function toFillHeight(grade) {
-    const g = Math.max(0, Math.min(grade, 100));
-    if (g <= 50) return 0;
-    if (g <= 60) return ((g - 50) / 10) * 20;
-    if (g <= 70) return 20 + ((g - 60) / 10) * 20;
-    if (g <= 80) return 40 + ((g - 70) / 10) * 20;
-    if (g <= 90) return 60 + ((g - 80) / 10) * 20;
-    return 80 + ((g - 90) / 10) * 20;
-}
-
-function getGradeColor(grade) {
-    if (grade >= 90) return "#55ad2a";
-    if (grade >= 80) return "#9cdc52";
-    if (grade >= 70) return "#f1df00";
-    if (grade >= 60) return "#f6bf00";
-    return "#ff1a0a";
+function getGradeStatusClass(grade) {
+    if (grade >= 90) return "status-good";
+    if (grade >= 80) return "status-good-soft";
+    if (grade >= 70) return "status-warn";
+    if (grade >= 60) return "status-warn-soft";
+    return "status-bad";
 }
 
 function GradeMeterCard({ course, isLast }) {
+    const navigate = useNavigate();
+
     const grade = Math.max(0, Math.min(course.grade ?? 0, 100));
     const minimum = course.requiredMinimum ?? null;
-
-    let statusClass = "low";
-    if (grade >= 90) statusClass = "excellent";
-    else if (grade >= 80) statusClass = "strong";
-    else if (grade >= 70) statusClass = "warning";
+    const statusClass = getGradeStatusClass(grade);
 
     const fillHeight = `${grade}%`;
     const thresholdHeight =
-        minimum !== null ? `${Math.max(0, Math.min(minimum, 100))}%` : null;
+        minimum !== null ? `${minimum}%` : null;
 
     return (
-        <div className={`grade-bar-card${isLast ? " last" : ""}`}>
+        <button
+            type="button"
+            className={`grade-bar-card clickable-grade-card${isLast ? " last" : ""}`}
+            onClick={() => navigate(`/classes/${course.name}`)}
+        >
             <div className="grade-bar-header">
                 <span className="grade-course-name">{course.name}</span>
                 <span className={`grade-pill ${statusClass}`}>{grade}%</span>
@@ -991,7 +967,7 @@ function GradeMeterCard({ course, isLast }) {
                     Minimum: {minimum !== null ? `${minimum}%` : "—"}
                 </span>
             </div>
-        </div>
+        </button>
     );
 }
 
@@ -1031,6 +1007,8 @@ function GradeMeterWidget({ classes }) {
 }
 
 function AdviseeStatusBoard() {
+    const navigate = useNavigate();
+
     const advisees = [
         {
             id: 1,
@@ -1056,7 +1034,14 @@ function AdviseeStatusBoard() {
         <section className="dashboard-surface advisee-status-board">
             <div className="dashboard-surface-header">
                 <div>
-                    <h2 className="dashboard-surface-title">Advisees</h2>
+                    <button
+                        type="button"
+                        className="surface-title-link"
+                        onClick={() => navigate("/students")}
+                    >
+                        <span className="dashboard-surface-title2">Advisees</span>
+                    </button>
+
                     <p className="dashboard-surface-subtitle">
                         Advising snapshot by student
                     </p>
@@ -1067,23 +1052,31 @@ function AdviseeStatusBoard() {
                 {advisees.map((student) => (
                     <article className="advisee-status-card polished-card" key={student.id}>
                         <div className="advisee-status-top">
-                            <div className="advisee-identity-block">
+                            <button
+                                type="button"
+                                className="advisee-identity-block clickable-advisee-block"
+                                onClick={() => navigate(`/students/${student.id}`)}
+                            >
                                 <div className="advisee-name">{student.name}</div>
                                 <div className="advisee-year">{student.yearLabel}</div>
-                            </div>
+                            </button>
 
                             <div
                                 className={`advisee-summary-block ${student.summaryStatus === "good"
-                                    ? "status-good"
-                                    : student.summaryStatus === "bad"
-                                        ? "status-bad"
-                                        : "status-planned"
-                                    }`}
+                                        ? "status-good"
+                                        : student.summaryStatus === "bad"
+                                            ? "status-bad"
+                                            : "status-planned"
+                                    } ${student.warningCourse ? "has-warning" : ""}`}
                             >
                                 {student.warningCourse ? (
-                                    <span className="advisee-warning-course">
+                                    <button
+                                        type="button"
+                                        className="advisee-warning-course-button clickable-warning-block"
+                                        onClick={() => navigate(`/classes/${student.warningCourse}`)}
+                                    >
                                         {student.warningCourse}
-                                    </span>
+                                    </button>
                                 ) : (
                                     <span className="advisee-summary-text">
                                         {student.summaryText}
@@ -1099,8 +1092,9 @@ function AdviseeStatusBoard() {
                                 {student.inProgress.map((course) => (
                                     <button
                                         type="button"
-                                        className="advisee-course-pill status-warn"
+                                        className="advisee-course-pill clickable-advisee-pill status-warn"
                                         key={`${student.id}-${course}`}
+                                        onClick={() => navigate(`/classes/${course}`)}
                                     >
                                         {course}
                                     </button>
