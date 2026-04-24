@@ -235,8 +235,12 @@ public class TestController {
             Long studentId = Long.parseLong(columnSpliter[1]);
             Long mountClassId = Long.parseLong(columnSpliter[2]);
             int status = Integer.parseInt(columnSpliter[3]);
+            String grade = columnSpliter[4];
+            LocalDate enrollmentDate = LocalDate.parse(
+    columnSpliter[5].replace("'", "").trim()
+    );
 
-            EnrollmentDTO enrollmentDTO = new EnrollmentDTO(mountClassId,studentId,status);
+            EnrollmentDTO enrollmentDTO = new EnrollmentDTO(mountClassId,studentId,status,grade,enrollmentDate);
 
             enrollmentService.addEnrollment(enrollmentDTO);
             

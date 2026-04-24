@@ -1,5 +1,9 @@
 package com.example.backend.Entities;
 
+import java.time.LocalDate;
+
+import org.springframework.cglib.core.Local;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -25,16 +29,23 @@ public class Enrollment {
 
     @Column(nullable = false)
     private int status;
+    
+    @Column
+    private String grade;
 
+    @Column (nullable = false)
+    private LocalDate enrollment_date;
 
     public Enrollment(){
 
     }
 
-    public Enrollment(MountClass mountClass, Student student, int status){
+    public Enrollment(MountClass mountClass, Student student, int status,String grade, LocalDate enrollment_date){
         this.mountClass = mountClass;
         this.student = student;
         this.status = status;
+        this.grade = grade;
+        this.enrollment_date = enrollment_date;
     }
 
     public Long getEnrollment_id() {
@@ -67,5 +78,22 @@ public class Enrollment {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
+    }
+
+
+    public LocalDate getEnrollment_date() {
+        return enrollment_date;
+    }
+
+    public void setEnrollment_date(LocalDate enrollment_date) {
+        this.enrollment_date = enrollment_date;
     }
 }

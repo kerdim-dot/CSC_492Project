@@ -33,7 +33,7 @@ public class EnrollmentService {
             Student student = studentOptional.get();
             MountClass mountClass = classOptional.get();
 
-            Enrollment enrollment = new Enrollment(mountClass,student,enrollmentDTO.getStatus());
+            Enrollment enrollment = new Enrollment(mountClass,student,enrollmentDTO.getStatus(),enrollmentDTO.getGrade(),enrollmentDTO.getEnrollment_date());
             enrollmentRepository.save(enrollment);
         }
     }

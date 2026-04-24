@@ -79,4 +79,4 @@ function multiPlatformMajorRequirements(studentItem,enrollmentMap,currentYear,cu
     //let isBehindCredits = false
 }
  
-export {computerScienceMajorRequirements,computerScienceMinorRequirements,multiPlatformMajorRequirements}
+export {computerScienceMajorRequirements,computerScienceMinorRequirements,multiPlatformMajorRequirements, timeCalculator}

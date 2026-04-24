@@ -17,18 +17,18 @@ import com.example.backend.dtos.EnrollmentDTO;
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long>{
     
       @Query("SELECT new com.example.backend.dtos.EnrollmentDTO(" +
-            "e.id, e.mountClass.id, e.student.id, e.status) " +
+            "e.id, e.mountClass.id, e.student.id, e.status, e.grade, e.enrollment_date) " +
             "FROM Enrollment e")
       List<EnrollmentDTO> findAllEnrollmentDTOs();
 
 
       @Query("SELECT new com.example.backend.dtos.EnrollmentDTO(" +
-            "e.id, e.mountClass.id, e.student.id, e.status) " +
+            "e.id, e.mountClass.id, e.student.id, e.status, e.grade, e.enrollment_date) " +
             "FROM Enrollment e where e.student.id = :studentId")
       List<EnrollmentDTO> findEnrollmentPerStudentDTOs(@Param("studentId") Long studentId);
 
       @Query("SELECT new com.example.backend.dtos.EnrollmentDTO(" +
-            "e.id, e.mountClass.id, e.student.id, e.status) " +
+            "e.id, e.mountClass.id, e.student.id, e.status, e.grade, e.enrollment_date) " +
             "FROM Enrollment e where e.mountClass.id = :classId")
       List<EnrollmentDTO> findEnrollmentPerClassDTOs(@Param("classId") Long classId);
 
