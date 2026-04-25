@@ -72,7 +72,7 @@ function AdviseesBoard() {
                         className="surface-title-link dashboard-surface-title2"
                         onClick={() => navigate("/students")}
                     >
-                        <span className="dashboard-surface-title2">Advisees</span>
+                        <span className="dashboard-surface-title2">Advisee Grades</span>
                     </button>
 
                     <p className="dashboard-surface-subtitle">
@@ -460,17 +460,28 @@ function Dashboard() {
 
     return (
         <div className="dashboard-page">
+            <span className="dashboard-page-title">
+                Dashboard
+            </span>
             <div className="dashboard-top-section">
-                <RequirementProgressCard rows={requirementData} />
-                <GraphComparison
-                    behindCount={dashboardStats.behindCount}
-                    onTimeCount={dashboardStats.onTimeCount}
-                />
-                <CreditRingWidget />
-                <GradeMeterWidget />
-                <AdviseesBoard />
-                <SemesterPlanBoard />
-                <AdviseeStatusBoard />
+                {(role === "user") && (
+                    <>
+                        <RequirementProgressCard rows={requirementData} />
+                        <CreditRingWidget />
+                        <GradeMeterWidget />
+                    </>
+                )}
+                {(role === "admin" || role === "supervisor") && (
+                    <>
+                        <AdviseesBoard />
+                        <SemesterPlanBoard />
+                        <AdviseeStatusBoard />
+                        <GraphComparison
+                            behindCount={dashboardStats.behindCount}
+                            onTimeCount={dashboardStats.onTimeCount}
+                        />
+                    </>
+                )}
             </div>
         </div>
     );
@@ -1063,10 +1074,10 @@ function AdviseeStatusBoard() {
 
                             <div
                                 className={`advisee-summary-block ${student.summaryStatus === "good"
-                                        ? "status-good"
-                                        : student.summaryStatus === "bad"
-                                            ? "status-bad"
-                                            : "status-planned"
+                                    ? "status-good"
+                                    : student.summaryStatus === "bad"
+                                        ? "status-bad"
+                                        : "status-planned"
                                     } ${student.warningCourse ? "has-warning" : ""}`}
                             >
                                 {student.warningCourse ? (

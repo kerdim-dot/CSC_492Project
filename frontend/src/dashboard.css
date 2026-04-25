@@ -26,6 +26,14 @@
     margin-bottom: 1rem;
 }
 
+.dashboard-page-title {
+    display: flex;
+    font: inherit;
+    font-weight: bold;
+    font-size: 2.5rem;
+    margin: 1rem 0 2rem 0.5rem;
+}
+
 /* requirement card internals */
 .requirement-progress-content {
     display: flex;
