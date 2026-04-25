@@ -5,7 +5,19 @@ import axios from "axios";
 
 
 function Schedule() {
+    const [previewMeetings, setPreviewMeetings] = useState({
+        required: null,
+        elective: null,
+    });
 
+    const previewMeeting = previewMeetings.required ?? previewMeetings.elective;
+
+    function updatePreviewMeeting(source, meeting) {
+        setPreviewMeetings((prev) => ({
+            ...prev,
+            [source]: meeting,
+        }));
+    }
 
     useEffect(() => {
         const student_id = 1;
@@ -17,70 +29,79 @@ function Schedule() {
                 const scheduleEntryData = await axios.get(`http://localhost:8080/test/get/schedule/entries?scheduleId=${scheduleData.data[i].schedule_id}`);
                 console.log(`Entries for schedule ${scheduleData.data[i].schedule_id}:`, scheduleEntryData.data);
             }
+        };
 
-        }
         fetchSchedules();
-    }, [])
+    }, []);
 
-    const addScheduleEntry = async() => {
+    const addScheduleEntry = async () => {
         const entry = {
-            schedule_id:1,
-            mountClass_id:1,
-            isMonday:true,
-            isTuesday:false,
-            isWednesDay:true,
-            isThursday:false,
-            isFriday:true,
-            time:"730am-8:45am"
-        }
-        const addScheduleData = await axios.post('http://localhost:8080/test/add/schedule/Entry',entry)
-        console.log("scheduleData confirmation", addScheduleData)
-    }
+            schedule_id: 1,
+            mountClass_id: 1,
+            isMonday: true,
+            isTuesday: false,
+            isWednesDay: true,
+            isThursday: false,
+            isFriday: true,
+            time: "730am-8:45am"
+        };
 
+        const addScheduleData = await axios.post("http://localhost:8080/test/add/schedule/Entry", entry);
+        console.log("scheduleData confirmation", addScheduleData);
+    };
 
-    const addSchedule = async() => {
-        const student_id = 1
-        const startDate = "2025-11-25"
-        const endDate = "2026-11-25"
+    const addSchedule = async () => {
+        const student_id = 1;
+        const startDate = "2025-11-25";
+        const endDate = "2026-11-25";
+
         const entry = {
-            student_id :student_id,
+            student_id: student_id,
             scheduleStartDate: startDate,
             scheduleEndDate: endDate
-        }
-        const addScheduleData = await axios.post('http://localhost:8080/test/add/schedule',entry)
-        console.log("scheduleData confirmation", addScheduleData)
-    }
+        };
 
-    // connor, in order to delete a schedule, you have to delete the scheduleEntries first bc of foriegn key restrictions
-    const deleteSchedule = async() =>{
+        const addScheduleData = await axios.post("http://localhost:8080/test/add/schedule", entry);
+        console.log("scheduleData confirmation", addScheduleData);
+    };
+
+    const deleteSchedule = async () => {
         const schedule_id = 1;
-        const deleteStudentScheduleEntries = await axios.delete(`http://localhost:8080/test/delete/schedule/entries?id=${schedule_id}`);
-        const deleteSchedule = await axios.delete(`http://localhost:8080/test/delete/schedule?id=${schedule_id}`);
-    }
+        await axios.delete(`http://localhost:8080/test/delete/schedule/entries?id=${schedule_id}`);
+        await axios.delete(`http://localhost:8080/test/delete/schedule?id=${schedule_id}`);
+    };
 
     return (
         <div className="schedule-container">
             <RequiredCourseCarousel
                 completedCourses={["CSC-120", "CSC-220"]}
                 inProgressCourses={["CSC-130"]}
+                onPreviewChange={(meeting) => updatePreviewMeeting("required", meeting)}
             />
+
             <ElectivesCarousel
                 completedCourses={["CSC-120", "CSC-220"]}
                 inProgressCourses={["CSC-130"]}
+                onPreviewChange={(meeting) => updatePreviewMeeting("elective", meeting)}
             />
-            <ScheduleBlock />
-            <AdminControls />
-            <button onClick={addScheduleEntry}>click here to add ScheduleEntry</button>
-            <button onClick={addSchedule}>click here to add Schedule</button>
-            <button onClick={deleteSchedule}>click here to delete Schedule/its entries</button>
-        </div>
 
+            <ScheduleBlock previewMeeting={previewMeeting} />
+
+            <AdminControls />
+
+            <div className="schedule-dev-buttons">
+                <button onClick={addScheduleEntry}>Add Schedule Entry</button>
+                <button onClick={addSchedule}>Add Schedule</button>
+                <button onClick={deleteSchedule}>Delete Schedule</button>
+            </div>
+        </div>
     );
 }
 
 function RequiredCourseCarousel({
     completedCourses = [],
     inProgressCourses = [],
+    onPreviewChange,
 }) {
 
     const requiredCourses = [
@@ -254,6 +275,26 @@ function RequiredCourseCarousel({
     }
 
     const [isOpen, setIsOpen] = useState(false);
+
+    useEffect(() => {
+        if (!onPreviewChange) return;
+
+        if (!isOpen || !selectedCourse || !selectedSection) {
+            onPreviewChange(null);
+            return;
+        }
+
+        onPreviewChange({
+            source: "required",
+            courseCode: selectedCourse.code,
+            courseTitle: selectedCourse.title,
+            sectionNumber: selectedSection.sectionNumber,
+            days: selectedSection.days,
+            startTime: selectedSection.startTime,
+            endTime: selectedSection.endTime,
+            professor: selectedSection.professor,
+        });
+    }, [isOpen, selectedCourse, selectedSection, onPreviewChange]);
 
     useEffect(() => {
         if (!slideDirection) return;
@@ -437,6 +478,7 @@ function RequiredCourseCarousel({
 function ElectivesCarousel({
     completedCourses = [],
     inProgressCourses = [],
+    onPreviewChange,
 }) {
 
     const requiredCourses = [
@@ -612,6 +654,26 @@ function ElectivesCarousel({
     const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
+        if (!onPreviewChange) return;
+
+        if (!isOpen || !selectedCourse || !selectedSection) {
+            onPreviewChange(null);
+            return;
+        }
+
+        onPreviewChange({
+            source: "elective",
+            courseCode: selectedCourse.code,
+            courseTitle: selectedCourse.title,
+            sectionNumber: selectedSection.sectionNumber,
+            days: selectedSection.days,
+            startTime: selectedSection.startTime,
+            endTime: selectedSection.endTime,
+            professor: selectedSection.professor,
+        });
+    }, [isOpen, selectedCourse, selectedSection, onPreviewChange]);
+
+    useEffect(() => {
         if (!slideDirection) return;
 
         const timer = setTimeout(() => {
@@ -629,7 +691,7 @@ function ElectivesCarousel({
         <section className="required-carousel-section-2">
             <button
                 type="button"
-                className={`required-carousel-toggle-2 ${isOpen ? "open" : ""}`}
+                className={`required-carousel-toggle ${isOpen ? "open" : ""}`}
                 onClick={() => setIsOpen((prev) => !prev)}
                 aria-expanded={isOpen}
                 aria-controls="required-course-carousel-panel"
@@ -792,16 +854,21 @@ function ElectivesCarousel({
 
 
 
-function ScheduleBlock() {
+function ScheduleBlock({ previewMeeting }) {
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
     const startHour = 7;
     const endHour = 22;
+    const slotMinutes = 15;
 
-    const times = Array.from(
+    const totalSlots = ((endHour - startHour) * 60) / slotMinutes;
+
+    const hourLabels = Array.from(
         { length: endHour - startHour + 1 },
         (_, i) => startHour + i
     );
+
+    const slotRows = Array.from({ length: totalSlots }, (_, i) => i);
 
     function formatHour(hour) {
         const suffix = hour >= 12 ? "PM" : "AM";
@@ -809,31 +876,160 @@ function ScheduleBlock() {
         return `${displayHour}:00 ${suffix}`;
     }
 
+    function parseTimeToMinutes(timeString) {
+        if (!timeString) return null;
+
+        const cleaned = timeString.trim().toLowerCase();
+        const match = cleaned.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
+
+        if (!match) return null;
+
+        let hours = Number(match[1]);
+        const minutes = Number(match[2] ?? 0);
+        const meridian = match[3];
+
+        if (meridian === "pm" && hours !== 12) hours += 12;
+        if (meridian === "am" && hours === 12) hours = 0;
+
+        return hours * 60 + minutes;
+    }
+
+    function getMeetingDays(daysString) {
+        if (!daysString) return [];
+
+        const normalized = daysString.toUpperCase().replace(/\s/g, "");
+
+        if (normalized === "MWF") return ["Monday", "Wednesday", "Friday"];
+        if (normalized === "TR" || normalized === "TTH") return ["Tuesday", "Thursday"];
+
+        const parsedDays = [];
+
+        if (normalized.includes("M")) parsedDays.push("Monday");
+        if (normalized.includes("W")) parsedDays.push("Wednesday");
+        if (normalized.includes("F")) parsedDays.push("Friday");
+
+        // Treat R as Thursday so T can safely mean Tuesday.
+        if (normalized.includes("T")) parsedDays.push("Tuesday");
+        if (normalized.includes("R")) parsedDays.push("Thursday");
+
+        return parsedDays;
+    }
+
+    function buildPreviewBlocks(meeting) {
+        if (!meeting) return [];
+
+        const start = parseTimeToMinutes(meeting.startTime);
+        const end = parseTimeToMinutes(meeting.endTime);
+
+        if (start === null || end === null || end <= start) return [];
+
+        const startOffset = start - startHour * 60;
+        const endOffset = end - startHour * 60;
+
+        if (endOffset <= 0 || startOffset >= totalSlots * slotMinutes) return [];
+
+        const clampedStart = Math.max(0, startOffset);
+        const clampedEnd = Math.min(totalSlots * slotMinutes, endOffset);
+
+        const rowStart = Math.floor(clampedStart / slotMinutes) + 2;
+        const rowSpan = Math.max(1, Math.ceil((clampedEnd - clampedStart) / slotMinutes));
+
+        return getMeetingDays(meeting.days)
+            .map((day) => {
+                const dayIndex = days.indexOf(day);
+                if (dayIndex === -1) return null;
+
+                return {
+                    day,
+                    gridColumn: dayIndex + 2,
+                    gridRow: `${rowStart} / span ${rowSpan}`,
+                };
+            })
+            .filter(Boolean);
+    }
+
+    const previewBlocks = buildPreviewBlocks(previewMeeting);
+
     return (
-        <div
-            className="schedule-grid"
-            style={{
-                display: "grid",
-                gridTemplateColumns: `100px repeat(${days.length}, 1fr)`,
-            }}
-        >
-            <div className="cell header-cell"></div>
-
-            {days.map((day) => (
-                <div key={day} className="cell header-cell">
-                    {day}
+        <section className="schedule-surface">
+            <div className="schedule-surface-header">
+                <div>
+                    <h2 className="schedule-surface-title">Weekly Schedule</h2>
+                    <p className="schedule-surface-subtitle">
+                        Selected sections preview temporarily while their dropdown is open.
+                    </p>
                 </div>
-            ))}
 
-            {times.flatMap((hour) => [
-                <div key={`time-${hour}`} className="cell time-cell">
-                    {formatHour(hour)}
-                </div>,
-                ...days.map((day) => (
-                    <div key={`${day}-${hour}`} className="cell schedule-slot"></div>
-                )),
-            ])}
-        </div>
+                {previewMeeting && (
+                    <div className="schedule-preview-chip">
+                        Previewing {previewMeeting.courseCode}-{previewMeeting.sectionNumber}
+                    </div>
+                )}
+            </div>
+
+            <div
+                className="schedule-grid"
+                style={{
+                    gridTemplateColumns: `100px repeat(${days.length}, minmax(0, 1fr))`,
+                    gridTemplateRows: `56px repeat(${totalSlots}, 12px)`,
+                }}
+            >
+                <div className="schedule-corner-cell" />
+
+                {days.map((day) => (
+                    <div key={day} className="schedule-day-header">
+                        {day}
+                    </div>
+                ))}
+
+                {hourLabels.slice(0, -1).map((hour, index) => (
+                    <div
+                        key={`time-${hour}`}
+                        className="schedule-time-cell"
+                        style={{
+                            gridColumn: 1,
+                            gridRow: `${index * 4 + 2} / span 4`,
+                        }}
+                    >
+                        {formatHour(hour)}
+                    </div>
+                ))}
+
+                {slotRows.flatMap((slot) =>
+                    days.map((day, dayIndex) => (
+                        <div
+                            key={`${day}-${slot}`}
+                            className={`schedule-slot ${slot % 4 === 0 ? "hour-start" : ""}`}
+                            style={{
+                                gridColumn: dayIndex + 2,
+                                gridRow: slot + 2,
+                            }}
+                        />
+                    ))
+                )}
+
+                {previewBlocks.map((block) => (
+                    <div
+                        key={`${previewMeeting.courseCode}-${previewMeeting.sectionNumber}-${block.day}`}
+                        className="schedule-preview-block"
+                        style={{
+                            gridColumn: block.gridColumn,
+                            gridRow: block.gridRow,
+                        }}
+                    >
+                        <div className="schedule-preview-code">
+                            {previewMeeting.courseCode}
+                        </div>
+                        <div className="schedule-preview-meta">
+                            Sec. {previewMeeting.sectionNumber}
+                        </div>
+                        <div className="schedule-preview-time">
+                            {previewMeeting.startTime} – {previewMeeting.endTime}
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </section>
     );
 }
 
@@ -1100,8 +1296,8 @@ function AdminControls() {
             dayOfWeekStart: "Saturday",
             dayOfWeekEnd: "Saturday",
         },
-        
-        
+
+
     ]
 
     const existingCourses = [
