@@ -44,9 +44,23 @@ function Schedule() {
             console.log(`Important Dates:`, importantDatesResponse.data);
         };
 
+        const retriveStudentData = async() =>{
+            const studentData = await axios.get('http://localhost:8080/test/get/students');
+            console.log("student fetch:", studentData.data)
+        }
+
+        const retriveEnrollmentData = async() =>{
+            const enrollmentData = await axios.get('http://localhost:8080/test/get/enrollments');
+            console.log("enrollment fetch:",enrollmentData.data)
+        }
+
+
         fetchSchedulesAndEntries();
         fetchClassAndEntries();
         fetchImportantDates();
+        retriveStudentData();
+        retriveEnrollmentData();
+
     }, []);
 
     const addScheduleEntry = async () => {
