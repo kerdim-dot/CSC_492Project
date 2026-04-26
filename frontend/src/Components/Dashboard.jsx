@@ -15,6 +15,31 @@ ChartJS.register(ArcElement, Tooltip, Legend);
 
 /* ----------------------------- helper functions ---------------------------- */
 
+
+// const retriveClassData = async() =>{
+//     const classData = await axios.get('http://localhost:8080/test/get/classes');
+//     console.log("class fetch:", classData.data)
+// }
+
+
+// const retriveStudentData = async() =>{
+//     const studentData = await axios.get('http://localhost:8080/test/get/students');
+//     // const updatedStudents = studentData.data.map((item) => ({
+//     //     ...item,
+//     //     graduationFormula: GraduationConverter(item.graduationDate)
+//     // }));
+//     console.log("student fetch:", studentData.data)
+// }
+
+
+
+// const retriveEnrollmentData = async() =>{
+//     const enrollmentData = await axios.get('http://localhost:8080/test/get/enrollments');
+//     console.log("enrollment fetch:",enrollmentData.data)
+// }
+
+
+
 function buildEnrollmentMap(enrollment) {
     const enrollmentMap = {};
 
@@ -178,6 +203,7 @@ function processStudents(students, classes, enrollment, currentYear, currentSeme
   Replace this later with real major/minor requirement data from backend.
 */
 function getMockRequirementData() {
+    
     return [
         {
             label: "Major",
