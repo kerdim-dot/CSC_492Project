@@ -824,7 +824,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                     </div>
 
                     <div className="graduation-container">
-                        <button onClick={addStudent}>Add Student</button>
+                        <button className="adding-buttons" onClick={addStudent}>Add Student</button>
                     </div>
                 </div>
                 <div className="mass-add">
@@ -834,7 +834,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                         <button className={csvIsSelected ? "mass-add-btn":"mass-add-btn-active"} onClick={()=>{setcsvIsSelected(false)}}>JSON</button>
                     </div>
                     <textarea className="mass-add-textarea" value={multipleStudentText} onChange={(e)=>{setMultipleStudentText(e.target.value)}}/>
-                    <button onClick={()=>{structureStudentData(multipleStudentText)}}>Add Student</button>
+                    <button className = "mass-add-button" onClick={()=>{structureStudentData(multipleStudentText)}}>Add Students</button>
                 </div>
             </div>
             }

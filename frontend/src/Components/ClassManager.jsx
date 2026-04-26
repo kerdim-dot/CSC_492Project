@@ -520,7 +520,7 @@ function ClassManager(){
             const rawNodes = classes.map(c => ({
             id: String(c.class_id),
             type: 'course',
-            data: { label: c.header, color: '#754913' },
+            data: { label: c.header, color: '#ac30e6' },
             }));
         
             const rawEdges = prerequisiteMapping.map((p, i) => ({
@@ -542,7 +542,7 @@ function ClassManager(){
             <div className="tab-content">
                 {activeTab === "add" && 
                 <div className="class-add-container">
-                    <p className="add-class-title">Add Class</p>
+                    <p  className="add-class-title">Add Class</p>
                     <div className="class-headers-container">
                         <input type= "text" className="title-input" placeholder="Title" onChange={(e)=>{setAddClassTitle(e.target.value)}} value={addClassTitle}/>
                         <input type= "text" className="header-input" placeholder="Header" onChange={(e)=>{setAddClassHeader(e.target.value)}} value={addClassHeader}/>
@@ -589,7 +589,7 @@ function ClassManager(){
                     </div>
                     
                     <div className="graduation-container">
-                        <button>Add Class</button>
+                        <button className="adding-buttons">Add Class</button>
                     </div>
                     
                 </div>

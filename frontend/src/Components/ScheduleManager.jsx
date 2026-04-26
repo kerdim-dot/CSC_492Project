@@ -8,7 +8,8 @@ function ScheduleManager() {
     const [classes, setClasses] = useState(null);
     const [classEntries, setClassEntries] = useState(null);
 
-    const [isBeginning, setIsBeginning] = useState(true);
+    const [isBeginningDate, setIsBeginningDate] = useState(true);
+    const [isBeginningEntry, setIsBeginningEntry] = useState(true);
 
     // Important date update state
     const [selectedUpdateImportantDate, setSelectedUpdateImportantDate] = useState(null);
@@ -36,7 +37,8 @@ function ScheduleManager() {
             const classesResp = await axios.get(`http://localhost:8080/test/get/classes`);
             const classEntriesResp = await axios.get(`http://localhost:8080/test/get/class/entries`);
 
-            setImportantDates(retrieveImportantDatesData.data);
+            const sortedDates = retrieveImportantDatesData.data.sort((a, b) => a.dateOfEvent.localeCompare(b.dateOfEvent));
+            setImportantDates(sortedDates);
             console.log(retrieveImportantDatesData.data)
             setClasses(classesResp.data);
             setClassEntries(classEntriesResp.data);
@@ -46,14 +48,36 @@ function ScheduleManager() {
 
     return (
         <div>
-            <HeaderPanel activeTab={activeTab} setActiveTab={setActiveTab} />
+            <HeaderPanel
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                setSelectedUpdateClassEntry={setSelectedUpdateClassEntry}
+                setSelectedUpdateImportantDate={setSelectedUpdateImportantDate}
+                setUpdateHeader={setUpdateHeader}
+                setUpdateDescription={setUpdateDescription}
+                setUpdateDate={setUpdateDate}
+                setUpdateTime={setUpdateTime}
+                setUpdateClassHeader={setUpdateClassHeader}
+                setUpdateProfessor={setUpdateProfessor}
+                setUpdateTotalSeats={setUpdateTotalSeats}
+                setUpdateMeetingTime={setUpdateMeetingTime}
+                setUpdateMonday={setUpdateMonday}
+                setUpdateTuesday={setUpdateTuesday}
+                setUpdateWednesday={setUpdateWednesday}
+                setUpdateThursday={setUpdateThursday}
+                setUpdateFriday={setUpdateFriday}
+                setIsBeginningDate = {setIsBeginningDate}
+                setIsBeginningEntry = {setIsBeginningEntry}
+            />
             <BodyPanel
                 activeTab={activeTab}
                 importantDates={importantDates}
                 classes={classes}
                 classEntries={classEntries}
-                isBeginning={isBeginning}
-                setIsBeginning={setIsBeginning}
+                isBeginningDate={isBeginningDate}
+                isBeginningEntry={isBeginningEntry}
+                setIsBeginningDate={setIsBeginningDate}
+                setIsBeginningEntry={setIsBeginningEntry}
                 selectedUpdateImportantDate={selectedUpdateImportantDate}
                 setSelectedUpdateImportantDate={setSelectedUpdateImportantDate}
                 updateHeader={updateHeader}
@@ -91,19 +115,49 @@ function ScheduleManager() {
 
 export default ScheduleManager;
 
-function HeaderPanel({ activeTab, setActiveTab }) {
+function HeaderPanel({ activeTab, setActiveTab,setSelectedUpdateClassEntry, setSelectedUpdateImportantDate,setUpdateHeader,setUpdateDescription,setUpdateDate,setUpdateTime,
+    setUpdateClassHeader,setUpdateProfessor,setUpdateTotalSeats,setUpdateMeetingTime,setUpdateMonday,setUpdateTuesday,setUpdateWednesday,setUpdateThursday,setUpdateFriday,
+    setIsBeginningDate, setIsBeginningEntry
+ }) {
+
+    const moveToImportantDates = () =>{
+        setActiveTab("important-dates");
+        setSelectedUpdateImportantDate(null);
+        setUpdateHeader(null);
+        setUpdateDescription(null);
+        setUpdateDate(null);
+        setUpdateTime(null);
+        setIsBeginningDate(true);
+    }
+
+    const moveToClassEntries = () =>{
+        setActiveTab("class-entries");
+        setSelectedUpdateClassEntry(null);
+        setUpdateClassHeader(null);
+        setUpdateProfessor(null);
+        setUpdateTotalSeats(null);
+        setUpdateMeetingTime(null);
+        setUpdateMonday(null);
+        setUpdateTuesday(null);
+        setUpdateWednesday(null);
+        setUpdateThursday(null);
+        setUpdateFriday(null);
+        setIsBeginningEntry(true);
+    }
+
+
     return (
         <div className="tab-header">
             <button
                 className={activeTab === "important-dates" ? "tab active" : "tab"}
-                onClick={() => { setActiveTab("important-dates") }}
+                onClick={moveToImportantDates}
             >
                 Important Dates
             </button>
 
             <button
                 className={activeTab === "class-entries" ? "tab active" : "tab"}
-                onClick={() => { setActiveTab("class-entries") }}
+                onClick={moveToClassEntries}
             >
                 Class Entries
             </button>
@@ -112,7 +166,7 @@ function HeaderPanel({ activeTab, setActiveTab }) {
 }
 
 function UpdateImportantDateBlock({
-    isBeginning,
+    isBeginningDate,
     selectedUpdateImportantDate,
     setSelectedUpdateImportantDate,
     updateHeader,
@@ -133,7 +187,7 @@ function UpdateImportantDateBlock({
         <div className={
             selectedUpdateImportantDate
                 ? "update-important-date-panel-out"
-                : isBeginning
+                : isBeginningDate
                     ? "update-important-date-panel"
                     : "update-important-date-panel-hidden"
         }>
@@ -217,7 +271,7 @@ function CreateImportantDate() {
 
 function DisplayImportantDates({
     importantDates,
-    setIsBeginning,
+    setIsBeginningDate,
     setSelectedUpdateImportantDate,
     setUpdateHeader,
     setUpdateDescription,
@@ -225,7 +279,7 @@ function DisplayImportantDates({
     setUpdateTime
 }) {
     const clickOnUpdateEntry = (item) => {
-        setIsBeginning(false);
+        setIsBeginningDate(false);
         setSelectedUpdateImportantDate(item.important_id);
         setUpdateHeader(item.header);
         setUpdateDescription(item.description);
@@ -237,35 +291,38 @@ function DisplayImportantDates({
 
     return (
         <div className="important-dates-container">
-            <CreateImportantDate />
-
-            <div className="important-dates-scroll">
-                {importantDates.length === 0 ? (
-                    <p className="empty-message">No important dates yet.</p>
-                ) : (
-                    importantDates.map((item) => (
-                        <div
-                            key={item.id}
-                            className="date-card"
-                            onClick={() => { clickOnUpdateEntry(item) }}
-                        >
-                            <div className="date-card-header">
-                                <p className="date-card-title">{item.header}</p>
-                                <p className="date-card-datetime">
-                                    {item.dateOfEvent} · {item.timeOfEvent}
-                                </p>
+            
+            <div className="placeholder-two">
+                <CreateImportantDate />
+                <div className="important-dates-scroll">
+                    {importantDates.length === 0 ? (
+                        <p className="empty-message">No important dates yet.</p>
+                    ) : (
+                        importantDates.map((item) => (
+                            <div
+                                key={item.id}
+                                className="date-card"
+                                onClick={() => { clickOnUpdateEntry(item) }}
+                            >
+                                <div className="date-card-header">
+                                    <p className="date-card-title">{item.header}</p>
+                                    <p className="date-card-datetime">
+                                        {item.dateOfEvent} · {item.timeOfEvent}
+                                    </p>
+                                </div>
+                                <p className="date-card-description">{item.description}</p>
                             </div>
-                            <p className="date-card-description">{item.description}</p>
-                        </div>
-                    ))
-                )}
+                        ))
+                    )}
+                </div>
             </div>
+            
         </div>
     );
 }
 
 function UpdateClassEntryBlock({
-    isBeginning,
+    isBeginningEntry,
     selectedUpdateClassEntry,
     setSelectedUpdateClassEntry,
     updateClassHeader,
@@ -297,7 +354,7 @@ function UpdateClassEntryBlock({
         <div className={
             selectedUpdateClassEntry
                 ? "update-class-entry-panel-out"
-                : isBeginning
+                : isBeginningEntry
                     ? "update-class-entry-panel"
                     : "update-class-entry-panel-hidden"
         }>
@@ -413,7 +470,11 @@ function CreateClassEntries() {
 
             <div className="create-entry-row">
                 <input type="number" className="create-entry-input" placeholder="Total seats" min="1" />
-                <input type="text" className="create-entry-input" placeholder="Meeting time (e.g. 10:00 AM - 11:15 AM)" />
+                <div className="important-date-time-container">
+                    <input type="time" className="create-date-input" />
+                    <p>-</p>
+                    <input type="time" className="create-date-input" />
+                </div>
             </div>
 
             <div className="create-entry-days">
@@ -435,7 +496,7 @@ function CreateClassEntries() {
 function DisplayClassEntries({
     classes,
     classEntries,
-    setIsBeginning,
+    setIsBeginningEntry,
     setSelectedUpdateClassEntry,
     setUpdateClassHeader,
     setUpdateProfessor,
@@ -474,7 +535,7 @@ function DisplayClassEntries({
     }, [classes, classEntries]);
 
     const clickOnUpdateEntry = (entry, groupHeader) => {
-        setIsBeginning(false);
+        setIsBeginningEntry(false);
         setSelectedUpdateClassEntry(entry.entry_id);
         setUpdateClassHeader(groupHeader);
         setUpdateProfessor(entry.professorName);
@@ -493,60 +554,63 @@ function DisplayClassEntries({
 
     return (
         <div className="class-entries-container">
-            <CreateClassEntries />
+            <div className="placeholder-two">
+                <CreateClassEntries />
+                <div className="class-entries-scroll">
+                    {groupKeys.length === 0 ? (
+                        <p className="empty-message">No class entries yet.</p>
+                    ) : (
+                        groupKeys.map((classId) => {
+                            const group = classEntryList[classId];
+                            return (
+                                <div key={classId} className="entry-group">
+                                    <div className="entry-group-header">
+                                        <p className="entry-group-title">{group.header}</p>
+                                        <p className="entry-group-subtitle">
+                                            Class ID: {group.classId}
+                                        </p>
+                                    </div>
 
-            <div className="class-entries-scroll">
-                {groupKeys.length === 0 ? (
-                    <p className="empty-message">No class entries yet.</p>
-                ) : (
-                    groupKeys.map((classId) => {
-                        const group = classEntryList[classId];
-                        return (
-                            <div key={classId} className="entry-group">
-                                <div className="entry-group-header">
-                                    <p className="entry-group-title">{group.header}</p>
-                                    <p className="entry-group-subtitle">
-                                        Class ID: {group.classId}
-                                    </p>
+                                    <div className="entry-list">
+                                        {group.entries.map((entry) => (
+                                            <div
+                                                key={entry.entry_id}
+                                                className="entry-card"
+                                                onClick={() => { clickOnUpdateEntry(entry, group.header) }}
+                                            >
+                                                <div className="entry-card-row">
+                                                    <span className="entry-card-label">Professor</span>
+                                                    <span>{entry.professorName}</span>
+                                                </div>
+                                                <div className="entry-card-row">
+                                                    <span className="entry-card-label">Seats</span>
+                                                    <span>{entry.totalSeats}</span>
+                                                </div>
+                                                <div className="entry-card-row">
+                                                    <span className="entry-card-label">Time</span>
+                                                    <span>{entry.meetingTime}</span>
+                                                </div>
+                                                <div className="entry-card-row">
+                                                    <span className="entry-card-label">Days</span>
+                                                    <span className="entry-card-days">
+                                                        {entry.monday && <span className="day-pill">M</span>}
+                                                        {entry.tuesday && <span className="day-pill">T</span>}
+                                                        {entry.wednesday && <span className="day-pill">W</span>}
+                                                        {entry.thursday && <span className="day-pill">Th</span>}
+                                                        {entry.friday && <span className="day-pill">F</span>}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
-
-                                <div className="entry-list">
-                                    {group.entries.map((entry) => (
-                                        <div
-                                            key={entry.entry_id}
-                                            className="entry-card"
-                                            onClick={() => { clickOnUpdateEntry(entry, group.header) }}
-                                        >
-                                            <div className="entry-card-row">
-                                                <span className="entry-card-label">Professor</span>
-                                                <span>{entry.professorName}</span>
-                                            </div>
-                                            <div className="entry-card-row">
-                                                <span className="entry-card-label">Seats</span>
-                                                <span>{entry.totalSeats}</span>
-                                            </div>
-                                            <div className="entry-card-row">
-                                                <span className="entry-card-label">Time</span>
-                                                <span>{entry.meetingTime}</span>
-                                            </div>
-                                            <div className="entry-card-row">
-                                                <span className="entry-card-label">Days</span>
-                                                <span className="entry-card-days">
-                                                    {entry.monday && <span className="day-pill">M</span>}
-                                                    {entry.tuesday && <span className="day-pill">T</span>}
-                                                    {entry.wednesday && <span className="day-pill">W</span>}
-                                                    {entry.thursday && <span className="day-pill">Th</span>}
-                                                    {entry.friday && <span className="day-pill">F</span>}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        );
-                    })
-                )}
+                            );
+                        })
+                    )}
+                </div>
             </div>
+
+            
         </div>
     );
 }
@@ -556,8 +620,10 @@ function BodyPanel({
     importantDates,
     classes,
     classEntries,
-    isBeginning,
-    setIsBeginning,
+    isBeginningDate,
+    isBeginningEntry,
+    setIsBeginningEntry,
+    setIsBeginningDate,
     selectedUpdateImportantDate,
     setSelectedUpdateImportantDate,
     updateHeader,
@@ -600,7 +666,7 @@ function BodyPanel({
                 <div className="placeholder">
                     <DisplayImportantDates
                         importantDates={importantDates}
-                        setIsBeginning={setIsBeginning}
+                        setIsBeginningDate={setIsBeginningDate}
                         setSelectedUpdateImportantDate={setSelectedUpdateImportantDate}
                         setUpdateHeader={setUpdateHeader}
                         setUpdateDescription={setUpdateDescription}
@@ -608,7 +674,7 @@ function BodyPanel({
                         setUpdateTime={setUpdateTime}
                     />
                     <UpdateImportantDateBlock
-                        isBeginning={isBeginning}
+                        isBeginningDate={isBeginningDate}
                         selectedUpdateImportantDate={selectedUpdateImportantDate}
                         setSelectedUpdateImportantDate={setSelectedUpdateImportantDate}
                         updateHeader={updateHeader}
@@ -628,7 +694,7 @@ function BodyPanel({
                     <DisplayClassEntries
                         classes={classes}
                         classEntries={classEntries}
-                        setIsBeginning={setIsBeginning}
+                        setIsBeginningEntry={setIsBeginningEntry}
                         setSelectedUpdateClassEntry={setSelectedUpdateClassEntry}
                         setUpdateClassHeader={setUpdateClassHeader}
                         setUpdateProfessor={setUpdateProfessor}
@@ -641,7 +707,7 @@ function BodyPanel({
                         setUpdateFriday={setUpdateFriday}
                     />
                     <UpdateClassEntryBlock
-                        isBeginning={isBeginning}
+                        isBeginningEntry={isBeginningEntry}
                         selectedUpdateClassEntry={selectedUpdateClassEntry}
                         setSelectedUpdateClassEntry={setSelectedUpdateClassEntry}
                         updateClassHeader={updateClassHeader}
