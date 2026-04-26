@@ -40,9 +40,9 @@ function ClassManager(){
     const [addClassHeader, setAddClassHeader] = useState(null);
     const [addClassDescription, setAddClassDescription] = useState(null);
     const [addClassCredits, setAddClassCredits] = useState(null);
-    const [addIsRequiredComputerScienceMajor, setAddIsRequiredComputerScienceMajor] = useState(null);
-    const [addIsRequiredComputerScienceMinor, setAddIsRequiredComputerScienceMinor] = useState(null);
-    const [addIsRequiredMultiPlatformMajor, setAddIsRequiredMultiPlatformMajor] = useState(null);
+    const [addIsRequiredComputerScienceMajor, setAddIsRequiredComputerScienceMajor] = useState(false);
+    const [addIsRequiredComputerScienceMinor, setAddIsRequiredComputerScienceMinor] = useState(false);
+    const [addIsRequiredMultiPlatformMajor, setAddIsRequiredMultiPlatformMajor] = useState(false);
 
     const [updateClassTitle, setUpdateClassTitle] = useState(null);
     const [updateClassHeader, setUpdateClassHeader] = useState(null);
@@ -226,10 +226,10 @@ function ClassManager(){
                 title:updateClassTitle.trim(),
                 header:updateClassHeader.trim(),
                 description:updateClassDescription.trim(),
-                credits:updateClassCredits.trim(),
-                isRequiredComputerScienceMajor: updateIsRequiredComputerScienceMajor.trim(),
-                isRequiredComputerScienceMinor:updateIsRequiredComputerScienceMinor.trim(),
-                isRequiredMultiPlatformMajor: updateIsRequiredMultiPlatformMajor.trim()
+                credits:updateClassCredits,
+                isRequiredComputerScienceMajor: updateIsRequiredComputerScienceMajor,
+                isRequiredComputerScienceMinor:updateIsRequiredComputerScienceMinor,
+                isRequiredMultiPlatformMajor: updateIsRequiredMultiPlatformMajor
             }
             
             const impossibleTitle= !updateClassTitle;
@@ -237,9 +237,9 @@ function ClassManager(){
             const impossibleDescription=!updateClassDescription;
             const creditsNum = Number(updateClassCredits);
             const impossibleCredits = updateClassCredits === "" || Number.isNaN(creditsNum) || creditsNum <= 0;
-            const impossibleRequiredComputerScienceMajor = updateIsRequiredComputerScienceMajor === "" || (updateIsRequired !== true && updateIsRequired !== false);
-            const impossibleRequiredComputerScienceMinor = updateIsRequiredComputerScienceMinor === "" || (updateIsRequired !== true && updateIsRequired !== false);
-            const impossibleRequiredMultiPlatformMajor = updateIsRequiredMultiPlatformMajor === "" || (updateIsRequired !== true && updateIsRequired !== false);
+            const impossibleRequiredComputerScienceMajor = updateIsRequiredComputerScienceMajor === "" || (updateIsRequiredComputerScienceMajor !== true && updateIsRequiredComputerScienceMajor !== false);
+            const impossibleRequiredComputerScienceMinor = updateIsRequiredComputerScienceMinor === "" || (updateIsRequiredComputerScienceMinor!== true && updateIsRequiredComputerScienceMinor !== false);
+            const impossibleRequiredMultiPlatformMajor = updateIsRequiredMultiPlatformMajor === "" || (updateIsRequiredMultiPlatformMajor !== true && updateIsRequiredMultiPlatformMajor !== false);
 
             const isImpossibleClass = impossibleTitle || impossibleHeader || impossibleDescription || impossibleCredits || impossibleRequiredComputerScienceMajor || impossibleRequiredComputerScienceMinor || impossibleRequiredMultiPlatformMajor
 
@@ -514,6 +514,69 @@ function ClassManager(){
         }
 
 
+        const addClass = async () => {
+            const title = addClassTitle.trim();
+            const header = addClassHeader.trim();
+            const description = addClassDescription.trim();
+            const creditsNum = Number(addClassCredits);
+
+            const impossibleTitle = !title;
+            const impossibleHeader = !header;
+            const impossibleDescription = !description;
+            const impossibleCredits = addClassCredits === "" || Number.isNaN(creditsNum) || creditsNum <= 0;
+            const impossibleRequiredCSMajor = typeof addIsRequiredComputerScienceMajor !== "boolean";
+            const impossibleRequiredCSMinor = typeof addIsRequiredComputerScienceMinor !== "boolean";
+            const impossibleRequiredMultiPlatform = typeof addIsRequiredMultiPlatformMajor !== "boolean";
+
+            const isImpossible =
+                impossibleTitle ||
+                impossibleHeader ||
+                impossibleDescription ||
+                impossibleCredits ||
+                impossibleRequiredCSMajor ||
+                impossibleRequiredCSMinor ||
+                impossibleRequiredMultiPlatform;
+
+            if (isImpossible) {
+                const impossibleList = [];
+                if (impossibleTitle) impossibleList.push("Invalid Title");
+                if (impossibleHeader) impossibleList.push("Invalid Header");
+                if (impossibleDescription) impossibleList.push("Invalid Description");
+                if (impossibleCredits) impossibleList.push("Invalid Credits");
+                if (impossibleRequiredCSMajor) impossibleList.push("Invalid CS Major flag");
+                if (impossibleRequiredCSMinor) impossibleList.push("Invalid CS Minor flag");
+                if (impossibleRequiredMultiPlatform) impossibleList.push("Invalid Multiplatform Major flag");
+                console.log("The following is not valid to add to the class:", impossibleList);
+                return;
+            }
+
+            const mountClass = {
+                title,
+                header,
+                description,
+                credits: creditsNum,
+                isRequiredComputerScienceMajor: addIsRequiredComputerScienceMajor,
+                isRequiredComputerScienceMinor: addIsRequiredComputerScienceMinor,
+                isRequiredMultiPlatformMajor: addIsRequiredMultiPlatformMajor,
+            };
+
+            try {
+                const response = await axios.post("http://localhost:8080/test/add/class", mountClass);
+                if (response.status === 200 || response.status === 201) {
+                    setAddClassTitle("");
+                    setAddClassHeader("");
+                    setAddClassDescription("");
+                    setAddClassCredits("");
+                    setAddIsRequiredComputerScienceMajor(false);
+                    setAddIsRequiredComputerScienceMinor(false);
+                    setAddIsRequiredMultiPlatformMajor(false);
+                }
+            } catch (error) {
+                console.error("Failed to add class:", error);
+            }
+        };
+
+
         const { nodes, edges } = useMemo(() => {
             if (!classes || !prerequisiteMapping) return { nodes: [], edges: [] };
         
@@ -549,8 +612,11 @@ function ClassManager(){
                     </div>
 
                     <div className="graduation-container">
-                        <input type="text" className="description-input" placeholder="Class Description"  onChange={setAddClassDescription} value={addClassDescription}></input>
+                        <input type="text" className="description-input" placeholder="Class Description"  onChange={(e)=>{setAddClassDescription(e.target.value)}} value={addClassDescription}></input>
+                         <input type="number" className="description-input" placeholder="Class Credits"  onChange={(e)=>{setAddClassCredits(e.target.value)}} value={addClassCredits}></input>
                     </div>
+
+                    
 
                     <div className="boolean-container">
                         <label className="boolean-label">Required for Computer Science Major</label>
@@ -589,7 +655,7 @@ function ClassManager(){
                     </div>
                     
                     <div className="graduation-container">
-                        <button className="adding-buttons">Add Class</button>
+                        <button className="adding-buttons" onClick={addClass}>Add Class</button>
                     </div>
                     
                 </div>

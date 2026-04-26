@@ -121,7 +121,7 @@ public class MountClass {
         this.isRequiredMultiPlatformMajor = isRequiredMutliPlatformMajor;
     }
 
-    public Boolean getIsRequiredComputerMultiPlatformMajor(){
+    public Boolean getIsRequiredMultiPlatformMajor(){
         return this.isRequiredComputerScienceMajor;
     }
 }

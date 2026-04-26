@@ -16,6 +16,8 @@ function EnrollmentManager(){
     const [enrollment, setEnrollment] = useState([]);
     const [prerequisiteMapping, setPrerequisiteMapping] = useState([]);
 
+    const [updateHappenedSwitch, setUpdateHappenedSwitch] = useState(true);
+
     /* Backend Needs
     - Fetch students c
     - Fetch classes c
@@ -55,7 +57,7 @@ function EnrollmentManager(){
         retriveEnrollmentData();
         retrivePrerequisiteMappingData();
 
-    },[])
+    },[updateHappenedSwitch])
 
 
     // const classes = [
@@ -88,7 +90,7 @@ function EnrollmentManager(){
         <div>
             <SearchBar students = {students} setStudentSearchList={setStudentSearchList}/>
             <StudentList setIsBeginning = {setIsBeginning} studentSearchList={studentSearchList} selectedStudentId = {selectedStudentId} setSelectedStudentId={setSelectedStudentId} prerequisiteMapping={prerequisiteMapping}/>
-            <UpdateBlock isBeginning = {isBeginning} classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId} prerequisiteMapping={prerequisiteMapping}/>
+            <UpdateBlock isBeginning = {isBeginning} classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId} prerequisiteMapping={prerequisiteMapping} setUpdateHappenedSwitch={setUpdateHappenedSwitch}/>
         </div>
     )
 }
@@ -137,7 +139,7 @@ function SearchBar({students, setStudentSearchList}){
 
 
 
-function UpdateBlock({isBeginning, classes, enrollment, selectedStudentId, setSelectedStudentId, prerequisiteMapping}){
+function UpdateBlock({isBeginning, classes, enrollment, selectedStudentId, setSelectedStudentId, prerequisiteMapping, setUpdateHappenedSwitch}){
     const [studentEnrollmentMap, setStudentEnrollmentMap] = useState({});
     const [selectedClasses, setSelectedClasses] = useState([]);
 
@@ -228,26 +230,44 @@ function UpdateBlock({isBeginning, classes, enrollment, selectedStudentId, setSe
         return base;
     };
 
-    const addEnrollmentsToStudent = ()=>{
-        for (let i = 0 ; i<selectedClasses.length; i++){
-            classes.forEach((item)=>{
-                if(item.header === selectedClasses[i]){
-                    const studentId = selectedStudentId;
+    const addEnrollmentsToStudent = async () => {
+        try {
+            const requests = [];
+            for (let i = 0; i < selectedClasses.length; i++) {
+                const cls = classes.find(c => c.header === selectedClasses[i]);
+                if (cls) {
                     const enrollmentDTO = {
-                        student_id:studentId,
-                        class_id:item.class_id,
-                        status:1
-                    }
-                    axios.post(`http://loclahost:8080/test/add/student/enrollment?id=${studentId}`,enrollmentDTO);
+                        student_id: selectedStudentId,
+                        mountClass_id: cls.class_id,
+                        status: 1,
+                        grade:'A',
+                        enrollment_date:new Date().toISOString().split("T")[0]
+                    };
+                    requests.push(
+                        axios.post(`http://localhost:8080/test/add/enrollment?id=${selectedStudentId}`, enrollmentDTO)
+                    );
                 }
-            })
+            }
+            await Promise.all(requests);
+            setSelectedClasses([]);
+            setUpdateHappenedSwitch(prev => !prev);
+        } catch (error) {
+            console.error("Failed to add enrollments:", error);
         }
-    }
+    };
 
-    const deleteAllStudentEnrollmeents = ()=>{
-        const studentId = selectedStudentId;
-        axios.delete(`http://localhost:8080/test/delete/student/enrollment?id=${studentId}`);
-    }
+    const deleteAllStudentEnrollments = async () => {
+        try {
+            const response = await axios.delete(
+                `http://localhost:8080/test/delete/student/enrollment?id=${selectedStudentId}`
+            );
+            if (response.status === 200) {
+                setUpdateHappenedSwitch(prev => !prev)
+            }
+        } catch (error) {
+            console.error("Failed to delete enrollments:", error);
+        }
+    };
 
     return(
         <div className={selectedStudentId ? "update-student-panel-out" : isBeginning ? "update-student-panel" : "update-student-panel-hidden"}>
@@ -271,8 +291,8 @@ function UpdateBlock({isBeginning, classes, enrollment, selectedStudentId, setSe
                 );
             })}
             <div>
-                <button className="panel-button">Confirm Enrollment</button>
-                <button className="panel-button">Reset Student Enrollment</button>
+                <button className="panel-button" onClick={addEnrollmentsToStudent}>Confirm Enrollment</button>
+                <button className="panel-button" onClick={deleteAllStudentEnrollments}>Reset Student Enrollment</button>
             </div>
 
         </div>

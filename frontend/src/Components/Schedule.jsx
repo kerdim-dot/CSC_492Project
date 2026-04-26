@@ -21,9 +21,9 @@ function Schedule() {
 
     useEffect(() => {
         const student_id = 1;
-        const fetchSchedules = async () => {
+        const fetchSchedulesAndEntries = async () => {
             const scheduleData = await axios.get(`http://localhost:8080/test/get/schedules?studentId=${student_id}`);
-            console.log(`Schedules for student ${student_id}`, scheduleData.data);
+            console.log(`Schedules for student ${student_id}:`, scheduleData.data);
 
             for (let i = 0; i < scheduleData.data.length; i++) {
                 const scheduleEntryData = await axios.get(`http://localhost:8080/test/get/schedule/entries?scheduleId=${scheduleData.data[i].schedule_id}`);
@@ -31,7 +31,22 @@ function Schedule() {
             }
         };
 
-        fetchSchedules();
+        const fetchClassAndEntries = async () => {
+            const classResponse = await axios.get(`http://localhost:8080/test/get/classes`);
+            console.log(`Mount Union classes:`, classResponse.data);
+
+            const classEntriesResponse = await axios.get(`http://localhost:8080/test/get/class/entries`);
+            console.log(`Mount Union class Entries:`, classEntriesResponse.data);
+        };
+
+        const fetchImportantDates = async () => {
+            const importantDatesResponse = await axios.get(`http://localhost:8080/test/get/important/dates`);
+            console.log(`Important Dates:`, importantDatesResponse.data);
+        };
+
+        fetchSchedulesAndEntries();
+        fetchClassAndEntries();
+        fetchImportantDates();
     }, []);
 
     const addScheduleEntry = async () => {

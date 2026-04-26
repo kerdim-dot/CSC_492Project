@@ -35,29 +35,21 @@ public class MountClassService {
         }
     }
 
-    public void updateMountClass(MountClass classInfo, Long classId){
-        Optional <MountClass> mountClassOptional = mountClassRepository.findById(classId);
+    public void updateMountClass(MountClass classInfo, Long classId) {
+        Optional<MountClass> mountClassOptional = mountClassRepository.findById(classId);
 
-        if(mountClassOptional.isPresent()){
-            MountClass mountClass  = mountClassOptional.get();
+        if (mountClassOptional.isPresent()) {
+            MountClass mountClass = mountClassOptional.get();
 
-            if(mountClass.getCredits() != classInfo.getCredits()){
-                mountClass.setCredits(classInfo.getCredits());
-            }
+            mountClass.setTitle(classInfo.getTitle());
+            mountClass.setHeader(classInfo.getHeader());
+            mountClass.setDescription(classInfo.getDescription());
+            mountClass.setCredits(classInfo.getCredits());
+            mountClass.setIsRequiredComputerScienceMajor(classInfo.getIsRequiredComputerScienceMajor());
+            mountClass.setIsRequiredComputerScienceMinor(classInfo.getIsRequiredComputerScienceMinor());
+            mountClass.setIsRequiredMultiPlatformMajor(classInfo.getIsRequiredMultiPlatformMajor());
 
-            if (mountClass.getDescription().equals(classInfo.getDescription())){
-                mountClass.setDescription(classInfo.getDescription());
-            }
-
-            if (mountClass.getHeader().equals(classInfo.getHeader())){
-                mountClass.setHeader(classInfo.getHeader());
-            }
-
-            if (mountClass.getTitle().equals(classInfo.getTitle())){
-                mountClass.setTitle(classInfo.getTitle());
-            }
             mountClassRepository.save(mountClass);
         }
-
     }
 }

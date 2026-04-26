@@ -36,9 +36,7 @@ function StudentManager(){
 
     const [addFirstName, setAddFirstName] = useState(null);
     const [addLastName, setAddLastName] = useState(null);
-    const [addGraduationDay, setAddGraduationDay] = useState(null);
-    const [addGraduationMonth, setAddGraduationMonth] = useState(null);
-    const [addGraduationYear, setAddGraduationYear] = useState(null);
+    const [addGraduationDate, setAddGraduationDate] = useState(null);
     const [addIsComputerScienceMajor, setAddIsComputerScienceMajor] = useState(false);
     const [addIsComputerScienceMinor, setAddIsComputerScienceMinor] = useState(false);
     const [addIsMultiPlatformMajor, setAddIsMultiPlatformMajor] = useState(false);
@@ -256,7 +254,8 @@ useEffect(()=>{
       
       <BodyPanel isBeginning={isBeginning} setIsBeginning={setIsBeginning} activeTab={activeTab} studentSearchList={studentSearchList} selectedDeleteEntry={selectedDeleteEntry} 
       setSelectedDeleteEntry={setSelectedDeleteEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} addFirstName = {addFirstName} 
-      addLastName = {addLastName} addGraduationDay={addGraduationDay} addGraduationMonth={addGraduationMonth} addGraduationYear={addGraduationYear} 
+      addLastName = {addLastName} setAddFirstName={setAddFirstName} setAddLastName={setAddLastName} 
+      addGraduationDate ={addGraduationDate} setAddGraduationDate = {setAddGraduationDate}
       addIsComputerScienceMajor = {addIsComputerScienceMajor} addIsComputerScienceMinor = {addIsComputerScienceMinor}
       addIsMultiPlatformMajor = {addIsMultiPlatformMajor} setAddIsComputerScienceMajor={setAddIsComputerScienceMajor} 
       setAddIsComputerScienceMinor={setAddIsComputerScienceMinor} setAddIsMultiPlatformMajor = {setAddIsMultiPlatformMajor}
@@ -266,7 +265,7 @@ useEffect(()=>{
       setSelectDeleteMultiple={setSelectDeleteMultiple} selectedDeleteEntries = {selectedDeleteEntries} setSelectedDeleteEntries={setSelectedDeleteEntries} 
       updateIsComputerScienceMajor={updateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} 
       setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} 
-      updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor}/>
+      updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor} setUpdateList={setUpdateList}/>
 
     </div>
   );
@@ -393,7 +392,7 @@ function FilterBlock({ startDate, endDate, setStartDate, setEndDate, setShowFilt
 }
 
 
-function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, updateIsComputerScienceMajor, setUpdateIsComputerScienceMajor, updateIsComputerScienceMinor, setUpdateIsComputerScienceMinor, updateIsMultiPlatformMajor, setUpdateIsMultiPlatformMajor}){
+function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, updateIsComputerScienceMajor, setUpdateIsComputerScienceMajor, updateIsComputerScienceMinor, setUpdateIsComputerScienceMinor, updateIsMultiPlatformMajor, setUpdateIsMultiPlatformMajor, setUpdateList}){
     const [processingStudentUpate, setProcessingStudentUpdate] = useState(false);
 
     const updateStudentEntry = async() =>{
@@ -402,9 +401,9 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
             firstName: updateFirstNameValue.trim(),
             lastName: updateLastNameValue.trim(),
             graduationDate:updateGraduationValue.trim(),
-            isComputerScienceMajor:updateIsComputerScienceMajor.trim(),
-            isComputerScienceMinor: updateIsComputerScienceMinor.trim(),
-            isMultiPlatformMajor: (updateIsMultiPlatformMajor.trim()),
+            isComputerScienceMajor:updateIsComputerScienceMajor,
+            isComputerScienceMinor: updateIsComputerScienceMinor,
+            isMultiPlatformMajor: updateIsMultiPlatformMajor,
         }
 
         const impossibleFirstName = !student.firstName;
@@ -412,7 +411,7 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
         const impossibleGraduationDate = !student.graduationDate && !Date(student.graduationDate);
         const impossibleComputerScienceMajor = student.isComputerScienceMajor!==true && student.isComputerScienceMajor!==false;
         const impossibleComputerScienceMinor = student.isComputerScienceMinor!==true && student.isComputerScienceMinor!==false
-        const impossibleMultiPlatformMajor = student.isMultiPlatformMajor!==true && student.isMajor!==false
+        const impossibleMultiPlatformMajor = student.isMultiPlatformMajor!==true && student.isMultiPlatformMajor!==false
 
         const impossibleValues = impossibleFirstName || impossibleLastName || impossibleGraduationDate || impossibleComputerScienceMajor || impossibleComputerScienceMinor ||
         impossibleMultiPlatformMajor
@@ -447,75 +446,95 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
                 console.log("You cannot have both a major and a minor in the same classes")
             },2000)
         }
+
+        else if(!student.isComputerScienceMajor && !student.isComputerScienceMinor && !student.isMultiPlatformMajor){
+            setTimeout(()=>{
+                console.log("Students must be part of the computer science program")
+            },2000)
+        }
+
         else{
             const updateStudent = await axios.put(`http://localhost:8080/test/update/student?id=${studentUpdateEntry}`,student);
+            setUpdateList(prev => !prev)
         }
+        
         setProcessingStudentUpdate(false);
         
     }
 
-    return(
-        <div className={studentUpdateEntry?"update-student-panel-out":isBeginning?"update-student-panel":"update-student-panel-hidden" }>
-            
+    return (
+        <div className={studentUpdateEntry ? "update-student-panel-out" : isBeginning ? "update-student-panel" : "update-student-panel-hidden"}>
 
-            <img className="close-img-two" src={close} onClick={()=>{setStudentUpdateEntry(null)}}></img>
+            <img className="close-img-two" src={close} onClick={() => { setStudentUpdateEntry(null) }} />
 
             <p className="student-panel-title">Update Student Panel</p>
 
             <div className="panel-entry">
                 <p>First Name</p>
-                <input 
-                    className="panel-input" 
-                    value={updateFirstNameValue} 
-                    onChange={(e)=>{setUpdateFirstNameValue(e.target.value)}}
+                <input
+                    className="panel-input"
+                    value={updateFirstNameValue}
+                    onChange={(e) => setUpdateFirstNameValue(e.target.value)}
                 />
             </div>
-            
+
             <div className="panel-entry">
                 <p>Last Name</p>
-                <input 
-                    className="panel-input" 
-                    value={updateLastNameValue} 
-                    onChange={(e)=>{setUpdateLastNameValue(e.target.value)}}
+                <input
+                    className="panel-input"
+                    value={updateLastNameValue}
+                    onChange={(e) => setUpdateLastNameValue(e.target.value)}
                 />
             </div>
 
             <div className="panel-entry">
                 <p>Graduation Date</p>
-                <input 
-                    className="panel-input" 
-                    value={updateGraduationValue} 
-                    onChange={(e)=>{setUpdateGraduationValue(e.target.value)}}
+                <input
+                    className="panel-input"
+                    value={updateGraduationValue}
+                    onChange={(e) => setUpdateGraduationValue(e.target.value)}
                 />
             </div>
 
             <div className="panel-entry">
                 <p>Is a Computer Science Major</p>
-                <input 
-                    className="panel-input" 
-                    value={updateIsComputerScienceMajor} 
-                    onChange={(e)=>{setUpdateIsComputerScienceMajor(e.target.value)}}
-                />
+                <select
+                    className="panel-input"
+                    value={String(updateIsComputerScienceMajor)}
+                    onChange={(e) => setUpdateIsComputerScienceMajor(e.target.value === "true")}
+                >
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
             </div>
 
             <div className="panel-entry">
                 <p>Is a Computer Science Minor</p>
-                <input 
-                    className="panel-input" 
-                    value={updateIsComputerScienceMinor} 
-                    onChange={(e)=>{setUpdateIsComputerScienceMinor(e.target.value)}}
-                />
-            </div>
-            <div className="panel-entry">
-                <p>Is Multiplatorm Major</p>
-                <input 
-                    className="panel-input" 
-                    value={updateIsMultiPlatformMajor} 
-                    onChange={(e)=>{setUpdateIsMultiPlatformMajor(e.target.value)}}
-                />
+                <select
+                    className="panel-input"
+                    value={String(updateIsComputerScienceMinor)}
+                    onChange={(e) => setUpdateIsComputerScienceMinor(e.target.value === "true")}
+                >
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
             </div>
 
-            <button className="panel-button" onClick={updateStudentEntry}>{processingStudentUpate? "Processing..." : "Confirm Update"}</button>
+            <div className="panel-entry">
+                <p>Is Multiplatform Major</p>
+                <select
+                    className="panel-input"
+                    value={String(updateIsMultiPlatformMajor)}
+                    onChange={(e) => setUpdateIsMultiPlatformMajor(e.target.value === "true")}
+                >
+                    <option value="true">True</option>
+                    <option value="false">False</option>
+                </select>
+            </div>
+
+            <button className="panel-button" onClick={updateStudentEntry}>
+                {processingStudentUpate ? "Processing..." : "Confirm Update"}
+            </button>
         </div>
     )
 }
@@ -530,14 +549,16 @@ function DeleteConfirmation({setDeleteConfirmationScreen,selectDeleteMultiple, s
         if(selectDeleteMultiple){
             for(let i = 0; i<selectedDeleteEntries.length; i++){
                 const currentStudentId = selectedDeleteEntries[i];
+                console.log(currentStudentId)
                 const deleteStudentEnrollment = await axios.delete(`http://localhost:8080/test/delete/student/enrollment?id=${currentStudentId}`);
                 console.log(deleteStudentEnrollment);
                 const fetchSchedules = await axios.get(`http://localhost:8080/test/get/schedules?studentId=${currentStudentId}`);
                 const scheduleIds = fetchSchedules.data;
                 console.log(scheduleIds);
                 for (let j = 0 ; j<scheduleIds.length; j++){
-                    const deleteStudentScheduleEntries = await axios.delete(`http://localhost:8080/test/delete/schedule/entries?scheduleId=${scheduleIds[j]}`);
-                    const deleteSchedule = await axios.delete(`http://localhost:8080/test/delete/schedule?id=${scheduleIds[j]}`)
+                    console.log(scheduleIds[j]);
+                    const deleteStudentScheduleEntries = await axios.delete(`http://localhost:8080/test/delete/schedule/entries?id=${scheduleIds[j].schedule_id}`);
+                    const deleteSchedule = await axios.delete(`http://localhost:8080/test/delete/schedule?id=${scheduleIds[j].schedule_id}`)
                 }
                 const deleteStudent = await axios.delete(`http://localhost:8080/test/delete/student?id=${currentStudentId}`);
                 console.log(deleteStudent.status);
@@ -552,8 +573,8 @@ function DeleteConfirmation({setDeleteConfirmationScreen,selectDeleteMultiple, s
             const scheduleIds = fetchSchedules.data;
             console.log(scheduleIds);
             for (let j = 0 ; j<scheduleIds.length; j++){
-                const deleteStudentScheduleEntries = await axios.delete(`http://localhost:8080/test/delete/schedule/entries?scheduleId=${scheduleIds[j]}`);
-                const deleteSchedule = await axios.delete(`http://localhost:8080/test/delete/schedule?id=${scheduleIds[j]}`)
+                const deleteStudentScheduleEntries = await axios.delete(`http://localhost:8080/test/delete/schedule/entries?id=${scheduleIds[j].schedule_id}`);
+                const deleteSchedule = await axios.delete(`http://localhost:8080/test/delete/schedule?id=${scheduleIds[j].schedule_id}`)
             }
             const deleteStudent = await axios.delete(`http://localhost:8080/test/delete/student?id=${currentStudentId}`);
             console.log(deleteStudent.status);
@@ -569,28 +590,57 @@ function DeleteConfirmation({setDeleteConfirmationScreen,selectDeleteMultiple, s
         setSelectedDeleteEntry(null);
     }
 
-    return(
-        <div className="student-delete-confirmation-overlay">
-            <div className="student-delete-confirmation">
-                <img className="close-img" onClick={onCloseConfirmation} src={close}></img>
-                <p>Confirm Student Deletion</p>
-                <p>type 'confirm' to delete Student</p>
-                <p>*warning this will delete all their schedule and enrollment data</p>
-                <input value={inputConfirm} onChange={(e)=>{setInputConfirm(e.target.value)}}></input>
-                <button onClick={deleteStudent} disabled={inputConfirm !== "confirm"}>{isProcessing ? "processing...":"Confirm Deletion"}</button>
+    return (
+        <div className="student-delete-confirmation-overlay" onClick={onCloseConfirmation}>
+            <div className="student-delete-confirmation" onClick={(e) => e.stopPropagation()}>
+                <img className="close-img" onClick={onCloseConfirmation} src={close} alt="Close" />
+
+                <p className="delete-title">Confirm Student Deletion</p>
+
+                <div className="delete-warning">
+                    <p className="delete-instruction">
+                        Type <span className="delete-keyword">confirm</span> to delete student
+                        {selectDeleteMultiple && selectedDeleteEntries.length > 1 ? "s" : ""}
+                    </p>
+                    <p className="delete-warning-text">
+                        Warning: this will permanently delete all schedule and enrollment data.
+                    </p>
+                </div>
+
+                <input
+                    className="delete-input"
+                    value={inputConfirm ?? ""}
+                    onChange={(e) => setInputConfirm(e.target.value)}
+                />
+
+                <div className="delete-button-row">
+                    <button
+                        className="delete-cancel-button"
+                        onClick={onCloseConfirmation}
+                        disabled={isProcessing}
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        className="delete-confirm-button"
+                        onClick={deleteStudent}
+                        disabled={inputConfirm !== "confirm" || isProcessing}
+                    >
+                        {isProcessing ? "Processing..." : "Confirm Deletion"}
+                    </button>
+                </div>
             </div>
         </div>
-        
     )
 }
 
 function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, selectedDeleteEntry, setSelectedDeleteEntry, updateFirstNameValue, 
     updateLastNameValue,updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, setStudentUpdateEntry, 
-    studentUpdateEntry,addGraduationDay,addGraduationMonth,addGraduationYear,setAddGraduationDay,setAddGraduationMonth,setAddGraduationYear,
+    studentUpdateEntry,addGraduationDate,setAddGraduationDate, addFirstName,addLastName, setAddFirstName, setAddLastName,
     addIsComputerScienceMajor,setAddIsComputerScienceMajor,addIsComputerScienceMinor,setAddIsComputerScienceMinor,addIsMultiPlatformMajor,setAddIsMultiPlatformMajor,
     setDeleteConfirmationScreen, selectDeleteMultiple, setSelectDeleteMultiple,selectedDeleteEntries, setSelectedDeleteEntries,
     updateIsComputerScienceMajor,setUpdateIsComputerScienceMajor,updateIsComputerScienceMinor,setUpdateIsComputerScienceMinor,
-    updateIsMultiPlatformMajor,setUpdateIsMultiPlatformMajor
+    updateIsMultiPlatformMajor,setUpdateIsMultiPlatformMajor, setUpdateList
     }){
     const [warning, setWarning] = useState(null);
     const [multipleStudentText, setMultipleStudentText] = useState(null);
@@ -684,11 +734,13 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         const student = {
             firstName: addFirstName,
             lastName: addLastName,
-            graduationDate:(addGraduationYear+"-"+addGraduationMonth+"-"+addGraduationDay) ,
+            graduationDate:addGraduationDate ,
             isComputerScienceMajor: addIsComputerScienceMajor, 
             isComputerScienceMinor: addIsComputerScienceMinor,
             isMultiPlatformMajor: addIsMultiPlatformMajor,
         }
+
+        console.log(student);
 
         const impossibleFirstName = !student.firstName;
         const impossibleLastName = !student.lastName;
@@ -732,10 +784,16 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                 console.log("You cannot have both a major and a minor in the same classes")
             },2000)
         }
-        else{
-            const addStudent = await axios.put(`http://localhost:8080/test/add/student}`,student);
+
+        else if(!student.isComputerScienceMajor && !student.isComputerScienceMinor && !student.isMultiPlatformMajor){
+            setTimeout(()=>{
+                console.log("Student must be part of the computer science program")
+            },2000)
         }
-        setProcessingStudentUpdate(false);
+
+        else{
+            const addStudent = await axios.post(`http://localhost:8080/test/add/student`,student);
+        }
     }
 
     const changeIsCompMajor = () =>{
@@ -768,6 +826,8 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         }
     }
 
+
+
     return(
         <div className="tab-content">
             {activeTab === "add" && 
@@ -776,16 +836,16 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                     <p>Add Student</p>
                     <div className="name-container">
                         <p>Student Name:</p>
-                        <input type= "text" className="name-input" placeholder="first name" onClick={(e)=>{setUpdateFirstNameValue(e.target.value)}}/>
-                        <input type= "text" className="name-input" placeholder="last name" onClick={(e)=>{setUpdateLastNameValue(e.target.value)}}/>
+                        <input type= "text" className="name-input" placeholder="first name" onChange={(e)=>{setAddFirstName(e.target.value)}}/>
+                        <input type= "text" className="name-input" placeholder="last name" onChange={(e)=>{setAddLastName(e.target.value)}}/>
                     </div>
                     <div className="graduation-container">
-                        <p>Grduation Date:</p>
-                        <input type="text" className = "graduation-input" placeholder="DD" onClick={(e)=>{setAddGraduationDay(e.target.value)}}></input>
-                        <p>-</p>
-                        <input type="text" className = "graduation-input" placeholder="MM" onClick={(e)=>{setAddGraduationMonth(e.target.value)}}></input>
-                        <p>-</p>
-                        <input type="text" className = "graduation-input year" placeholder="YYYY" onClick={(e)=>{setAddGraduationYear(e.target.value)}}></input>
+                        <p>Graduation Date:</p>
+                        <input
+                            type="date"
+                            className="graduation-input"
+                            onChange={(e) => setAddGraduationDate(e.target.value)}
+                        />
                     </div> 
                     <div className= {alreadyMinor? "boolean-container red":"boolean-container"}>
                         <label className="boolean-label">Is A Computer Science Major</label>
@@ -851,7 +911,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                             </div>)
                         })}
                     </div>
-                    {<UpdateBlock isBeginning={isBeginning} studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue} updateIsComputerScienceMajor={updateIsComputerScienceMajor} setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor}/>}
+                    {<UpdateBlock isBeginning={isBeginning} studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue} updateIsComputerScienceMajor={updateIsComputerScienceMajor} setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor} setUpdateList={setUpdateList}/>}
                 </div>}
             {activeTab === "delete" && 
                 <div className="placeholder">

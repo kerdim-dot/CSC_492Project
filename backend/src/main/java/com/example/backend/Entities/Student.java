@@ -112,7 +112,7 @@ public class Student {
         this.is_computer_science_minor = isComputerScienceMinor;
     }
 
-    public void setIsOtherMajor(Boolean isMultiPlatformMajor){
+    public void setIsMultiPlatformMajor(Boolean isMultiPlatformMajor){
         this.is_multi_platform_major = isMultiPlatformMajor;
     } 
 

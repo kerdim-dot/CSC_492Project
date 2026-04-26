@@ -35,35 +35,18 @@ public class StudentService {
         }
     }
 
-    public void updateStudent(Student studentInfo,long student_id){
-        Optional <Student> studentOptional = studentRepository.findById(student_id);
-        if(studentOptional.isPresent()){
-            Student student = studentOptional.get();
+    public void updateStudent(Student studentInfo, long studentId) {
+        Student student = studentRepository.findById(studentId)
+            .orElseThrow(() -> new IllegalArgumentException("Student not found: " + studentId));
 
-            if(studentInfo.getIsComputerScienceMajor() != student.getIsComputerScienceMajor()){
-                student.setIsComputerScienceMajor(studentInfo.getIsComputerScienceMajor());
-            }
+        student.setFirstName(studentInfo.getFirstName());
+        student.setLastName(studentInfo.getLastName());
+        student.setGraduationDate(studentInfo.getGraduationDate());
+        student.setIsComputerScienceMajor(studentInfo.getIsComputerScienceMajor());
+        student.setIsComputerScienceMinor(studentInfo.getIsComputerScienceMinor());
+        student.setIsMultiPlatformMajor(studentInfo.getIsMultiPlatformMajor());
 
-            if(studentInfo.getIsComputerScienceMinor() != student.getIsComputerScienceMinor()){
-                student.setIsComputerScienceMinor(studentInfo.getIsComputerScienceMinor());
-            }
-
-            if(studentInfo.getIsMultiPlatformMajor() != student.getIsMultiPlatformMajor()){
-                student.setIsOtherMajor(studentInfo.getIsMultiPlatformMajor());
-            }
-
-            if(studentInfo.getGraduationDate() != studentInfo.getGraduationDate()){
-                student.setGraduationDate(studentInfo.getGraduationDate());
-            }
-
-            if(studentInfo.getFirstName().equals(studentInfo.getFirstName())){
-                student.setFirstName(studentInfo.getFirstName());
-            }
-            if(studentInfo.getLastName().equals(studentInfo.getFirstName())){
-                student.setLastName(studentInfo.getLastName());
-            }     
-            studentRepository.save(student);
-        }
+        studentRepository.save(student);
     }
 
 }

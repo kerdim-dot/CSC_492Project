@@ -365,7 +365,7 @@ public class TestController {
 
     @PostMapping("/add/enrollment")
     public void addEnrollment(@RequestBody EnrollmentDTO enrollmentDTO){
-
+        enrollmentService.addEnrollment(enrollmentDTO);
     }
 
 }

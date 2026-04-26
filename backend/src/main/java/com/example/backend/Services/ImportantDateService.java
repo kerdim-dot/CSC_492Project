@@ -35,6 +35,17 @@ public class ImportantDateService {
         }
     }
 
+    public void updateImportantDate(ImportantDate importantDate, long id) {
+        ImportantDate currentImportantDate = importantDateRepository.findById(id)
+            .orElseThrow(() -> new IllegalArgumentException("Important date not found: " + id));
+
+        currentImportantDate.setHeader(importantDate.getHeader());
+        currentImportantDate.setDescription(importantDate.getDescription());
+        currentImportantDate.setDateOfEvent(importantDate.getDateOfEvent());
+        currentImportantDate.setTimeOfEvent(importantDate.getTimeOfEvent());
+
+        importantDateRepository.save(currentImportantDate);
+    }
 
 
 }
