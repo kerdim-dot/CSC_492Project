@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../progress_page.css";
-import { formatClassUrlCode } from "../tools/classRoutes.jsx";
+import { formatClassUrlCode, normalizeClassCode } from "../tools/classRoutes.jsx";
 
 
 const CLASS_ROUTE_PREFIX = "/classes/";
@@ -548,16 +548,37 @@ function getNodeNavigationOptions(course) {
     const label = course.requirementLabel || course.code || "";
     const code = course.code || "";
 
+    /*
+        Highest priority:
+        If this slot has already been satisfied by a real course,
+        do NOT show the requirement menu.
+
+        Example:
+        requirementLabel: "CSC360 or Elective"
+        code: "CSC360"
+        isPlaceholder: false
+
+        This should navigate directly to /classes/CSC-360.
+    */
+    if (!course.isPlaceholder && code) {
+        return [
+            {
+                label: `View ${code}`,
+                path: `${CLASS_ROUTE_PREFIX}${formatClassUrlCode(code)}`,
+            },
+        ];
+    }
+
     // "Foreign Language or Elective"
     if (label === "Foreign Language or Elective") {
         return [
             {
                 label: "View foreign language courses",
-                path: `/foreign-languages`,
+                path: "/foreign-language",
             },
             {
                 label: "View electives",
-                path: `/electives`,
+                path: "/electives",
             },
         ];
     }
@@ -573,7 +594,7 @@ function getNodeNavigationOptions(course) {
             },
             {
                 label: "View electives",
-                path: `/electives`,
+                path: "/electives",
             },
         ];
     }
@@ -588,17 +609,29 @@ function getNodeNavigationOptions(course) {
         return [
             {
                 label: "View CSC 300/400 courses",
-                path: `/csc-upper-level`,
+                path: "/csc-upper-level",
             },
         ];
     }
 
-    // Normal course node
-    if (!course.isPlaceholder) {
+    // Plain elective placeholders
+    if (label === "Elective" || code === "Elective") {
         return [
             {
-                label: `View ${code}`,
-                path: `${CLASS_ROUTE_PREFIX}${formatClassUrlCode(code)}`,
+                label: "View electives",
+                path: "/electives",
+            },
+        ];
+    }
+
+    if (
+        label === "Declared Minor Elective" ||
+        code === "Declared Minor Elective"
+    ) {
+        return [
+            {
+                label: "View electives",
+                path: "/electives",
             },
         ];
     }

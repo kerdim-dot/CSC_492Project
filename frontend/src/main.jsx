@@ -25,7 +25,7 @@ import ScheduleManagerPage from './Pages/Admin_Pages/ScheduleManagerPage.jsx'
 import ForeignLanguagePage from "./Pages/ForeignLanguagePage";
 import ElectivesPage from "./Pages/ElectivesPage";
 import CscUpperLevelPage from "./Pages/CscUpperLevelPage";
-
+import DeclaredMinorElectivesPage from './Pages/DeclaredMinorElectivesPage.jsx'
 
 const router = createBrowserRouter([
     {path:"/", element:<LandingPage/>},
@@ -45,9 +45,7 @@ const router = createBrowserRouter([
     {path:"/foreign-languages", element: <ForeignLanguagePage/>},
     {path:"/electives", element: <ElectivesPage/>},
     {path:"/csc-upper-level", element: <CscUpperLevelPage/>},
-
-
-
+    {path:"/declared-minor-electives", element: <DeclaredMinorElectivesPage/>},
     
 ])
 

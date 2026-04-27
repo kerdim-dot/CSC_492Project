@@ -10,6 +10,8 @@ import {
     Legend
 } from "chart.js";
 import { useNavigate } from "react-router-dom";
+import { formatClassUrlCode } from "../tools/classRoutes.jsx";
+
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
@@ -187,8 +189,8 @@ function processStudents(students, classes, enrollment, currentYear, currentSeme
 }
 
 function SemesterPlanBoard({ semesterData = [] }) {
-
     const navigate = useNavigate();
+    const [openSemesterMenuId, setOpenSemesterMenuId] = useState(null);
 
     const getTotalCredits = (courses) =>
         courses.reduce((sum, course) => {
@@ -203,6 +205,110 @@ function SemesterPlanBoard({ semesterData = [] }) {
 
     const getTotalPoints = (courses) =>
         courses.reduce((sum, course) => sum + (course.points || 0), 0);
+
+    function getSemesterCourseNavigationOptions(course) {
+        const label = course.requirementLabel || course.code || "";
+        const code = course.code || "";
+
+        /*
+            If the slot has already been satisfied by a real class,
+            do NOT show the original choice menu.
+
+            Example:
+            requirementLabel: "CSC360 or Elective"
+            code: "CSC360"
+            isPlaceholder: false
+
+            This should go directly to CSC360.
+        */
+        if (!course.isPlaceholder && code) {
+            return [
+                {
+                    label: `View ${code}`,
+                    path: `/classes/${formatClassUrlCode(code)}`,
+                },
+            ];
+        }
+
+        if (label === "Foreign Language or Elective") {
+            return [
+                {
+                    label: "View foreign language courses",
+                    path: "/foreign-languages",
+                },
+                {
+                    label: "View electives",
+                    path: "/electives",
+                },
+            ];
+        }
+
+        if (label.includes(" or Elective")) {
+            const specificCourse = label.replace("or Elective", "").trim();
+
+            return [
+                {
+                    label: `View ${specificCourse}`,
+                    path: `/classes/${formatClassUrlCode(specificCourse)}`,
+                },
+                {
+                    label: "View electives",
+                    path: "/electives",
+                },
+            ];
+        }
+
+        if (
+            label.includes("CSC3XX") ||
+            label.includes("CSC4XX") ||
+            code.includes("CSC3XX") ||
+            code.includes("CSC4XX")
+        ) {
+            return [
+                {
+                    label: "View CSC 300/400 courses",
+                    path: "/csc-upper-level",
+                },
+            ];
+        }
+
+        if (label === "Elective" || code === "Elective") {
+            return [
+                {
+                    label: "View electives",
+                    path: "/electives",
+                },
+            ];
+        }
+
+        if (
+            label === "Declared Minor Elective" ||
+            code === "Declared Minor Elective"
+        ) {
+            return [
+                {
+                    label: "View minor electives",
+                    path: "/declared-minor-electives",
+                },
+            ];
+        }
+
+        return [];
+    }
+
+    function handleSemesterCourseClick(course, rowId) {
+        const options = getSemesterCourseNavigationOptions(course);
+
+        if (options.length === 0) return;
+
+        if (options.length === 1) {
+            setOpenSemesterMenuId(null);
+            navigate(options[0].path);
+            return;
+        }
+
+        setOpenSemesterMenuId((prev) => (prev === rowId ? null : rowId));
+    }
 
     return (
         <section className="dashboard-surface semester-plan-board">
@@ -256,24 +362,63 @@ function SemesterPlanBoard({ semesterData = [] }) {
                             </div>
 
                             <div className="segmented-stack semester-course-list">
-                                {semester.courses.map((course, idx) => (
-                                    <button
-                                        type="button"
-                                        className={`segmented-row semester-course-row clickable-semester-row ${course.isPlaceholder ? "semester-placeholder-row" : ""
-                                            }`}
-                                        key={`${semester.id}-${idx}`}
-                                        onClick={() => navigate(`/classes/${course.code}`)}
-                                    >
-                                        <span className={`segmented-primary status-${course.status}`}>
-                                            {course.code}
-                                        </span>
-                                        <span className="segmented-cell">
-                                            {course.creditsLabel ?? course.credits ?? "2—4"}
-                                        </span>
-                                        <span className="segmented-cell">{course.points ?? "—"}</span>
-                                        <span className="segmented-cell">{course.grade ?? "—"}</span>
-                                    </button>
-                                ))}
+                                {semester.courses.map((course, idx) => {
+                                    const rowId = `${semester.id}-${idx}`;
+                                    const navOptions = getSemesterCourseNavigationOptions(course);
+                                    const hasMultipleOptions = navOptions.length > 1;
+                                    const isMenuOpen = openSemesterMenuId === rowId;
+
+                                    return (
+                                        <div
+                                            className="semester-course-row-shell"
+                                            key={rowId}
+                                        >
+                                            <button
+                                                type="button"
+                                                className={`segmented-row semester-course-row clickable-semester-row ${
+                                                    course.isPlaceholder ? "semester-placeholder-row" : ""
+                                                } ${
+                                                    hasMultipleOptions ? "semester-course-row-has-menu" : ""
+                                                }`}
+                                                onClick={() =>
+                                                    handleSemesterCourseClick(course, rowId)
+                                                }
+                                            >
+                                                <span className={`segmented-primary status-${course.status}`}>
+                                                    {course.code}
+                                                </span>
+                                                <span className="segmented-cell">
+                                                    {course.creditsLabel ?? course.credits ?? "2—4"}
+                                                </span>
+                                                <span className="segmented-cell">
+                                                    {course.points ?? "—"}
+                                                </span>
+                                                <span className="segmented-cell">
+                                                    {course.grade ?? "—"}
+                                                </span>
+                                            </button>
+
+                                            {isMenuOpen && (
+                                                <div className="semester-course-nav-menu">
+                                                    {navOptions.map((option) => (
+                                                        <button
+                                                            key={option.path}
+                                                            type="button"
+                                                            className="semester-course-nav-option"
+                                                            onClick={(event) => {
+                                                                event.stopPropagation();
+                                                                navigate(option.path);
+                                                                setOpenSemesterMenuId(null);
+                                                            }}
+                                                        >
+                                                            {option.label}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    );
+                                })}
                             </div>
 
                             <div className="semester-summary">
@@ -1908,6 +2053,16 @@ function buildCourseFromPlanSlot({
             classByCode,
             studentEnrollments,
             usedClassIds,
+            creditsOverride: normalizedSlot.creditsOverride,
+        });
+    }
+
+    if (normalizedSlot.type === "choice") {
+        return buildChoiceCourseSlot({
+            slot: normalizedSlot,
+            classByCode,
+            studentEnrollments,
+            usedClassIds,
         });
     }
 
@@ -1932,10 +2087,6 @@ function buildCourseFromPlanSlot({
         return buildPlaceholderSlot(normalizedSlot);
     }
 
-    if (normalizedSlot.type === "choice") {
-        return buildPlaceholderSlot(normalizedSlot);
-    }
-
     return buildPlaceholderSlot({
         label: normalizedSlot.label ?? "Requirement",
         credits: normalizedSlot.credits,
@@ -1943,11 +2094,69 @@ function buildCourseFromPlanSlot({
     });
 }
 
+function buildChoiceCourseSlot({
+    slot,
+    classByCode,
+    studentEnrollments,
+    usedClassIds,
+}) {
+    const options = slot.options ?? [];
+
+    for (const option of options) {
+        if (typeof option === "string") continue;
+
+        const normalizedOption = normalizePlanSlot(option);
+
+        if (normalizedOption.type !== "specific") continue;
+
+        const classItem = classByCode[normalizeCourseCode(normalizedOption.code)];
+
+        if (!classItem) continue;
+
+        if (usedClassIds.has(Number(classItem.classId))) continue;
+
+        const enrollment = getEnrollmentForClass(
+            studentEnrollments,
+            classItem.classId
+        );
+
+        if (!enrollment) continue;
+
+        usedClassIds.add(Number(classItem.classId));
+
+        const grade = enrollment.grade ?? null;
+        const credits =
+            normalizedOption.creditsOverride ??
+            classItem.credits ??
+            slot.credits ??
+            "";
+
+        return {
+            code: classItem.code,
+            credits,
+            points:
+                grade === null || grade === undefined || credits === ""
+                    ? null
+                    : getGradePoints(grade) * Number(credits),
+            grade:
+                grade === null || grade === undefined
+                    ? null
+                    : getLetterGrade(grade),
+            status: getSemesterCourseStatus(enrollment),
+            requirementLabel: slot.label,
+            isPlaceholder: false,
+        };
+    }
+
+    return buildPlaceholderSlot(slot);
+}
+
 function buildSpecificCourseSlot({
     code,
     classByCode,
     studentEnrollments,
     usedClassIds,
+    creditsOverride,
 }) {
     const normalizedCode = normalizeCourseCode(code);
     const classItem = classByCode[normalizedCode];
@@ -1961,7 +2170,7 @@ function buildSpecificCourseSlot({
     }
 
     const grade = enrollment?.grade ?? null;
-    const credits = classItem?.credits ?? "";
+    const credits = creditsOverride ?? classItem?.credits ?? "";
 
     return {
         code,
@@ -1973,6 +2182,7 @@ function buildSpecificCourseSlot({
         grade: grade === null || grade === undefined ? null : getLetterGrade(grade),
         status: getSemesterCourseStatus(enrollment),
         isPlaceholder: !classItem,
+        requirementLabel: null,
     };
 }
 
@@ -1997,6 +2207,10 @@ function buildCscLevelSlot({
         const courseNumber = Number(code.replace("CSC", ""));
 
         if (!isCsc || Number.isNaN(courseNumber)) return false;
+
+        if (slot.level === "300-or-400") {
+            return courseNumber >= 300 && courseNumber < 500;
+        }
 
         if (slot.level === 300) {
             return courseNumber >= 300 && courseNumber < 400;

@@ -110,6 +110,13 @@ function isElectiveCourse(course) {
     );
 }
 
+function isMinorElectiveCourse(course) {
+    return (
+        course.isMinorElective ||
+        categoryMatches(course, "minor-elective")
+    );
+}
+
 function isForeignLanguageCourse(course) {
     return (
         course.isForeignLanguage ||
@@ -136,6 +143,16 @@ function getPageConfig(pageType) {
             emptyMessage:
                 "No electives were found. The backend needs to mark these with isElective, is_elective, or a category/requirementType value.",
             filter: isElectiveCourse,
+        };
+    }
+
+    if (pageType === "minor-electives") {
+        return {
+            title: "Minor Electives",
+            subtitle: "Courses marked by the backend as minor elective options.",
+            emptyMessage:
+                "No minor electives were found. The backend needs to mark these with isMinorElective, is_minor_elective, or a category/requirementType value.",
+            filter: isMinorElectiveCourse,
         };
     }
 
