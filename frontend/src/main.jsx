@@ -22,6 +22,9 @@ import StudentManager from './Pages/Admin_Pages/StudentManager.jsx'
 import ProgressPage from './Pages/ProgressPage.jsx'
 import DashboardPage from './Pages/DashboardPage.jsx'
 import ScheduleManagerPage from './Pages/Admin_Pages/ScheduleManagerPage.jsx'
+import ForeignLanguagePage from "./Pages/ForeignLanguagePage";
+import ElectivesPage from "./Pages/ElectivesPage";
+import CscUpperLevelPage from "./Pages/CscUpperLevelPage";
 
 
 const router = createBrowserRouter([
@@ -38,7 +41,13 @@ const router = createBrowserRouter([
     {path:"/test", element:<TestPage/>},
     {path:"/students/:id/", element:<StudentZoomPage/>},
     {path:"/classes/:header", element:<ClassZoomPage/>},
-    {path:"/schedule/manager", element: <ScheduleManagerPage/>}
+    {path:"/schedule/manager", element: <ScheduleManagerPage/>},
+    {path:"/foreign-languages", element: <ForeignLanguagePage/>},
+    {path:"/electives", element: <ElectivesPage/>},
+    {path:"/csc-upper-level", element: <CscUpperLevelPage/>},
+
+
+
     
 ])
 

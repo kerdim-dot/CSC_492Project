@@ -5,6 +5,7 @@ import "../searchers.css"
 import { useNavigate } from "react-router-dom"
 import { useEffect, useState } from "react"
 import axios from 'axios'
+import { formatClassUrlCode } from "../tools/classRoutes.jsx";
 
 // const requiredClasses = [
 //         {title:	"Programming Problem Solving I",header:"CSC-120", credits: 4}, 
@@ -17,35 +18,35 @@ import axios from 'axios'
 //         {title:"Practice Software Engineering",header:"CSC-492", credits: 2}
 //     ];
 
-function Classes(){
-    
+function Classes() {
+
     const [classes, setClasses] = useState([]);
 
-    useEffect(()=>{
-        
-        const retriveClassData = async() =>{
+    useEffect(() => {
+
+        const retriveClassData = async () => {
             const classData = await axios.get('http://localhost:8080/test/get/classes');
-            setClasses (classData.data);
+            setClasses(classData.data);
             console.log("class fetch:", classData.data)
         }
 
         retriveClassData();
-    },[])
+    }, [])
 
 
     const [classSearchList, setClassSearchList] = useState(null);
-    
+
     const [showFilter, setShowFilter] = useState(false);
-    const [year,setYear] = useState("All");
-    const [requirement,setRequirement] = useState("All");
-    const [credits,setCredits] = useState(null);
+    const [year, setYear] = useState("All");
+    const [requirement, setRequirement] = useState("All");
+    const [credits, setCredits] = useState(null);
 
     const [searchInput, setSearchInput] = useState("");
 
-     
+
 
     useEffect(() => {
-    if (!classes) return;
+        if (!classes) return;
 
         let filtered = [...classes];
 
@@ -90,54 +91,56 @@ function Classes(){
 
     }, [classes, searchInput, year, requirement, credits]);
 
-    return(
+    return (
         <div className="classes-container">
-            {showFilter && <FilterBlock year ={year} setYear ={setYear} requirement = {requirement} setRequirement = {setRequirement} credits = {credits} setCredits = {setCredits} setShowFilter = {setShowFilter}/>}
-            <SearchBar  searchInput={searchInput} setSearchInput={setSearchInput} setShowFilter={setShowFilter}/>
-            <ClassList classSearchList={classSearchList}/>
+            {showFilter && <FilterBlock year={year} setYear={setYear} requirement={requirement} setRequirement={setRequirement} credits={credits} setCredits={setCredits} setShowFilter={setShowFilter} />}
+            <SearchBar searchInput={searchInput} setSearchInput={setSearchInput} setShowFilter={setShowFilter} />
+            <ClassList classSearchList={classSearchList} />
+
+
         </div>
     )
 }
 
 
-function FilterBlock({ year, setYear, requirement, setRequirement,credits,setCredits, setShowFilter}) {
+function FilterBlock({ year, setYear, requirement, setRequirement, credits, setCredits, setShowFilter }) {
 
-    const onReset = ()=>{
+    const onReset = () => {
         setCredits(null);
         setYear("All");
         setRequirement("All");
     }
 
-    const onFilter = () =>{
+    const onFilter = () => {
 
     }
 
     return (
         <div>
             <div className="filter-container">
-                <img className="close-img" src={close} onClick={()=>{setShowFilter(false)}}></img>
+                <img className="close-img" src={close} onClick={() => { setShowFilter(false) }}></img>
 
                 <p className="filter-title">Filter Classes</p>
 
 
                 <div className="filter-graduation-overview">
                     <label>Credit Filter</label>
-                    <input className="credit-input" type = "number" value = {credits} onChange = {(e)=>{setCredits(e.target.value)}}/>
+                    <input className="credit-input" type="number" value={credits} onChange={(e) => { setCredits(e.target.value) }} />
                 </div>
 
-                 <div className="filter-graduation-overview">
+                <div className="filter-graduation-overview">
                     <label>Requirement Filter</label>
-                    <select className="year-select" value={requirement} onChange={(e)=>setRequirement(e.target.value)}>
+                    <select className="year-select" value={requirement} onChange={(e) => setRequirement(e.target.value)}>
                         <option value="All">All</option>
                         <option value="Required">First Year</option>
                         <option value="Not Required">Second Year</option>
                     </select>
                 </div>
 
-                
+
                 <div className="filter-graduation-overview">
                     <label>Year Filter</label>
-                    <select className="year-select" value={year} onChange={(e)=>setYear(e.target.value)}>
+                    <select className="year-select" value={year} onChange={(e) => setYear(e.target.value)}>
                         <option value="All">All</option>
                         <option value="First">First Year</option>
                         <option value="Second">Second Year</option>
@@ -175,27 +178,30 @@ function SearchBar({ searchInput, setSearchInput, setShowFilter }) {
     );
 }
 
-function ClassList({classSearchList}){
+function ClassList({ classSearchList }) {
     const navigate = useNavigate();
-    // function which allows the user to click on a student and nav to individual 
 
-    // replace with classes method, add an isrequired field
-   
-
-    return(
+    return (
         <div className="placeholder">
-             <div className="entry-list">
-                {classSearchList && classSearchList.map((item,index)=>{
-                    return(
-                    <div className="entry" onClick={()=>{navigate(`/classes/${item.header}`)}}>
-                        <p>{item.title} </p>
-                        <p>{item.header} </p>
-                    </div>
-                    )
-                })}
+            <div className="entry-list">
+                {classSearchList &&
+                    classSearchList.map((item, index) => {
+                        return (
+                            <div
+                                key={item.classId ?? item.id ?? item.header ?? index}
+                                className="entry"
+                                onClick={() => {
+                                    navigate(`/classes/${formatClassUrlCode(item.header)}`);
+                                }}
+                            >
+                                <p>{item.title}</p>
+                                <p>{item.header}</p>
+                            </div>
+                        );
+                    })}
             </div>
         </div>
-    ) 
+    );
 }
 
 export default Classes;

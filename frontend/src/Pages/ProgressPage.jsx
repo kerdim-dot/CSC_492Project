@@ -3,6 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../progress_page.css";
+import { formatClassUrlCode } from "../tools/classRoutes.jsx";
+
 
 const CLASS_ROUTE_PREFIX = "/classes/";
 
@@ -540,6 +542,68 @@ function normalizeEnrollment(rawEnrollment) {
                 ? null
                 : Number(rawEnrollment.grade),
     };
+}
+
+function getNodeNavigationOptions(course) {
+    const label = course.requirementLabel || course.code || "";
+    const code = course.code || "";
+
+    // "Foreign Language or Elective"
+    if (label === "Foreign Language or Elective") {
+        return [
+            {
+                label: "View foreign language courses",
+                path: `/foreign-languages`,
+            },
+            {
+                label: "View electives",
+                path: `/electives`,
+            },
+        ];
+    }
+
+    // "CSC360 or Elective", "CSW223 or Elective", "CSW423 or Elective", etc.
+    if (label.includes("or Elective")) {
+        const specificCourse = label.replace("or Elective", "").trim();
+
+        return [
+            {
+                label: `View ${specificCourse}`,
+                path: `${CLASS_ROUTE_PREFIX}${formatClassUrlCode(specificCourse)}`,
+            },
+            {
+                label: "View electives",
+                path: `/electives`,
+            },
+        ];
+    }
+
+    // "CSC3XX or CSC4XX"
+    if (
+        label.includes("CSC3XX") ||
+        label.includes("CSC4XX") ||
+        code.includes("CSC3XX") ||
+        code.includes("CSC4XX")
+    ) {
+        return [
+            {
+                label: "View CSC 300/400 courses",
+                path: `/csc-upper-level`,
+            },
+        ];
+    }
+
+    // Normal course node
+    if (!course.isPlaceholder) {
+        return [
+            {
+                label: `View ${code}`,
+                path: `${CLASS_ROUTE_PREFIX}${formatClassUrlCode(code)}`,
+            },
+        ];
+    }
+
+    return [];
 }
 
 function buildEnrollmentsByStudent(enrollments) {
@@ -1131,6 +1195,7 @@ function validateGridSpacing(courses, expanded) {
 function ProgressPage() {
     const navigate = useNavigate();
     const [showExternalPrereqs, setShowExternalPrereqs] = useState(false);
+    const [openNavMenuId, setOpenNavMenuId] = useState(null);
 
     const [rawStudents, setRawStudents] = useState([]);
     const [rawClasses, setRawClasses] = useState([]);
@@ -1222,8 +1287,16 @@ function ProgressPage() {
     const linePaths = buildLinePaths(edges, courseMap);
 
     const handleClick = (course) => {
-        if (course.isPlaceholder) return;
-        navigate(`${CLASS_ROUTE_PREFIX}${course.code}`);
+        const options = getNodeNavigationOptions(course);
+
+        if (options.length === 0) return;
+
+        if (options.length === 1) {
+            navigate(options[0].path);
+            return;
+        }
+
+        setOpenNavMenuId((prev) => (prev === course.id ? null : course.id));
     };
 
     if (isLoadingProgress) {
@@ -1311,32 +1384,64 @@ function ProgressPage() {
                             ))}
                         </svg>
 
-                        {courses.map((course) => (
-                            <button
-                                key={course.id}
-                                type="button"
-                                className={`progress-node progress-node-${course.status} ${course.isPlaceholder ? "progress-node-placeholder" : ""
-                                    }`}
-                                style={{
-                                    left: `${course.x}%`,
-                                    top: `${course.y}%`,
-                                }}
-                                onClick={() => handleClick(course)}
-                            >
-                                <span className="progress-node-code">
-                                    {course.code}
-                                </span>
-                                <span className="progress-node-cell">
-                                    {course.creditsLabel ?? course.credits ?? ""}
-                                </span>
-                                <span className="progress-node-cell">
-                                    {course.grade}
-                                </span>
-                                <span className="progress-node-cell">
-                                    {course.score}
-                                </span>
-                            </button>
-                        ))}
+                        {courses.map((course) => {
+                            const navOptions = getNodeNavigationOptions(course);
+                            const hasMultipleOptions = navOptions.length > 1;
+                            const isMenuOpen = openNavMenuId === course.id;
+
+                            return (
+                                <div key={course.id} className="progress-node-layer">
+                                    <button
+                                        type="button"
+                                        className={`progress-node progress-node-${course.status} ${course.isPlaceholder ? "progress-node-placeholder" : ""
+                                            } ${hasMultipleOptions ? "progress-node-has-menu" : ""}`}
+                                        style={{
+                                            left: `${course.x}%`,
+                                            top: `${course.y}%`,
+                                        }}
+                                        onClick={() => handleClick(course)}
+                                    >
+                                        <span className="progress-node-code">
+                                            {course.code}
+                                        </span>
+                                        <span className="progress-node-cell">
+                                            {course.creditsLabel ?? course.credits ?? ""}
+                                        </span>
+                                        <span className="progress-node-cell">
+                                            {course.grade}
+                                        </span>
+                                        <span className="progress-node-cell">
+                                            {course.score}
+                                        </span>
+                                    </button>
+
+                                    {isMenuOpen && (
+                                        <div
+                                            className="progress-node-nav-menu"
+                                            style={{
+                                                left: `${course.x}%`,
+                                                top: `calc(${course.y}% + 4.25rem)`,
+                                            }}
+                                        >
+                                            {navOptions.map((option) => (
+                                                <button
+                                                    key={option.path}
+                                                    type="button"
+                                                    className="progress-node-nav-option"
+                                                    onClick={(event) => {
+                                                        event.stopPropagation();
+                                                        navigate(option.path);
+                                                        setOpenNavMenuId(null);
+                                                    }}
+                                                >
+                                                    {option.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </section>
             </main>
