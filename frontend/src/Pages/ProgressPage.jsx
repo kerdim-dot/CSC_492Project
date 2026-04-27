@@ -1,138 +1,75 @@
 import SideBar from "../Components/Sidebar";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import "../progress_page.css";
 
 const CLASS_ROUTE_PREFIX = "/classes/";
 
-/*
- * These should match your CSS:
- *
- * .progress-node {
- *   width: 18%;
- *   height: 7%;
- *   transform: translateX(-50%);
- * }
- *
- * Since x is treated as the CENTER of the node,
- * NODE_WIDTH is mostly useful for spacing validation / future math.
- */
 const NODE_WIDTH = 18;
 const NODE_HEIGHT = 7;
 
+const DEMO_STUDENT_ID = 1;
+
+const ENROLLMENT_STATUS = {
+    PLANNED: 0,
+    IN_PROGRESS: 1,
+    COMPLETED: 2,
+    DROPPED: 3,
+};
+
 /*
- * Grid notes:
- * - row controls vertical level.
- * - col controls horizontal slot.
- * - expandedCol is used when non-CSC prerequisites are visible.
- *
- * Important:
- * Because nodes are wide, same-row courses should usually be
- * at least 2 columns apart.
+ * These are layout-only templates.
+ * Grades, credits, status, and score are filled from backend data.
  */
-const mainCourses = [
-    {
-        id: "CSC120",
-        code: "CSC120",
-        credits: 4,
-        grade: "A",
-        score: 16,
-        status: "good",
-        row: 0,
-        col: 3,
-        expandedCol: 3,
-    },
+const CS_PROGRESS_LAYOUT = {
+    CSC120: { row: 0, col: 3, expandedCol: 3 },
 
-    {
-        id: "CSC220",
-        code: "CSC220",
-        credits: 4,
-        grade: "A",
-        score: 16,
-        status: "good",
-        row: 1,
-        col: 1,
-        expandedCol: 1,
-    },
-    {
-        id: "CSC320",
-        code: "CSC320",
-        credits: 4,
-        grade: "A",
-        score: 16,
-        status: "good",
-        row: 1,
-        col: 3,
-        expandedCol: 3,
-    },
-    {
-        id: "CSC280",
-        code: "CSC280",
-        credits: 4,
-        grade: "",
-        score: "",
-        status: "bad",
-        row: 1,
-        col: 5,
-        expandedCol: 5,
-    },
+    CSC220: { row: 1, col: 1, expandedCol: 1 },
+    CSC320: { row: 1, col: 3, expandedCol: 3 },
+    CSC280: { row: 1, col: 5, expandedCol: 5 },
 
-    {
-        id: "CSC360A",
-        code: "CSC360",
-        credits: 4,
-        grade: "B",
-        score: 12,
-        status: "in-progress",
-        row: 2,
-        col: 1,
-        expandedCol: 1,
-    },
-    {
-        id: "CSC360B",
-        code: "CSC360",
-        credits: 4,
-        grade: "",
-        score: "",
-        status: "planned",
-        row: 2,
-        col: 3,
-        expandedCol: 3,
-    },
-    {
-        id: "CSC340",
-        code: "CSC340",
-        credits: 4,
-        grade: "",
-        score: "",
-        status: "planned",
-        row: 2,
-        col: 5,
-        expandedCol: 6,
-    },
+    CSC360: { row: 2, col: 1, expandedCol: 1 },
+    CSC340: { row: 2, col: 5, expandedCol: 6 },
 
-    {
-        id: "CSC450",
-        code: "CSC450",
-        credits: 4,
-        grade: "",
-        score: "",
-        status: "planned",
-        row: 3,
-        col: 2,
-        expandedCol: 2,
-    },
-    {
-        id: "CSC490",
-        code: "CSC490",
-        credits: 4,
-        grade: "B",
-        score: 12,
-        status: "planned",
-        row: 3,
-        col: 4,
-        expandedCol: 5,
-    },
+    CSC450: { row: 3, col: 2, expandedCol: 2 },
+    CSC490: { row: 3, col: 4, expandedCol: 5 },
+};
+
+const MPSD_PROGRESS_LAYOUT = {
+    CSC120: { row: 0, col: 3, expandedCol: 3 },
+
+    CSC220: { row: 1, col: 1, expandedCol: 1 },
+    CSC320: { row: 1, col: 3, expandedCol: 3 },
+    CSC280: { row: 1, col: 5, expandedCol: 5 },
+
+    CSC360: { row: 2, col: 1, expandedCol: 1 },
+    CSC340: { row: 2, col: 5, expandedCol: 6 },
+
+    CSC450: { row: 3, col: 2, expandedCol: 2 },
+    CSC490: { row: 3, col: 4, expandedCol: 5 },
+
+    // TODO: replace these with real MPSD-specific classes/layout if needed.
+    MPSD100: { row: 0, col: 5, expandedCol: 5 },
+    MPSD200: { row: 1, col: 6, expandedCol: 7 },
+    MPSD300: { row: 2, col: 6, expandedCol: 8 },
+};
+
+const CS_PROGRESS_EDGES = [
+    { from: "CSC120", to: "CSC220" },
+    { from: "CSC120", to: "CSC320" },
+    { from: "CSC320", to: "CSC280" },
+    { from: "CSC220", to: "CSC360" },
+    { from: "CSC360", to: "CSC450" },
+    { from: "CSC280", to: "CSC490" },
+];
+
+const MPSD_PROGRESS_EDGES = [
+    ...CS_PROGRESS_EDGES,
+
+    // TODO: replace these with real MPSD prerequisite edges if needed.
+    { from: "MPSD100", to: "MPSD200" },
+    { from: "MPSD200", to: "MPSD300" },
 ];
 
 const externalCourses = [
@@ -168,19 +105,8 @@ const externalCourses = [
     },
 ];
 
-const mainEdges = [
-    { from: "CSC120", to: "CSC220" },
-    { from: "CSC120", to: "CSC320" },
-    { from: "CSC320", to: "CSC280" },
-    { from: "CSC220", to: "CSC360A" },
-    { from: "CSC220", to: "CSC360B" },
-    { from: "CSC360A", to: "CSC450" },
-    { from: "CSC360B", to: "CSC450" },
-    { from: "CSC280", to: "CSC490" },
-];
-
 const externalEdges = [
-    { from: "MTH140", to: "CSC360B" },
+    { from: "MTH140", to: "CSC360" },
     { from: "PHY150", to: "CSC340" },
     { from: "ENG101", to: "CSC490" },
 ];
@@ -191,11 +117,6 @@ const GRID_CONFIG = {
         right: 88,
         cols: 7,
         rowYs: [8, 33, 58, 82],
-
-        /*
-         * Different offsets per row prevent vertical stacking.
-         * These are fractions of one grid step.
-         */
         rowOffsets: [0, 0.5, 0.25, 0.75],
     },
 
@@ -207,6 +128,226 @@ const GRID_CONFIG = {
         rowOffsets: [0, 0.5, 0.25, 0.75],
     },
 };
+
+function normalizeCourseCode(code) {
+    return String(code ?? "")
+        .replace("-", "")
+        .replace(/\s+/g, "")
+        .toUpperCase();
+}
+
+function normalizeStudent(rawStudent) {
+    const studentId =
+        rawStudent.studentId ??
+        rawStudent.student_id ??
+        rawStudent.id;
+
+    return {
+        ...rawStudent,
+        id: Number(studentId),
+        studentId: Number(studentId),
+        name:
+            rawStudent.name ??
+            `${rawStudent.firstName ?? ""} ${rawStudent.lastName ?? ""}`.trim(),
+        isMultiPlatformMajor: Boolean(rawStudent.isMultiPlatformMajor),
+    };
+}
+
+function normalizeClass(rawClass) {
+    const classId =
+        rawClass.classId ??
+        rawClass.class_id ??
+        rawClass.id;
+
+    return {
+        ...rawClass,
+
+        id: Number(classId),
+        classId: Number(classId),
+
+        code: rawClass.code ?? rawClass.header ?? rawClass.classCode,
+        header: rawClass.header ?? rawClass.code ?? rawClass.classCode,
+        name: rawClass.name ?? rawClass.title ?? rawClass.className,
+
+        credits: Number(rawClass.credits ?? 0),
+
+        isCSMajor: Boolean(
+            rawClass.isCSMajor ??
+            rawClass.isRequiredComputerScienceMajor
+        ),
+
+        isCSMinor: Boolean(
+            rawClass.isCSMinor ??
+            rawClass.isRequiredComputerScienceMinor
+        ),
+
+        isMultiPlatformMajor: Boolean(
+            rawClass.isMultiPlatformMajor ??
+            rawClass.isRequiredMultiPlatformMajor
+        ),
+    };
+}
+
+function normalizeEnrollment(rawEnrollment) {
+    return {
+        ...rawEnrollment,
+
+        id:
+            rawEnrollment.id ??
+            rawEnrollment.enrollmentId ??
+            rawEnrollment.enrollment_id,
+
+        studentId: Number(
+            rawEnrollment.studentId ??
+            rawEnrollment.student_id ??
+            rawEnrollment.student?.id
+        ),
+
+        classId: Number(
+            rawEnrollment.classId ??
+            rawEnrollment.class_id ??
+            rawEnrollment.mountClass_id ??
+            rawEnrollment.mountClass?.id
+        ),
+
+        status: Number(rawEnrollment.status),
+
+        grade:
+            rawEnrollment.grade === null ||
+            rawEnrollment.grade === undefined ||
+            rawEnrollment.grade === ""
+                ? null
+                : Number(rawEnrollment.grade),
+    };
+}
+
+function buildEnrollmentsByStudent(enrollments) {
+    const map = {};
+
+    enrollments.forEach((enrollment) => {
+        const studentId = Number(enrollment.studentId);
+
+        if (!map[studentId]) {
+            map[studentId] = [];
+        }
+
+        map[studentId].push(enrollment);
+    });
+
+    return map;
+}
+
+function getStudentEnrollments(student, enrollmentsByStudent) {
+    return enrollmentsByStudent[Number(student.studentId)] ?? [];
+}
+
+function getEnrollmentForClass(studentEnrollments, classId) {
+    return (
+        studentEnrollments.find(
+            (enrollment) => Number(enrollment.classId) === Number(classId)
+        ) ?? null
+    );
+}
+
+function getLetterGrade(score) {
+    if (score === null || score === undefined || Number.isNaN(score)) return "";
+    if (score >= 90) return "A";
+    if (score >= 80) return "B";
+    if (score >= 70) return "C";
+    if (score >= 60) return "D";
+    return "F";
+}
+
+function getGradePoints(score) {
+    if (score === null || score === undefined || Number.isNaN(score)) return "";
+    if (score >= 90) return 4;
+    if (score >= 80) return 3;
+    if (score >= 70) return 2;
+    if (score >= 60) return 1;
+    return 0;
+}
+
+function getCourseStatus(enrollment) {
+    if (!enrollment) return "planned";
+
+    const grade = enrollment.grade;
+
+    if (grade !== null && grade !== undefined && Number(grade) < 60) {
+        return "bad";
+    }
+
+    if (enrollment.status === ENROLLMENT_STATUS.COMPLETED) {
+        return "good";
+    }
+
+    if (enrollment.status === ENROLLMENT_STATUS.IN_PROGRESS) {
+        return "in-progress";
+    }
+
+    if (enrollment.status === ENROLLMENT_STATUS.PLANNED) {
+        return "planned";
+    }
+
+    return "planned";
+}
+
+function getStudentProgramType(student) {
+    if (student?.isMultiPlatformMajor) return "mpsd";
+    return "cs";
+}
+
+function buildProgressCourses({
+    selectedStudent,
+    classes,
+    enrollmentsByStudent,
+}) {
+    if (!selectedStudent) return [];
+
+    const programType = getStudentProgramType(selectedStudent);
+
+    const layout =
+        programType === "mpsd"
+            ? MPSD_PROGRESS_LAYOUT
+            : CS_PROGRESS_LAYOUT;
+
+    const studentEnrollments = getStudentEnrollments(
+        selectedStudent,
+        enrollmentsByStudent
+    );
+
+    const classByCode = Object.fromEntries(
+        classes.map((classItem) => [
+            normalizeCourseCode(classItem.code),
+            classItem,
+        ])
+    );
+
+    return Object.entries(layout).map(([courseCode, position]) => {
+        const normalizedCode = normalizeCourseCode(courseCode);
+        const classItem = classByCode[normalizedCode];
+
+        const enrollment = classItem
+            ? getEnrollmentForClass(studentEnrollments, classItem.classId)
+            : null;
+
+        const grade = enrollment?.grade ?? null;
+        const credits = classItem?.credits ?? "";
+
+        return {
+            id: normalizedCode,
+            code: courseCode,
+            credits,
+            grade: getLetterGrade(grade),
+            score:
+                grade === null || grade === undefined || credits === ""
+                    ? ""
+                    : getGradePoints(grade) * Number(credits),
+            status: getCourseStatus(enrollment),
+
+            ...position,
+        };
+    });
+}
 
 function getGridPosition(course, expanded) {
     const grid = expanded ? GRID_CONFIG.expanded : GRID_CONFIG.collapsed;
@@ -225,27 +366,22 @@ function getGridPosition(course, expanded) {
 }
 
 function getLineLaneOffset(edge) {
-    /*
-     * Small manual line-lane offsets.
-     * These do not move the nodes — only the line attachment points.
-     * Useful when two prerequisite lines visually stack.
-     */
     const laneOffsets = {
         "CSC120-CSC220": -1.2,
         "CSC120-CSC320": 0,
         "CSC320-CSC280": 1.2,
 
-        "CSC220-CSC360A": -1.2,
-        "CSC220-CSC360B": 1.2,
-
-        "CSC360A-CSC450": -1.1,
-        "CSC360B-CSC450": 1.1,
+        "CSC220-CSC360": -1.2,
+        "CSC360-CSC450": 1.1,
 
         "CSC280-CSC490": 1.35,
 
-        "MTH140-CSC360B": -1.6,
+        "MTH140-CSC360": -1.6,
         "PHY150-CSC340": 2.2,
         "ENG101-CSC490": 2.4,
+
+        "MPSD100-MPSD200": 1.3,
+        "MPSD200-MPSD300": 1.4,
     };
 
     return laneOffsets[`${edge.from}-${edge.to}`] ?? 0;
@@ -256,16 +392,12 @@ function buildLinePaths(edges, courseMap) {
         .map((edge) => {
             const from = courseMap[edge.from];
             const to = courseMap[edge.to];
+
             if (!from || !to) return null;
 
             const lane = getLineLaneOffset(edge);
             const direction = to.x >= from.x ? 1 : -1;
 
-            /*
-             * Since x is node center, the base line goes from center-bottom
-             * to center-top. lane nudges the line left/right so overlapping
-             * paths are easier to distinguish.
-             */
             const x1 = from.x + lane;
             const y1 = from.y + NODE_HEIGHT;
 
@@ -323,6 +455,80 @@ function ProgressPage() {
     const navigate = useNavigate();
     const [showExternalPrereqs, setShowExternalPrereqs] = useState(false);
 
+    const [rawStudents, setRawStudents] = useState([]);
+    const [rawClasses, setRawClasses] = useState([]);
+    const [rawEnrollments, setRawEnrollments] = useState([]);
+
+    const [isLoadingProgress, setIsLoadingProgress] = useState(true);
+    const [progressError, setProgressError] = useState(null);
+
+    useEffect(() => {
+        async function fetchProgressData() {
+            try {
+                setIsLoadingProgress(true);
+                setProgressError(null);
+
+                const [studentRes, classRes, enrollmentRes] = await Promise.all([
+                    axios.get("http://localhost:8080/test/get/students"),
+                    axios.get("http://localhost:8080/test/get/classes"),
+                    axios.get("http://localhost:8080/test/get/enrollments"),
+                ]);
+
+                setRawStudents(studentRes.data ?? []);
+                setRawClasses(classRes.data ?? []);
+                setRawEnrollments(enrollmentRes.data ?? []);
+            } catch (error) {
+                console.error("Failed to fetch progress data:", error);
+                setProgressError(error);
+            } finally {
+                setIsLoadingProgress(false);
+            }
+        }
+
+        fetchProgressData();
+    }, []);
+
+    const students = useMemo(() => {
+        return rawStudents.map(normalizeStudent);
+    }, [rawStudents]);
+
+    const classes = useMemo(() => {
+        return rawClasses.map(normalizeClass);
+    }, [rawClasses]);
+
+    const enrollments = useMemo(() => {
+        return rawEnrollments.map(normalizeEnrollment);
+    }, [rawEnrollments]);
+
+    const enrollmentsByStudent = useMemo(() => {
+        return buildEnrollmentsByStudent(enrollments);
+    }, [enrollments]);
+
+    const selectedStudent = useMemo(() => {
+        if (!students.length) return null;
+
+        return (
+            students.find(
+                (student) => Number(student.studentId) === Number(DEMO_STUDENT_ID)
+            ) ?? students[0]
+        );
+    }, [students]);
+
+    const mainCourses = useMemo(() => {
+        return buildProgressCourses({
+            selectedStudent,
+            classes,
+            enrollmentsByStudent,
+        });
+    }, [selectedStudent, classes, enrollmentsByStudent]);
+
+    const programType = getStudentProgramType(selectedStudent);
+
+    const mainEdges =
+        programType === "mpsd"
+            ? MPSD_PROGRESS_EDGES
+            : CS_PROGRESS_EDGES;
+
     const positionedMainCourses = mainCourses.map((course) => ({
         ...course,
         ...getGridPosition(course, showExternalPrereqs),
@@ -350,8 +556,43 @@ function ProgressPage() {
     const linePaths = buildLinePaths(edges, courseMap);
 
     const handleClick = (code) => {
-        navigate(`${CLASS_ROUTE_PREFIX}${code.toLowerCase()}`);
+        navigate(`${CLASS_ROUTE_PREFIX}${code}`);
     };
+
+    if (isLoadingProgress) {
+        return (
+            <div className="progress-page-shell">
+                <SideBar />
+
+                <main className="progress-page-content">
+                    <section className="dashboard-surface progress-tree-surface">
+                        <p className="dashboard-surface-subtitle">
+                            Loading progress data...
+                        </p>
+                    </section>
+                </main>
+            </div>
+        );
+    }
+
+    if (progressError) {
+        return (
+            <div className="progress-page-shell">
+                <SideBar />
+
+                <main className="progress-page-content">
+                    <section className="dashboard-surface progress-tree-surface">
+                        <h2 className="dashboard-surface-title">
+                            Progress failed to load
+                        </h2>
+                        <p className="dashboard-surface-subtitle">
+                            Check that the backend is running and the progress endpoints are available.
+                        </p>
+                    </section>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="progress-page-shell">
@@ -361,9 +602,12 @@ function ProgressPage() {
                 <section className="dashboard-surface progress-tree-surface">
                     <div className="dashboard-surface-header">
                         <div>
-                            <h2 className="dashboard-surface-title">Progress Tree</h2>
+                            <h2 className="dashboard-surface-title">
+                                Progress Tree
+                            </h2>
                             <p className="dashboard-surface-subtitle">
                                 CSC sequence with prerequisite structure and course status
+                                {selectedStudent ? ` for ${selectedStudent.name}` : ""}
                             </p>
                         </div>
 

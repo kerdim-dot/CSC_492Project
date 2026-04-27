@@ -73,7 +73,7 @@ function getSemestersLeft(student, currentYear, currentSemester) {
 
 
 function AdviseesBoard({ students = [] }) {
-    
+
     const navigate = useNavigate();
 
     return (
@@ -309,7 +309,7 @@ const semesterData = [
 ];
 
 function SemesterPlanBoard({ semesterData = [] }) {
-    
+
     const navigate = useNavigate();
 
     const getTotalCredits = (courses) =>
@@ -1045,7 +1045,6 @@ function normalizeClass(rawClass) {
     return {
         ...rawClass,
 
-        // flexible aliases
         id: rawClass.id ?? rawClass.class_id ?? rawClass.classId,
         classId: rawClass.classId ?? rawClass.class_id ?? rawClass.id,
 
@@ -1055,9 +1054,20 @@ function normalizeClass(rawClass) {
 
         credits: Number(rawClass.credits ?? 0),
 
-        isCSMajor: Boolean(rawClass.isCSMajor),
-        isCSMinor: Boolean(rawClass.isCSMinor),
-        isMultiPlatformMajor: Boolean(rawClass.isMultiPlatformMajor),
+        isCSMajor: Boolean(
+            rawClass.isCSMajor
+            ?? rawClass.isRequiredComputerScienceMajor
+        ),
+
+        isCSMinor: Boolean(
+            rawClass.isCSMinor
+            ?? rawClass.isRequiredComputerScienceMinor
+        ),
+
+        isMultiPlatformMajor: Boolean(
+            rawClass.isMultiPlatformMajor
+            ?? rawClass.isRequiredMultiPlatformMajor
+        ),
 
         requiredMinimum: rawClass.requiredMinimum ?? DEFAULT_REQUIRED_MINIMUM,
     };
@@ -1559,10 +1569,6 @@ function buildAdviseeStatusCards({
 }
 
 function getApproximateYearLabel(student) {
-    /*
-      Derivable from graduationDate/graduationFormula, but this is approximate.
-      Replace with student.currentYear/classStanding if your backend adds it.
-    */
 
     const semestersLeft = getSemestersLeft(student, CURRENT_YEAR, CURRENT_SEMESTER);
 
@@ -1655,12 +1661,19 @@ function getGradePoints(score) {
 
 function getSemesterCourseStatus(enrollment) {
     if (!enrollment) return "planned";
-    if (isCompletedEnrollment(enrollment)) return "good";
+
+    const grade = enrollment.grade;
+
+    if (grade !== null && grade !== undefined && Number(grade) < 60) {
+        return "bad";
+    }
+
+    if (isCompletedEnrollment(enrollment)) {
+        return "good";
+    }
+
     if (isInProgressEnrollment(enrollment)) {
-        if (
-            enrollment.grade !== null
-            && enrollment.grade < DEFAULT_REQUIRED_MINIMUM
-        ) {
+        if (Number(grade) < DEFAULT_REQUIRED_MINIMUM) {
             return "bad";
         }
 
@@ -1687,6 +1700,173 @@ function buildScheduleLabel(schedule) {
     const season = month < 6 ? "Spring" : "Fall";
 
     return `${season} ${year}`;
+}
+
+const CS_SEMESTER_PLAN_TEMPLATE = [
+    {
+        id: 1,
+        term: "Semester 1",
+        label: "Fall Year 1",
+        courses: ["CSC120", "MTH160", "FYS100"],
+    },
+    {
+        id: 2,
+        term: "Semester 2",
+        label: "Spring Year 1",
+        courses: ["CSC220", "MTH170", "GEN101"],
+    },
+    {
+        id: 3,
+        term: "Semester 3",
+        label: "Fall Year 2",
+        courses: ["CSC270", "CSC290", "MTH250"],
+    },
+    {
+        id: 4,
+        term: "Semester 4",
+        label: "Spring Year 2",
+        courses: ["CSC310", "CSC320", "GEN200"],
+    },
+    {
+        id: 5,
+        term: "Semester 5",
+        label: "Fall Year 3",
+        courses: ["CSC330", "CSC340", "CSC360"],
+    },
+    {
+        id: 6,
+        term: "Semester 6",
+        label: "Spring Year 3",
+        courses: ["CSC410", "CSC420", "GEN300"],
+    },
+    {
+        id: 7,
+        term: "Semester 7",
+        label: "Fall Year 4",
+        courses: ["CSC430", "CSC450", "GEN350"],
+    },
+    {
+        id: 8,
+        term: "Semester 8",
+        label: "Spring Year 4",
+        courses: ["CSC499", "GEN400", "GEN401"],
+    },
+];
+
+const MPSD_SEMESTER_PLAN_TEMPLATE = [
+    {
+        id: 1,
+        term: "Semester 1",
+        label: "Fall Year 1",
+        courses: ["CSC120", "MTH160", "MPSD100"],
+    },
+    {
+        id: 2,
+        term: "Semester 2",
+        label: "Spring Year 1",
+        courses: ["CSC220", "MTH170", "MPSD110"],
+    },
+    {
+        id: 3,
+        term: "Semester 3",
+        label: "Fall Year 2",
+        courses: ["CSC270", "CSC290", "MPSD200"],
+    },
+    {
+        id: 4,
+        term: "Semester 4",
+        label: "Spring Year 2",
+        courses: ["CSC310", "CSC320", "MPSD210"],
+    },
+    {
+        id: 5,
+        term: "Semester 5",
+        label: "Fall Year 3",
+        courses: ["CSC330", "CSC340", "MPSD300"],
+    },
+    {
+        id: 6,
+        term: "Semester 6",
+        label: "Spring Year 3",
+        courses: ["CSC410", "CSC420", "MPSD310"],
+    },
+    {
+        id: 7,
+        term: "Semester 7",
+        label: "Fall Year 4",
+        courses: ["CSC430", "CSC450", "MPSD400"],
+    },
+    {
+        id: 8,
+        term: "Semester 8",
+        label: "Spring Year 4",
+        courses: ["CSC499", "MPSD410", "MPSD420"],
+    },
+];
+
+function buildSemesterPlanFromTemplate({
+    selectedStudent,
+    classes,
+    enrollmentsByStudent,
+}) {
+    if (!selectedStudent) return [];
+
+    const programType = getStudentProgramType(selectedStudent);
+
+    const template =
+        programType === "mpsd"
+            ? MPSD_SEMESTER_PLAN_TEMPLATE
+            : CS_SEMESTER_PLAN_TEMPLATE;
+
+    const studentEnrollments = getStudentEnrollments(
+        selectedStudent,
+        enrollmentsByStudent
+    );
+
+    const classByCode = Object.fromEntries(
+        classes.map((classItem) => [
+            normalizeCourseCode(classItem.code),
+            classItem,
+        ])
+    );
+
+    return template.map((semester) => ({
+        ...semester,
+
+        courses: semester.courses.map((courseCode) => {
+            const normalizedCode = normalizeCourseCode(courseCode);
+            const classItem = classByCode[normalizedCode];
+
+            const enrollment = classItem
+                ? getEnrollmentForClass(studentEnrollments, classItem.classId)
+                : null;
+
+            const grade = enrollment?.grade ?? null;
+            const credits = classItem?.credits ?? 0;
+
+            return {
+                code: courseCode,
+                credits,
+                points: grade === null ? null : getGradePoints(grade) * credits,
+                grade: grade === null ? null : getLetterGrade(grade),
+                status: getSemesterCourseStatus(enrollment),
+            };
+        }),
+    }));
+}
+
+function getStudentProgramType(student) {
+
+    if (student?.isMultiPlatformMajor) return "mpsd";
+
+    return "cs";
+}
+
+function normalizeCourseCode(code) {
+    return String(code ?? "")
+        .replace("-", "")
+        .replace(/\s+/g, "")
+        .toUpperCase();
 }
 
 
@@ -1783,16 +1963,16 @@ function Dashboard() {
         return buildEnrollmentsByStudent(enrollments);
     }, [enrollments]);
 
-    /*
-      TODO:
-      For now, this picks the first student.
-      Later, this should come from logged-in user identity or selected advisee.
-    */
+    const DEMO_STUDENT_ID = 1;
+
     const selectedStudent = useMemo(() => {
         if (!students.length) return null;
 
         if (isStudent) {
-            return students[0];
+            return (
+                students.find((student) => Number(student.studentId) === DEMO_STUDENT_ID)
+                ?? students[0]
+            );
         }
 
         return students[0];
@@ -1881,20 +2061,13 @@ function Dashboard() {
     ]);
 
     const semesterPlanData = useMemo(() => {
-        return buildSemesterPlan({
+        return buildSemesterPlanFromTemplate({
             selectedStudent,
-            schedules,
-            scheduleEntries,
             classes,
             enrollmentsByStudent,
         });
-    }, [
-        selectedStudent,
-        schedules,
-        scheduleEntries,
-        classes,
-        enrollmentsByStudent,
-    ]);
+    }, [selectedStudent, classes, enrollmentsByStudent]);
+
 
     if (isLoadingDashboard) {
         return (

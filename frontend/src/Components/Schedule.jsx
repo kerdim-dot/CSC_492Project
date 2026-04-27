@@ -1,10 +1,21 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import "../schedule.css"
 import down_arrow from './../assets/down_arrow.svg'
 import axios from "axios";
 
 
 function Schedule() {
+    const DEMO_STUDENT_ID = 1;
+
+    const [rawClasses, setRawClasses] = useState([]);
+    const [rawEnrollments, setRawEnrollments] = useState([]);
+    const [rawPrerequisites, setRawPrerequisites] = useState([]);
+    const [rawClassEntries, setRawClassEntries] = useState([]);
+    const [rawImportantDates, setRawImportantDates] = useState([]);
+
+    const [isLoadingSchedule, setIsLoadingSchedule] = useState(true);
+    const [scheduleError, setScheduleError] = useState(null);
+
     const [previewMeetings, setPreviewMeetings] = useState({
         required: null,
         elective: null,
@@ -12,223 +23,406 @@ function Schedule() {
 
     const previewMeeting = previewMeetings.required ?? previewMeetings.elective;
 
-    function updatePreviewMeeting(source, meeting) {
-        setPreviewMeetings((prev) => ({
-            ...prev,
-            [source]: meeting,
-        }));
-    }
+    const updatePreviewMeeting = useCallback((source, meeting) => {
+        setPreviewMeetings((prev) => {
+            const previousMeeting = prev[source];
 
-    useEffect(() => {
-        const student_id = 1;
-        const fetchSchedulesAndEntries = async () => {
-            const scheduleData = await axios.get(`http://localhost:8080/test/get/schedules?studentId=${student_id}`);
-            console.log(`Schedules for student ${student_id}:`, scheduleData.data);
+            const sameMeeting =
+                previousMeeting?.courseCode === meeting?.courseCode &&
+                previousMeeting?.sectionNumber === meeting?.sectionNumber &&
+                previousMeeting?.days === meeting?.days &&
+                previousMeeting?.startTime === meeting?.startTime &&
+                previousMeeting?.endTime === meeting?.endTime;
 
-            for (let i = 0; i < scheduleData.data.length; i++) {
-                const scheduleEntryData = await axios.get(`http://localhost:8080/test/get/schedule/entries?scheduleId=${scheduleData.data[i].schedule_id}`);
-                console.log(`Entries for schedule ${scheduleData.data[i].schedule_id}:`, scheduleEntryData.data);
-            }
-        };
+            if (sameMeeting) return prev;
 
-        const fetchClassAndEntries = async () => {
-            const classResponse = await axios.get(`http://localhost:8080/test/get/classes`);
-            console.log(`Mount Union classes:`, classResponse.data);
-
-            const classEntriesResponse = await axios.get(`http://localhost:8080/test/get/class/entries`);
-            console.log(`Mount Union class Entries:`, classEntriesResponse.data);
-        };
-
-        const fetchImportantDates = async () => {
-            const importantDatesResponse = await axios.get(`http://localhost:8080/test/get/important/dates`);
-            console.log(`Important Dates:`, importantDatesResponse.data);
-        };
-
-        const retriveStudentData = async() =>{
-            const studentData = await axios.get('http://localhost:8080/test/get/students');
-            console.log("student fetch:", studentData.data)
-        }
-
-        const retriveEnrollmentData = async() =>{
-            const enrollmentData = await axios.get('http://localhost:8080/test/get/enrollments');
-            console.log("enrollment fetch:",enrollmentData.data)
-        }
-
-
-        fetchSchedulesAndEntries();
-        fetchClassAndEntries();
-        fetchImportantDates();
-        retriveStudentData();
-        retriveEnrollmentData();
-
+            return {
+                ...prev,
+                [source]: meeting,
+            };
+        });
     }, []);
 
-    const addScheduleEntry = async () => {
-        const entry = {
-            schedule_id: 1,
-            mountClass_id: 1,
-            isMonday: true,
-            isTuesday: false,
-            isWednesDay: true,
-            isThursday: false,
-            isFriday: true,
-            time: "730am-8:45am"
-        };
+    const handleRequiredPreviewChange = useCallback((meeting) => {
+        updatePreviewMeeting("required", meeting);
+    }, [updatePreviewMeeting]);
 
-        const addScheduleData = await axios.post("http://localhost:8080/test/add/schedule/Entry", entry);
-        console.log("scheduleData confirmation", addScheduleData);
-    };
+    const handleElectivePreviewChange = useCallback((meeting) => {
+        updatePreviewMeeting("elective", meeting);
+    }, [updatePreviewMeeting]);
 
-    const addSchedule = async () => {
-        const student_id = 1;
-        const startDate = "2025-11-25";
-        const endDate = "2026-11-25";
+    useEffect(() => {
+        async function fetchScheduleData() {
+            try {
+                setIsLoadingSchedule(true);
+                setScheduleError(null);
 
-        const entry = {
-            student_id: student_id,
-            scheduleStartDate: startDate,
-            scheduleEndDate: endDate
-        };
+                const [
+                    classRes,
+                    enrollmentRes,
+                    prerequisiteRes,
+                    classEntryRes,
+                    importantDateRes,
+                ] = await Promise.all([
+                    axios.get("http://localhost:8080/test/get/classes"),
+                    axios.get("http://localhost:8080/test/get/enrollments"),
+                    axios.get("http://localhost:8080/test/get/prerequisites").catch(() => ({ data: [] })),
+                    axios.get("http://localhost:8080/test/get/class/entries").catch(() => ({ data: [] })),
+                    axios.get("http://localhost:8080/test/get/importantDates").catch(() => ({ data: [] })),
+                ]);
 
-        const addScheduleData = await axios.post("http://localhost:8080/test/add/schedule", entry);
-        console.log("scheduleData confirmation", addScheduleData);
-    };
+                setRawClasses(classRes.data ?? []);
+                setRawEnrollments(enrollmentRes.data ?? []);
+                setRawPrerequisites(prerequisiteRes.data ?? []);
+                setRawClassEntries(classEntryRes.data ?? []);
+                setRawImportantDates(importantDateRes.data ?? []);
+            } catch (error) {
+                console.error("Failed to fetch schedule data:", error);
+                setScheduleError(error);
+            } finally {
+                setIsLoadingSchedule(false);
+            }
+        }
 
-    const deleteSchedule = async () => {
-        const schedule_id = 1;
-        await axios.delete(`http://localhost:8080/test/delete/schedule/entries?id=${schedule_id}`);
-        await axios.delete(`http://localhost:8080/test/delete/schedule?id=${schedule_id}`);
-    };
+        fetchScheduleData();
+    }, []);
+
+    const classes = useMemo(() => {
+        return rawClasses.map(normalizeScheduleClass);
+    }, [rawClasses]);
+
+    const enrollments = useMemo(() => {
+        return rawEnrollments.map(normalizeScheduleEnrollment);
+    }, [rawEnrollments]);
+
+    const prerequisites = useMemo(() => {
+        return rawPrerequisites.map(normalizeSchedulePrerequisite);
+    }, [rawPrerequisites]);
+
+    const classEntries = useMemo(() => {
+        return rawClassEntries.map(normalizeClassEntry);
+    }, [rawClassEntries]);
+
+    const studentEnrollments = useMemo(() => {
+        return enrollments.filter(
+            (enrollment) => Number(enrollment.studentId) === Number(DEMO_STUDENT_ID)
+        );
+    }, [enrollments]);
+
+    const completedCourses = useMemo(() => {
+        return buildCompletedCourseCodes(studentEnrollments, classes);
+    }, [studentEnrollments, classes]);
+
+    const inProgressCourses = useMemo(() => {
+        return buildInProgressCourseCodes(studentEnrollments, classes);
+    }, [studentEnrollments, classes]);
+
+    const allCarouselCourses = useMemo(() => {
+        return buildCarouselCourses({
+            classes,
+            prerequisites,
+            classEntries,
+        });
+    }, [classes, prerequisites, classEntries]);
+
+    const requiredCourses = useMemo(() => {
+        return allCarouselCourses.filter((course) => course.isRequired);
+    }, [allCarouselCourses]);
+
+    const electiveCourses = useMemo(() => {
+        return allCarouselCourses.filter((course) => !course.isRequired);
+    }, [allCarouselCourses]);
+
+    if (isLoadingSchedule) {
+        return (
+            <div className="schedule-container">
+                <section className="schedule-surface">
+                    <p className="schedule-surface-subtitle">Loading schedule data...</p>
+                </section>
+            </div>
+        );
+    }
+
+    if (scheduleError) {
+        return (
+            <div className="schedule-container">
+                <section className="schedule-surface">
+                    <h2 className="schedule-surface-title">Schedule failed to load</h2>
+                    <p className="schedule-surface-subtitle">
+                        Check that the backend is running and that schedule endpoints exist.
+                    </p>
+                </section>
+            </div>
+        );
+    }
 
     return (
         <div className="schedule-container">
             <RequiredCourseCarousel
-                completedCourses={["CSC-120", "CSC-220"]}
-                inProgressCourses={["CSC-130"]}
-                onPreviewChange={(meeting) => updatePreviewMeeting("required", meeting)}
+                courses={requiredCourses}
+                completedCourses={completedCourses}
+                inProgressCourses={inProgressCourses}
+                onPreviewChange={handleRequiredPreviewChange}
             />
 
             <ElectivesCarousel
-                completedCourses={["CSC-120", "CSC-220"]}
-                inProgressCourses={["CSC-130"]}
-                onPreviewChange={(meeting) => updatePreviewMeeting("elective", meeting)}
+                courses={electiveCourses}
+                completedCourses={completedCourses}
+                inProgressCourses={inProgressCourses}
+                onPreviewChange={handleElectivePreviewChange}
             />
 
             <ScheduleBlock previewMeeting={previewMeeting} />
 
-            <AdminControls />
-
-            <div className="schedule-dev-buttons">
-                <button onClick={addScheduleEntry}>Add Schedule Entry</button>
-                <button onClick={addSchedule}>Add Schedule</button>
-                <button onClick={deleteSchedule}>Delete Schedule</button>
-            </div>
+            <AdminControls importantDates={rawImportantDates} existingCourses={allCarouselCourses} />
         </div>
     );
 }
 
+const ENROLLMENT_STATUS = {
+    PLANNED: 0,
+    IN_PROGRESS: 1,
+    COMPLETED: 2,
+    DROPPED: 3,
+};
+
+function normalizeScheduleClass(rawClass) {
+    const classId =
+        rawClass.classId
+        ?? rawClass.class_id
+        ?? rawClass.id;
+
+    return {
+        ...rawClass,
+        id: Number(classId),
+        classId: Number(classId),
+
+        code: rawClass.code ?? rawClass.header ?? rawClass.classCode,
+        title: rawClass.title ?? rawClass.name ?? rawClass.className ?? rawClass.header,
+        credits: Number(rawClass.credits ?? 0),
+        description: rawClass.description ?? "",
+
+        isRequired:
+            Boolean(rawClass.isRequiredComputerScienceMajor)
+            || Boolean(rawClass.isRequiredComputerScienceMinor)
+            || Boolean(rawClass.isRequiredMultiPlatformMajor)
+            || Boolean(rawClass.isCSMajor)
+            || Boolean(rawClass.isCSMinor)
+            || Boolean(rawClass.isMultiPlatformMajor),
+    };
+}
+
+function normalizeScheduleEnrollment(rawEnrollment) {
+    return {
+        ...rawEnrollment,
+
+        id: rawEnrollment.enrollment_id ?? rawEnrollment.enrollmentId ?? rawEnrollment.id,
+
+        studentId:
+            rawEnrollment.student_id
+            ?? rawEnrollment.studentId
+            ?? rawEnrollment.student?.id,
+
+        classId:
+            rawEnrollment.mountClass_id
+            ?? rawEnrollment.class_id
+            ?? rawEnrollment.classId
+            ?? rawEnrollment.mountClass?.id,
+
+        status: Number(rawEnrollment.status),
+        grade:
+            rawEnrollment.grade === null
+                || rawEnrollment.grade === undefined
+                || rawEnrollment.grade === ""
+                ? null
+                : Number(rawEnrollment.grade),
+    };
+}
+
+function normalizeSchedulePrerequisite(rawPrereq) {
+    return {
+        classId:
+            rawPrereq.class_id
+            ?? rawPrereq.classId
+            ?? rawPrereq.mountClass_id,
+
+        prerequisiteId:
+            rawPrereq.prerequisiteId
+            ?? rawPrereq.prequisiteId
+            ?? rawPrereq.prereqId,
+    };
+}
+
+function normalizeClassEntry(rawEntry) {
+    return {
+        ...rawEntry,
+
+        id: rawEntry.classEntry_id ?? rawEntry.classEntryId ?? rawEntry.id,
+
+        classId:
+            rawEntry.mountClass_id
+            ?? rawEntry.class_id
+            ?? rawEntry.classId
+            ?? rawEntry.mountClass?.id,
+
+        sectionNumber:
+            rawEntry.sectionNumber
+            ?? rawEntry.section_number
+            ?? rawEntry.section
+            ?? "01",
+
+        days:
+            rawEntry.days
+            ?? buildDaysString(rawEntry),
+
+        startTime:
+            rawEntry.startTime
+            ?? rawEntry.start_time
+            ?? parseStartFromRange(rawEntry.time),
+
+        endTime:
+            rawEntry.endTime
+            ?? rawEntry.end_time
+            ?? parseEndFromRange(rawEntry.time),
+
+        seatsFilled:
+            rawEntry.seatsFilled
+            ?? rawEntry.seats_filled
+            ?? 0,
+
+        totalSeats:
+            rawEntry.totalSeats
+            ?? rawEntry.total_seats
+            ?? rawEntry.capacity
+            ?? 0,
+
+        professor:
+            rawEntry.professor
+            ?? rawEntry.instructor
+            ?? "TBA",
+    };
+}
+
+function buildDaysString(entry) {
+    const days = [];
+
+    if (entry.isMonday) days.push("M");
+    if (entry.isTuesday) days.push("T");
+    if (entry.isWednesDay || entry.isWednesday) days.push("W");
+    if (entry.isThursday) days.push("R");
+    if (entry.isFriday) days.push("F");
+
+    return days.join("");
+}
+
+function parseStartFromRange(timeRange) {
+    if (!timeRange) return null;
+
+    const [start] = String(timeRange).split("-");
+    return normalizeTimeString(start);
+}
+
+function parseEndFromRange(timeRange) {
+    if (!timeRange) return null;
+
+    const [, end] = String(timeRange).split("-");
+    return normalizeTimeString(end);
+}
+
+function normalizeTimeString(value) {
+    if (!value) return null;
+
+    const cleaned = String(value).trim().toLowerCase();
+
+    const match = cleaned.match(/^(\d{1,2})(?::?(\d{2}))?\s*(am|pm)$/);
+    if (!match) return value;
+
+    const hour = match[1];
+    const minute = match[2] ?? "00";
+    const meridian = match[3].toUpperCase();
+
+    return `${hour}:${minute} ${meridian}`;
+}
+
+function buildCompletedCourseCodes(studentEnrollments, classes) {
+    const classById = Object.fromEntries(
+        classes.map((course) => [Number(course.classId), course])
+    );
+
+    return studentEnrollments
+        .filter((enrollment) => enrollment.status === ENROLLMENT_STATUS.COMPLETED)
+        .map((enrollment) => classById[Number(enrollment.classId)]?.code)
+        .filter(Boolean);
+}
+
+function buildInProgressCourseCodes(studentEnrollments, classes) {
+    const classById = Object.fromEntries(
+        classes.map((course) => [Number(course.classId), course])
+    );
+
+    return studentEnrollments
+        .filter((enrollment) => enrollment.status === ENROLLMENT_STATUS.IN_PROGRESS)
+        .map((enrollment) => classById[Number(enrollment.classId)]?.code)
+        .filter(Boolean);
+}
+
+function buildCarouselCourses({
+    classes,
+    prerequisites,
+    classEntries,
+}) {
+    const entriesByClassId = {};
+
+    classEntries.forEach((entry) => {
+        const classId = Number(entry.classId);
+
+        if (!entriesByClassId[classId]) {
+            entriesByClassId[classId] = [];
+        }
+
+        entriesByClassId[classId].push(entry);
+    });
+
+    const classById = Object.fromEntries(
+        classes.map((course) => [Number(course.classId), course])
+    );
+
+    return classes.map((course) => {
+        const prereqCodes = prerequisites
+            .filter((prereq) => Number(prereq.classId) === Number(course.classId))
+            .map((prereq) => classById[Number(prereq.prerequisiteId)]?.code)
+            .filter(Boolean);
+
+        const sections = (entriesByClassId[Number(course.classId)] ?? []).map((entry) => ({
+            sectionNumber: entry.sectionNumber,
+            days: entry.days,
+            startTime: entry.startTime,
+            endTime: entry.endTime,
+            seatsFilled: entry.seatsFilled,
+            totalSeats: entry.totalSeats,
+            professor: entry.professor,
+        }));
+
+        return {
+            code: course.code,
+            title: course.title,
+            credits: course.credits,
+            description: course.description,
+            prerequisites: prereqCodes,
+            sections,
+            isRequired: course.isRequired,
+        };
+    });
+}
+
 function RequiredCourseCarousel({
+    courses = [],
     completedCourses = [],
     inProgressCourses = [],
     onPreviewChange,
 }) {
 
-    const requiredCourses = [
-        {
-            code: "CSC-120",
-            title: "Programming Problem Solving I",
-            credits: 4,
-            description:
-                "Introduction to programming fundamentals, structured problem solving, and basic software development practices.",
-            prerequisites: [],
-            sections: [
-                {
-                    sectionNumber: "01",
-                    days: "MWF",
-                    startTime: "7:30 AM",
-                    endTime: "8:35 AM",
-                    seatsFilled: 18,
-                    totalSeats: 24,
-                    professor: "Dr. Smith",
-                },
-            ],
-        },
-        {
-            code: "CSC-130",
-            title: "Programming Problem Solving II",
-            credits: 4,
-            description:
-                "Continuation of introductory programming with more complex data structures, abstraction, and program design.",
-            prerequisites: ["CSC-120"],
-            sections: [
-                {
-                    sectionNumber: "01",
-                    days: "MWF",
-                    startTime: "8:45 AM",
-                    endTime: "9:50 AM",
-                    seatsFilled: 20,
-                    totalSeats: 24,
-                    professor: "Dr. Allen",
-                },
-                {
-                    sectionNumber: "02",
-                    days: "TR",
-                    startTime: "2:20 PM",
-                    endTime: "3:35 PM",
-                    seatsFilled: 16,
-                    totalSeats: 24,
-                    professor: "Dr. Allen",
-                },
-            ],
-        },
-        {
-            code: "CSC-220",
-            title: "Discrete Structures",
-            credits: 3,
-            description:
-                "Logic, sets, functions, counting, relations, graphs, and proof techniques used in computer science.",
-            prerequisites: ["CSC-120"],
-            sections: [
-                {
-                    sectionNumber: "01",
-                    days: "MWF",
-                    startTime: "10:00 AM",
-                    endTime: "11:05 AM",
-                    seatsFilled: 15,
-                    totalSeats: 24,
-                    professor: "Dr. Brown",
-                },
-            ],
-        },
-        {
-            code: "CSC-320",
-            title: "Algorithms and Data Structures",
-            credits: 4,
-            description:
-                "Study of algorithm design, asymptotic analysis, linear and non-linear data structures, and implementation techniques.",
-            prerequisites: ["CSC-130", "CSC-220"],
-            sections: [
-                {
-                    sectionNumber: "01",
-                    days: "MWF",
-                    startTime: "10:00 AM",
-                    endTime: "11:05 AM",
-                    seatsFilled: 22,
-                    totalSeats: 30,
-                    professor: "Dr. Jones",
-                },
-                {
-                    sectionNumber: "02",
-                    days: "TR",
-                    startTime: "2:20 PM",
-                    endTime: "4:00 PM",
-                    seatsFilled: 28,
-                    totalSeats: 28,
-                    professor: "Dr. Patel",
-                },
-            ],
-        },
-    ];
+    const requiredCourses = courses;
 
 
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -247,7 +441,7 @@ function RequiredCourseCarousel({
 
     const courseMap = useMemo(
         () => Object.fromEntries(requiredCourses.map((course) => [course.code, course])),
-        []
+        [requiredCourses]
     );
 
     const completedSet = useMemo(() => new Set(completedCourses), [completedCourses]);
@@ -1262,105 +1456,10 @@ function AlterCoursesModal({ isAdmin = false, courses = [], onClose }) {
     );
 }
 
-function AdminControls() {
-
+function AdminControls({ importantDates = [], existingCourses = [] }) {
     const role = localStorage.getItem("role") || "user";
     const isAdmin = role === "admin" || role === "supervisor";
     const [showAlter, setShowAlter] = useState(false);
-
-    const importantDates = [
-        {
-            dayName: "Graduation",
-            dateStart: "5/9/26",
-            dateEnd: "5/9/26",
-            dayOfWeekStart: "Saturday",
-            dayOfWeekEnd: "Saturday",
-        },
-        {
-            dayName: "Classes Resume from Easter Recess",
-            dateStart: "4/6/26",
-            dateEnd: "4/6/26",
-            dayOfWeekStart: "Monday",
-            dayOfWeekEnd: "Monday",
-        },
-        {
-            dayName: "Last Day to Petition to Change Day/Time of a Final Exam",
-            dateStart: "4/17/26",
-            dateEnd: "4/17/26",
-            dayOfWeekStart: "Friday",
-            dayOfWeekEnd: "Friday",
-        },
-        {
-            dayName: "SCHOLAR Day/Honors Convo (No Day Classes; Classes Resume at 6pm)",
-            dateStart: "4/21/26",
-            dateEnd: "4/21/26",
-            dayOfWeekStart: "Tuesday",
-            dayOfWeekEnd: "Tuesday",
-        },
-        {
-            dayName: "Last Day of Regular Classes",
-            dateStart: "4/30/26",
-            dateEnd: "4/30/26",
-            dayOfWeekStart: "Thursday",
-            dayOfWeekEnd: "Thursday",
-        },
-        {
-            dayName: "Final Exam Period (Includes Sunday 6pm Exam; No Saturday Exams)",
-            dateStart: "5/1/26",
-            dateEnd: "5/6/26",
-            dayOfWeekStart: "Friday",
-            dayOfWeekEnd: "Wednesday",
-        },
-        {
-            dayName: "Semester Ends at 11:00pm",
-            dateStart: "5/6/26",
-            dateEnd: "5/6/26",
-            dayOfWeekStart: "Wednesday",
-            dayOfWeekEnd: "Wednesday",
-        },
-        {
-            dayName: "Commencement",
-            dateStart: "5/9/26",
-            dateEnd: "5/9/26",
-            dayOfWeekStart: "Saturday",
-            dayOfWeekEnd: "Saturday",
-        },
-
-
-    ]
-
-    const existingCourses = [
-        {
-            courseCode: "CSC-220",
-            courseName: "Programming Problem Solving II",
-            sections: [
-                {
-                    sectionId: "A",
-                    meetingTimes: "MWF 8:45-9:50",
-                    totalSeats: 24,
-                    professor: "Dr. Smith",
-                },
-            ],
-        },
-        {
-            courseCode: "CSC-320",
-            courseName: "Algorithms and Data Structures",
-            sections: [
-                {
-                    sectionId: "A",
-                    meetingTimes: "MWF 10:00-11:05",
-                    totalSeats: 30,
-                    professor: "Dr. Jones",
-                },
-                {
-                    sectionId: "B",
-                    meetingTimes: "TR 2:20-4:00",
-                    totalSeats: 28,
-                    professor: "Dr. Acula",
-                },
-            ],
-        },
-    ];
 
     function parseDate(dateStr) {
         const [month, day, year] = dateStr.split("/");
