@@ -186,134 +186,20 @@ function processStudents(students, classes, enrollment, currentYear, currentSeme
     };
 }
 
-/*
-  Placeholder data generator for the new dashboard requirement widget.
-  Replace this later with real major/minor requirement data from backend.
-*/
-function getMockRequirementData() {
-
-    return [
-        {
-            label: "Major",
-            totalRequired: 19,
-            courses: [
-                { id: 101, code: "CSC-120", name: "Intro to Programming", status: "completed" },
-                { id: 102, code: "CSC-145", name: "Data Structures", status: "completed" },
-                { id: 103, code: "CSC-220", name: "Computer Architecture", status: "completed" },
-                { id: 104, code: "CSC-250", name: "Algorithms", status: "completed" },
-                { id: 105, code: "CSC-260", name: "Operating Systems", status: "completed" },
-                { id: 106, code: "CSC-310", name: "Software Engineering", status: "in_progress" },
-                { id: 107, code: "CSC-320", name: "Database Systems", status: "in_progress" },
-                { id: 108, code: "CSC-330", name: "Networks", status: "in_progress" },
-                { id: 109, code: "CSC-340", name: "Theory of Computation", status: "warning" }
-            ]
-        },
-        {
-            label: "Minor",
-            totalRequired: 19,
-            courses: [
-                { id: 201, code: "MTH-120", name: "Calculus I", status: "completed" },
-                { id: 202, code: "MTH-121", name: "Calculus II", status: "completed" },
-                { id: 203, code: "MTH-220", name: "Linear Algebra", status: "completed" },
-                { id: 204, code: "MTH-230", name: "Discrete Math", status: "completed" },
-                { id: 205, code: "MTH-310", name: "Probability", status: "completed" },
-                { id: 206, code: "MTH-315", name: "Statistics", status: "in_progress" },
-                { id: 207, code: "MTH-340", name: "Numerical Methods", status: "in_progress" },
-                { id: 208, code: "MTH-350", name: "Abstract Algebra", status: "in_progress" }
-            ]
-        }
-    ];
-}
-
-const semesterData = [
-    {
-        id: 1,
-        term: "Semester 1",
-        label: "Fall 2026",
-        courses: [
-            { code: "CSC120", credits: 4, points: 16, grade: "A", status: "good" },
-            { code: "MTH160", credits: 4, points: 16, grade: "A", status: "good" },
-            { code: "PHY151", credits: 4, points: 12, grade: "B", status: "warn" },
-        ],
-    },
-    {
-        id: 2,
-        term: "Semester 2",
-        label: "Spring 2027",
-        courses: [
-            { code: "CSC220", credits: 4, points: 16, grade: "A", status: "good" },
-            { code: "MTH170", credits: 4, points: 12, grade: "B", status: "warn" },
-            { code: "PHY152", credits: 4, points: 16, grade: "A", status: "good" },
-        ],
-    },
-    {
-        id: 3,
-        term: "Semester 3",
-        label: "Fall 2027",
-        courses: [
-            { code: "CSC270", credits: 4, points: 16, grade: "A", status: "good" },
-            { code: "CSC290", credits: 4, points: 12, grade: "B", status: "warn" },
-            { code: "MTH250", credits: 4, points: 12, grade: "B", status: "warn" },
-        ],
-    },
-    {
-        id: 4,
-        term: "Semester 4",
-        label: "Spring 2028",
-        courses: [
-            { code: "CSC310", credits: 4, points: 16, grade: "A", status: "good" },
-            { code: "CSC320", credits: 4, points: 12, grade: "B", status: "warn" },
-            { code: "PHY270", credits: 4, points: 0, grade: "F", status: "bad" },
-        ],
-    },
-    {
-        id: 5,
-        term: "Semester 5",
-        label: "Fall 2028",
-        courses: [
-            { code: "CSC410", credits: 4, points: null, grade: null, status: "planned" },
-            { code: "CSC420", credits: 4, points: null, grade: null, status: "planned" },
-            { code: "MTH300", credits: 4, points: null, grade: null, status: "planned" },
-        ],
-    },
-    {
-        id: 6,
-        term: "Semester 6",
-        label: "Spring 2029",
-        courses: [
-            { code: "CSC430", credits: 4, points: null, grade: null, status: "planned" },
-            { code: "PHY310", credits: 4, points: null, grade: null, status: "planned" },
-            { code: "GEN300", credits: 4, points: null, grade: null, status: "planned" },
-        ],
-    },
-    {
-        id: 7,
-        term: "Semester 7",
-        label: "Fall 2029",
-        courses: [
-            { code: "CSC450", credits: 4, points: null, grade: null, status: "planned" },
-            { code: "PHY350", credits: 4, points: null, grade: null, status: "planned" },
-            { code: "GEN350", credits: 4, points: null, grade: null, status: "planned" },
-        ],
-    },
-    {
-        id: 8,
-        term: "Semester 8",
-        label: "Spring 2030",
-        courses: [
-            { code: "CSC499", credits: 4, points: null, grade: null, status: "planned" },
-            { code: "PHY401", credits: 4, points: null, grade: null, status: "planned" },
-            { code: "GEN400", credits: 4, points: null, grade: null, status: "planned" },
-        ],
-    },
-];
-
 function SemesterPlanBoard({ semesterData = [] }) {
 
     const navigate = useNavigate();
 
     const getTotalCredits = (courses) =>
-        courses.reduce((sum, course) => sum + (course.credits || 0), 0);
+        courses.reduce((sum, course) => {
+            const numericCredits = Number(course.credits);
+
+            if (Number.isFinite(numericCredits)) {
+                return sum + numericCredits;
+            }
+
+            return sum;
+        }, 0);
 
     const getTotalPoints = (courses) =>
         courses.reduce((sum, course) => sum + (course.points || 0), 0);
@@ -373,14 +259,17 @@ function SemesterPlanBoard({ semesterData = [] }) {
                                 {semester.courses.map((course, idx) => (
                                     <button
                                         type="button"
-                                        className="segmented-row semester-course-row clickable-semester-row"
+                                        className={`segmented-row semester-course-row clickable-semester-row ${course.isPlaceholder ? "semester-placeholder-row" : ""
+                                            }`}
                                         key={`${semester.id}-${idx}`}
                                         onClick={() => navigate(`/classes/${course.code}`)}
                                     >
                                         <span className={`segmented-primary status-${course.status}`}>
                                             {course.code}
                                         </span>
-                                        <span className="segmented-cell">{course.credits ?? "—"}</span>
+                                        <span className="segmented-cell">
+                                            {course.creditsLabel ?? course.credits ?? "2—4"}
+                                        </span>
                                         <span className="segmented-cell">{course.points ?? "—"}</span>
                                         <span className="segmented-cell">{course.grade ?? "—"}</span>
                                     </button>
@@ -1707,49 +1596,142 @@ const CS_SEMESTER_PLAN_TEMPLATE = [
         id: 1,
         term: "Semester 1",
         label: "Fall Year 1",
-        courses: ["CSC120", "MTH160", "FYS100"],
+        courses: [
+            { type: "core", label: "Integrative Core - First-Year Seminar", group: "ICF", credits: 4 },
+            { type: "specific", code: "CSC120" },
+            { type: "specific", code: "MTH123", creditsOverride: 3 },
+            { type: "choice", label: "Foreign Language or Elective", options: ["foreign-language", "elective"], credits: 4 },
+        ],
     },
     {
         id: 2,
         term: "Semester 2",
         label: "Spring Year 1",
-        courses: ["CSC220", "MTH170", "GEN101"],
+        courses: [
+            { type: "core", label: "Integrative Core - Foundation", group: "ICF", credits: 4 },
+            { type: "specific", code: "CSC220" },
+            { type: "specific", code: "MTH125", creditsOverride: 3 },
+            { type: "choice", label: "Foreign Language or Elective", options: ["foreign-language", "elective"], credits: 4 },
+        ],
     },
     {
         id: 3,
         term: "Semester 3",
         label: "Fall Year 2",
-        courses: ["CSC270", "CSC290", "MTH250"],
+        courses: [
+            { type: "core", label: "Integrative Core - Foundation", group: "ICF", credits: 4 },
+            { type: "core", label: "Integrative Core - Foundation", group: "ICF", credits: 4 },
+            { type: "specific", code: "CSC270" },
+            { type: "specific", code: "MTH141" },
+        ],
     },
     {
         id: 4,
         term: "Semester 4",
         label: "Spring Year 2",
-        courses: ["CSC310", "CSC320", "GEN200"],
+        courses: [
+            { type: "core", label: "Integrative Core - Foundation", group: "ICF", credits: 4 },
+            { type: "elective", label: "Elective", credits: 4 },
+            {
+                type: "choice",
+                label: "CSC310 or CSC320",
+                options: [
+                    { type: "specific", code: "CSC310" },
+                    { type: "specific", code: "CSC320" },
+                ],
+                credits: 4,
+            },
+            { type: "minor-elective", label: "Declared Minor Elective", credits: 4 },
+        ],
     },
     {
         id: 5,
         term: "Semester 5",
         label: "Fall Year 3",
-        courses: ["CSC330", "CSC340", "CSC360"],
+        courses: [
+            { type: "core", label: "Integrative Core - Exploration", group: "ICF", credits: 4 },
+            {
+                type: "choice",
+                label: "CSC360 or Elective",
+                options: [
+                    { type: "specific", code: "CSC360" },
+                    { type: "elective", label: "Elective", credits: 4 },
+                ],
+                credits: 4,
+            },
+            {
+                type: "csc-level",
+                label: "CSC3XX or CSC4XX",
+                level: "300-or-400",
+                credits: 4,
+            },
+            { type: "minor-elective", label: "Declared Minor Elective", credits: 4 },
+        ],
     },
     {
         id: 6,
         term: "Semester 6",
         label: "Spring Year 3",
-        courses: ["CSC410", "CSC420", "GEN300"],
+        courses: [
+            { type: "core", label: "Integrative Core - Exploration", group: "ICF", credits: 4 },
+            {
+                type: "choice",
+                label: "CSC310 or CSC320",
+                options: [
+                    { type: "specific", code: "CSC310" },
+                    { type: "specific", code: "CSC320" },
+                ],
+                credits: 4,
+            },
+            {
+                type: "csc-level",
+                label: "CSC3XX or CSC4XX",
+                level: "300-or-400",
+                credits: 4,
+            },
+            { type: "minor-elective", label: "Declared Minor Elective", credits: 4 },
+        ],
     },
     {
         id: 7,
         term: "Semester 7",
         label: "Fall Year 4",
-        courses: ["CSC430", "CSC450", "GEN350"],
+        courses: [
+            { type: "core", label: "Integrative Core - Capstone", group: "ICF", credits: 4 },
+            {
+                type: "choice",
+                label: "CSC360 or Elective",
+                options: [
+                    { type: "specific", code: "CSC360" },
+                    { type: "elective", label: "Elective", credits: 4 },
+                ],
+                credits: 4,
+            },
+            {
+                type: "csc-level",
+                label: "CSC3XX or CSC4XX",
+                level: "300-or-400",
+                credits: 4,
+            },
+            { type: "specific", code: "CSC491", creditsOverride: 2 },
+            { type: "elective", label: "Elective", credits: 4 },
+        ],
     },
     {
         id: 8,
         term: "Semester 8",
         label: "Spring Year 4",
-        courses: ["CSC499", "GEN400", "GEN401"],
+        courses: [
+            { type: "specific", code: "CSC492", creditsOverride: 2 },
+            {
+                type: "csc-level",
+                label: "CSC3XX or CSC4XX",
+                level: "300-or-400",
+                credits: 4,
+            },
+            { type: "minor-elective", label: "Declared Minor Elective", credits: 4 },
+            { type: "elective", label: "Elective", credits: 4 },
+        ],
     },
 ];
 
@@ -1758,51 +1740,318 @@ const MPSD_SEMESTER_PLAN_TEMPLATE = [
         id: 1,
         term: "Semester 1",
         label: "Fall Year 1",
-        courses: ["CSC120", "MTH160", "MPSD100"],
+        courses: [
+            { type: "core", label: "Integrative Core - First-Year Seminar", group: "ICF", credits: 4 },
+            { type: "choice", label: "Foreign Language or Elective", options: ["foreign-language", "elective"], credits: 4 },
+            { type: "specific", code: "CSC120" },
+            { type: "specific", code: "MTH123" },
+        ],
     },
     {
         id: 2,
         term: "Semester 2",
         label: "Spring Year 1",
-        courses: ["CSC220", "MTH170", "MPSD110"],
+        courses: [
+            { type: "core", label: "Integrative Core - Foundation", group: "ICF", credits: 4 },
+            { type: "core", label: "Integrative Core - Foundation", group: "ICF", credits: 4 },
+            { type: "choice", label: "Foreign Language or Elective", options: ["foreign-language", "elective"], credits: 4 },
+            { type: "specific", code: "CSC220" },
+        ],
     },
     {
         id: 3,
         term: "Semester 3",
         label: "Fall Year 2",
-        courses: ["CSC270", "CSC290", "MPSD200"],
+        courses: [
+            { type: "core", label: "Integrative Core - Foundation", group: "ICF", credits: 4 },
+            { type: "elective", label: "Elective", credits: 4 },
+            { type: "specific", code: "CSW123" },
+            { type: "minor-elective", label: "Declared Minor Elective", credits: 4 },
+        ],
     },
     {
         id: 4,
         term: "Semester 4",
         label: "Spring Year 2",
-        courses: ["CSC310", "CSC320", "MPSD210"],
+        courses: [
+            { type: "core", label: "Integrative Core - Foundation", group: "ICF", credits: 4 },
+            { type: "specific", code: "MTH125" },
+            {
+                type: "choice",
+                label: "CSW223 or Elective",
+                options: [
+                    { type: "specific", code: "CSW223" },
+                    { type: "elective", label: "Elective", credits: 4 },
+                ],
+                credits: 4,
+            },
+            {
+                type: "choice",
+                label: "CSC310 or CSC330",
+                options: [
+                    { type: "specific", code: "CSC310" },
+                    { type: "specific", code: "CSC330" },
+                ],
+                credits: 4,
+            },
+        ],
     },
     {
         id: 5,
         term: "Semester 5",
         label: "Fall Year 3",
-        courses: ["CSC330", "CSC340", "MPSD300"],
+        courses: [
+            { type: "core", label: "Integrative Core - Exploration", group: "ICF", credits: 4 },
+            { type: "minor-elective", label: "Declared Minor Elective", credits: 4 },
+            {
+                type: "choice",
+                label: "CSC360 or CSC410",
+                options: [
+                    { type: "specific", code: "CSC360" },
+                    { type: "specific", code: "CSC410" },
+                ],
+                credits: 4,
+            },
+            {
+                type: "csc-level",
+                label: "CSC3XX or CSC4XX",
+                level: "300-or-400",
+                credits: 4,
+            },
+        ],
     },
     {
         id: 6,
         term: "Semester 6",
         label: "Spring Year 3",
-        courses: ["CSC410", "CSC420", "MPSD310"],
+        courses: [
+            { type: "core", label: "Integrative Core - Exploration", group: "ICF", credits: 4 },
+            { type: "minor-elective", label: "Declared Minor Elective", credits: 4 },
+            {
+                type: "choice",
+                label: "CSW223 or CSW423",
+                options: [
+                    { type: "specific", code: "CSW223" },
+                    { type: "specific", code: "CSW423" },
+                ],
+                credits: 4,
+            },
+            {
+                type: "choice",
+                label: "CSC310 or CSC330",
+                options: [
+                    { type: "specific", code: "CSC310" },
+                    { type: "specific", code: "CSC330" },
+                ],
+                credits: 4,
+            },
+        ],
     },
     {
         id: 7,
         term: "Semester 7",
         label: "Fall Year 4",
-        courses: ["CSC430", "CSC450", "MPSD400"],
+        courses: [
+            { type: "core", label: "Integrative Core - Capstone", group: "ICF", credits: 4 },
+            { type: "specific", code: "CSC491", creditsOverride: 2 },
+            {
+                type: "choice",
+                label: "CSC360 or CSC410",
+                options: [
+                    { type: "specific", code: "CSC360" },
+                    { type: "specific", code: "CSC410" },
+                ],
+                credits: 4,
+            },
+            {
+                type: "csc-level",
+                label: "CSC3XX or CSC4XX",
+                level: "300-or-400",
+                credits: 4,
+            },
+            { type: "elective", label: "Elective", credits: 4 },
+        ],
     },
     {
         id: 8,
         term: "Semester 8",
         label: "Spring Year 4",
-        courses: ["CSC499", "MPSD410", "MPSD420"],
+        courses: [
+            { type: "specific", code: "CSC492", creditsOverride: 2 },
+            { type: "elective", label: "Elective", credits: 4 },
+            {
+                type: "choice",
+                label: "CSW423 or Elective",
+                options: [
+                    { type: "specific", code: "CSW423" },
+                    { type: "elective", label: "Elective", credits: 4 },
+                ],
+                credits: 4,
+            },
+            { type: "elective", label: "Elective", credits: 4 },
+        ],
     },
 ];
+
+function buildCourseFromPlanSlot({
+    slot,
+    classByCode,
+    classes,
+    studentEnrollments,
+    usedClassIds,
+}) {
+    const normalizedSlot = normalizePlanSlot(slot);
+
+    if (normalizedSlot.type === "specific") {
+        return buildSpecificCourseSlot({
+            code: normalizedSlot.code,
+            classByCode,
+            studentEnrollments,
+            usedClassIds,
+        });
+    }
+
+    if (normalizedSlot.type === "csc-level") {
+        return buildCscLevelSlot({
+            slot: normalizedSlot,
+            classes,
+            studentEnrollments,
+            usedClassIds,
+        });
+    }
+
+    if (normalizedSlot.type === "elective") {
+        return buildPlaceholderSlot(normalizedSlot);
+    }
+
+    if (normalizedSlot.type === "minor-elective") {
+        return buildPlaceholderSlot(normalizedSlot);
+    }
+
+    if (normalizedSlot.type === "core") {
+        return buildPlaceholderSlot(normalizedSlot);
+    }
+
+    if (normalizedSlot.type === "choice") {
+        return buildPlaceholderSlot(normalizedSlot);
+    }
+
+    return buildPlaceholderSlot({
+        label: normalizedSlot.label ?? "Requirement",
+        credits: normalizedSlot.credits,
+        creditsLabel: normalizedSlot.creditsLabel,
+    });
+}
+
+function buildSpecificCourseSlot({
+    code,
+    classByCode,
+    studentEnrollments,
+    usedClassIds,
+}) {
+    const normalizedCode = normalizeCourseCode(code);
+    const classItem = classByCode[normalizedCode];
+
+    const enrollment = classItem
+        ? getEnrollmentForClass(studentEnrollments, classItem.classId)
+        : null;
+
+    if (classItem && enrollment) {
+        usedClassIds.add(Number(classItem.classId));
+    }
+
+    const grade = enrollment?.grade ?? null;
+    const credits = classItem?.credits ?? "";
+
+    return {
+        code,
+        credits,
+        points:
+            grade === null || grade === undefined || credits === ""
+                ? null
+                : getGradePoints(grade) * Number(credits),
+        grade: grade === null || grade === undefined ? null : getLetterGrade(grade),
+        status: getSemesterCourseStatus(enrollment),
+        isPlaceholder: !classItem,
+    };
+}
+
+function buildCscLevelSlot({
+    slot,
+    classes,
+    studentEnrollments,
+    usedClassIds,
+}) {
+    const matchingEnrollment = studentEnrollments.find((enrollment) => {
+        if (usedClassIds.has(Number(enrollment.classId))) return false;
+
+        const classItem = classes.find(
+            (course) => Number(course.classId) === Number(enrollment.classId)
+        );
+
+        if (!classItem) return false;
+
+        const code = normalizeCourseCode(classItem.code);
+
+        const isCsc = code.startsWith("CSC");
+        const courseNumber = Number(code.replace("CSC", ""));
+
+        if (!isCsc || Number.isNaN(courseNumber)) return false;
+
+        if (slot.level === 300) {
+            return courseNumber >= 300 && courseNumber < 400;
+        }
+
+        if (slot.level === 400) {
+            return courseNumber >= 400 && courseNumber < 500;
+        }
+
+        return false;
+    });
+
+    if (!matchingEnrollment) {
+        return buildPlaceholderSlot(slot);
+    }
+
+    const classItem = classes.find(
+        (course) => Number(course.classId) === Number(matchingEnrollment.classId)
+    );
+
+    if (!classItem) {
+        return buildPlaceholderSlot(slot);
+    }
+
+    usedClassIds.add(Number(classItem.classId));
+
+    const grade = matchingEnrollment.grade ?? null;
+    const credits = classItem.credits ?? slot.credits ?? "";
+
+    return {
+        code: classItem.code,
+        credits,
+        points:
+            grade === null || grade === undefined || credits === ""
+                ? null
+                : getGradePoints(grade) * Number(credits),
+        grade: grade === null || grade === undefined ? null : getLetterGrade(grade),
+        status: getSemesterCourseStatus(matchingEnrollment),
+        requirementLabel: slot.label,
+        isPlaceholder: false,
+    };
+}
+
+function buildPlaceholderSlot(slot) {
+    return {
+        code: slot.label ?? slot.code ?? "Requirement",
+        credits: slot.credits ?? null,
+        creditsLabel: slot.creditsLabel ?? null,
+        points: null,
+        grade: null,
+        status: "planned",
+        isPlaceholder: true,
+        requirementLabel: slot.label ?? null,
+    };
+}
 
 function buildSemesterPlanFromTemplate({
     selectedStudent,
@@ -1830,29 +2079,76 @@ function buildSemesterPlanFromTemplate({
         ])
     );
 
+    const usedClassIds = new Set();
+
     return template.map((semester) => ({
         ...semester,
 
-        courses: semester.courses.map((courseCode) => {
-            const normalizedCode = normalizeCourseCode(courseCode);
-            const classItem = classByCode[normalizedCode];
-
-            const enrollment = classItem
-                ? getEnrollmentForClass(studentEnrollments, classItem.classId)
-                : null;
-
-            const grade = enrollment?.grade ?? null;
-            const credits = classItem?.credits ?? 0;
-
-            return {
-                code: courseCode,
-                credits,
-                points: grade === null ? null : getGradePoints(grade) * credits,
-                grade: grade === null ? null : getLetterGrade(grade),
-                status: getSemesterCourseStatus(enrollment),
-            };
-        }),
+        courses: semester.courses.map((slot) =>
+            buildCourseFromPlanSlot({
+                slot,
+                classByCode,
+                classes,
+                studentEnrollments,
+                usedClassIds,
+            })
+        ),
     }));
+}
+
+function normalizePlanSlot(slot) {
+    if (typeof slot !== "string") {
+        return slot;
+    }
+
+    const normalized = normalizeCourseCode(slot);
+
+    if (slot === "Elective") {
+        return {
+            type: "elective",
+            label: "Elective",
+            creditsLabel: "2–4",
+        };
+    }
+
+    if (slot === "Declared Minor Elective") {
+        return {
+            type: "minor-elective",
+            label: "Declared Minor Elective",
+            creditsLabel: "2–4",
+        };
+    }
+
+    if (normalized === "CSC3XX") {
+        return {
+            type: "csc-level",
+            label: "CSC3XX",
+            level: 300,
+            credits: 4,
+        };
+    }
+
+    if (normalized === "CSC4XX") {
+        return {
+            type: "csc-level",
+            label: "CSC4XX",
+            level: 400,
+            credits: 4,
+        };
+    }
+
+    if (normalized.startsWith("ICF")) {
+        return {
+            type: "core",
+            label: slot,
+            group: normalized.split("-")[0],
+        };
+    }
+
+    return {
+        type: "specific",
+        code: slot,
+    };
 }
 
 function getStudentProgramType(student) {
