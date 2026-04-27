@@ -428,7 +428,7 @@ function SemesterPlanBoard({ semesterData = [] }) {
                                 </div>
 
                                 <div className="summary-block">
-                                    <span className="summary-label">Total Points</span>
+                                    <span className="summary-label">Total Q-Points</span>
                                     <span className="summary-value">
                                         {totalPoints > 0 ? totalPoints : "—"}
                                     </span>
@@ -1744,7 +1744,7 @@ const CS_SEMESTER_PLAN_TEMPLATE = [
         courses: [
             { type: "core", label: "Integrative Core - First-Year Seminar", group: "ICF", credits: 4 },
             { type: "specific", code: "CSC120" },
-            { type: "specific", code: "MTH123", creditsOverride: 3 },
+            { type: "specific", code: "MTH123", creditsOverride: 4 },
             { type: "choice", label: "Foreign Language or Elective", options: ["foreign-language", "elective"], credits: 4 },
         ],
     },
@@ -1755,7 +1755,7 @@ const CS_SEMESTER_PLAN_TEMPLATE = [
         courses: [
             { type: "core", label: "Integrative Core - Foundation", group: "ICF", credits: 4 },
             { type: "specific", code: "CSC220" },
-            { type: "specific", code: "MTH125", creditsOverride: 3 },
+            { type: "specific", code: "MTH125", creditsOverride: 4 },
             { type: "choice", label: "Foreign Language or Elective", options: ["foreign-language", "elective"], credits: 4 },
         ],
     },

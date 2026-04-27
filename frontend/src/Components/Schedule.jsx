@@ -68,7 +68,7 @@ function Schedule() {
                     axios.get("http://localhost:8080/test/get/enrollments"),
                     axios.get("http://localhost:8080/test/get/prerequisites").catch(() => ({ data: [] })),
                     axios.get("http://localhost:8080/test/get/class/entries").catch(() => ({ data: [] })),
-                    axios.get("http://localhost:8080/test/get/importantDates").catch(() => ({ data: [] })),
+                    axios.get("http://localhost:8080/test/get/important/dates").catch(() => ({ data: [] })),
                 ]);
 
                 setRawClasses(classRes.data ?? []);
@@ -1461,13 +1461,57 @@ function AdminControls({ importantDates = [], existingCourses = [] }) {
     const isAdmin = role === "admin" || role === "supervisor";
     const [showAlter, setShowAlter] = useState(false);
 
+    function getImportantDateValue(item) {
+        return (
+            item.dateOfEvent ??
+            item.date_of_event ??
+            item.dateStart ??
+            item.date
+        );
+    }
+
+    function getImportantTimeValue(item) {
+        return (
+            item.timeOfEvent ??
+            item.time_of_event ??
+            item.timeStart ??
+            item.time
+        );
+    }
+
     function parseDate(dateStr) {
-        const [month, day, year] = dateStr.split("/");
-        return new Date(`20${year}`, month - 1, day);
+        if (!dateStr) return new Date(0);
+
+        if (dateStr.includes("-")) {
+            const [year, month, day] = dateStr.split("-");
+            return new Date(Number(year), Number(month) - 1, Number(day));
+        }
+
+        if (dateStr.includes("/")) {
+            const [month, day, year] = dateStr.split("/");
+            const fullYear = year.length === 2 ? `20${year}` : year;
+            return new Date(Number(fullYear), Number(month) - 1, Number(day));
+        }
+
+        return new Date(dateStr);
+    }
+
+    function formatImportantDate(dateStr) {
+        const date = parseDate(dateStr);
+
+        if (Number.isNaN(date.getTime())) return dateStr ?? "";
+
+        return date.toLocaleDateString("en-US", {
+            month: "short",
+            day: "numeric",
+            year: "numeric",
+        });
     }
 
     const sortedDates = [...importantDates].sort(
-        (a, b) => parseDate(a.dateStart) - parseDate(b.dateStart)
+        (a, b) =>
+            parseDate(getImportantDateValue(a)) -
+            parseDate(getImportantDateValue(b))
     );
 
     return (
@@ -1477,24 +1521,55 @@ function AdminControls({ importantDates = [], existingCourses = [] }) {
 
                 <div className="important-dates-list">
                     {sortedDates.map((item, index) => {
-                        const isSingleDay = item.dateStart === item.dateEnd;
+                        const rawDate =
+                            item.dateOfEvent ??
+                            item.date_of_event ??
+                            item.dateStart ??
+                            item.date;
+
+                        const rawTime =
+                            item.timeOfEvent ??
+                            item.time_of_event ??
+                            item.timeStart ??
+                            item.time;
+
+                        const parsedDate = parseDate(rawDate);
+
+                        const dayOfWeek = Number.isNaN(parsedDate.getTime())
+                            ? ""
+                            : parsedDate.toLocaleDateString("en-US", {
+                                weekday: "long",
+                            });
+
+                        const formattedDate = Number.isNaN(parsedDate.getTime())
+                            ? rawDate ?? ""
+                            : parsedDate.toLocaleDateString("en-US", {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                            });
 
                         return (
-                            <div className="important-date-item" key={index}>
-                                <div className="important-date-name">{item.dayName}</div>
+                            <div
+                                className="important-date-item"
+                                key={item.id ?? `${item.header}-${rawDate}-${index}`}
+                            >
+                                <div className="important-date-name">
+                                    {item.header ?? item.title ?? "Important Date"}
+                                </div>
 
                                 <div className="important-date-range">
-                                    {isSingleDay ? (
-                                        <>
-                                            {item.dayOfWeekStart}, {item.dateStart}
-                                        </>
-                                    ) : (
-                                        <>
-                                            {item.dayOfWeekStart}, {item.dateStart} -{" "}
-                                            {item.dayOfWeekEnd}, {item.dateEnd}
-                                        </>
-                                    )}
+                                    {dayOfWeek}
+                                    {dayOfWeek && formattedDate ? ", " : ""}
+                                    {formattedDate}
+                                    {rawTime ? ` • ${rawTime}` : ""}
                                 </div>
+
+                                {item.description && (
+                                    <div className="important-date-description">
+                                        {item.description}
+                                    </div>
+                                )}
                             </div>
                         );
                     })}
