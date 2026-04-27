@@ -45,6 +45,20 @@ public class MountClassEntryDTO {
         this.isFriday = isFriday;
     }
 
+    public MountClassEntryDTO(long class_id, String meetingTime, int totalSeats, String professorName, boolean isMonday,
+        boolean isTuesday, boolean isWednesDay, boolean isThursday, boolean isFriday
+    ){
+        this.class_id =class_id;
+        this.meetingTime = meetingTime;
+        this.totalSeats = totalSeats;
+        this.professorName = professorName;
+        this.isMonday = isMonday;
+        this.isTuesday = isTuesday;
+        this.isWednesday = isWednesDay;
+        this.isThursday = isThursday;
+        this.isFriday = isFriday;
+    }
+
     public MountClassEntryDTO(){
 
     }

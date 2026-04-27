@@ -58,6 +58,21 @@ function ClassManager(){
 
     const [isBeginning, setIsBeginning] = useState(true);
 
+
+    const [toasts, setToasts] = useState([]);
+
+    const addToast = (message, type = "warning") => {
+        const id = Date.now() + Math.random();
+        setToasts(prev => [...prev, { id, message, type }]);
+        setTimeout(() => {
+            setToasts(prev => prev.filter(t => t.id !== id));
+        }, 4000);
+    };
+
+    const removeToast = (id) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+    };
+
     useEffect(() => {
         const fetchData = async () => {
         const [classData, prereqData] = await Promise.all([
@@ -80,6 +95,25 @@ function ClassManager(){
     //     {classId:7,title:"Software Engineer Fundamentals",header:"CSC-491", credits: 2,isActive: false}, 
     //     {classId:8,title:"Practice Software Engineering",header:"CSC-492", credits: 2,isActive: false}
     //  ]);
+
+
+    function ToastContainer({ toasts, removeToast }) {
+        return (
+            <div className="toast-container">
+                {toasts.map((toast) => (
+                    <div key={toast.id} className={`toast toast-${toast.type}`}>
+                        <p className="toast-message">{toast.message}</p>
+                        <img
+                            className="toast-close"
+                            src={close}
+                            alt="Close"
+                            onClick={() => removeToast(toast.id)}
+                        />
+                    </div>
+                ))}
+            </div>
+        );
+    }
 
      
 
@@ -128,6 +162,7 @@ function ClassManager(){
       
       return (
         <div className="tab-pane-container">
+            <ToastContainer toasts={toasts} removeToast={removeToast} />
             {showFilter && 
                 <FilterBlock 
                     year={year}
@@ -155,7 +190,7 @@ function ClassManager(){
           addIsRequiredComputerScienceMajor={addIsRequiredComputerScienceMajor} addIsRequiredComputerScienceMinor={addIsRequiredComputerScienceMinor} 
           addIsRequiredMultiPlatformMajor={addIsRequiredMultiPlatformMajor} setAddClassTitle={setAddClassTitle} setAddClassHeader={setAddClassHeader}
           setAddClassDescription={setAddClassDescription} setAddClassCredits={setAddClassCredits} setAddIsRequiredComputerScienceMajor={setAddIsRequiredComputerScienceMajor} 
-          setAddIsRequiredComputerScienceMinor={setAddIsRequiredComputerScienceMinor} setAddIsRequiredMultiPlatformMajor={setAddIsRequiredMultiPlatformMajor}/>
+          setAddIsRequiredComputerScienceMinor={setAddIsRequiredComputerScienceMinor} setAddIsRequiredMultiPlatformMajor={setAddIsRequiredMultiPlatformMajor} addToast={addToast}/>
           
         </div>
       );
@@ -216,64 +251,66 @@ function ClassManager(){
     }
 
 
-    function UpdateBlock({isBeginning, classUpdateEntry, setClassUpdateEntry, updateClassTitle, setUpdateClassTitle, updateClassHeader,setUpdateClassHeader, updateClassDescription, setUpdateClassDescription, updateClassCredits, setUpdateClassCredits, updateIsRequiredComputerScienceMajor, setUpdateIsRequiredComputerScienceMajor, updateIsRequiredComputerScienceMinor, setUpdateIsRequiredComputerScienceMinor, updateIsRequiredMultiPlatformMajor, setUpdateIsRequiredMultiPlatformMajor}){
+    function UpdateBlock({isBeginning, classUpdateEntry, setClassUpdateEntry, updateClassTitle, setUpdateClassTitle, updateClassHeader,setUpdateClassHeader, updateClassDescription, setUpdateClassDescription, updateClassCredits, setUpdateClassCredits, updateIsRequiredComputerScienceMajor, setUpdateIsRequiredComputerScienceMajor, updateIsRequiredComputerScienceMinor, setUpdateIsRequiredComputerScienceMinor, updateIsRequiredMultiPlatformMajor, setUpdateIsRequiredMultiPlatformMajor,  addToast}){
       
         const [processingClassUpate, setProcessingClassUpdate] = useState(false);
 
-        const updateClassEntry = async() =>{
+        const updateClassEntry = async () => {
             setProcessingClassUpdate(true);
-            const mountClass = {
-                title:updateClassTitle.trim(),
-                header:updateClassHeader.trim(),
-                description:updateClassDescription.trim(),
-                credits:updateClassCredits,
-                isRequiredComputerScienceMajor: updateIsRequiredComputerScienceMajor,
-                isRequiredComputerScienceMinor:updateIsRequiredComputerScienceMinor,
-                isRequiredMultiPlatformMajor: updateIsRequiredMultiPlatformMajor
-            }
-            
-            const impossibleTitle= !updateClassTitle;
-            const impossibleHeader= !updateClassHeader;
-            const impossibleDescription=!updateClassDescription;
+
+            const impossibleTitle = !updateClassTitle;
+            const impossibleHeader = !updateClassHeader;
+            const impossibleDescription = !updateClassDescription;
             const creditsNum = Number(updateClassCredits);
             const impossibleCredits = updateClassCredits === "" || Number.isNaN(creditsNum) || creditsNum <= 0;
-            const impossibleRequiredComputerScienceMajor = updateIsRequiredComputerScienceMajor === "" || (updateIsRequiredComputerScienceMajor !== true && updateIsRequiredComputerScienceMajor !== false);
-            const impossibleRequiredComputerScienceMinor = updateIsRequiredComputerScienceMinor === "" || (updateIsRequiredComputerScienceMinor!== true && updateIsRequiredComputerScienceMinor !== false);
-            const impossibleRequiredMultiPlatformMajor = updateIsRequiredMultiPlatformMajor === "" || (updateIsRequiredMultiPlatformMajor !== true && updateIsRequiredMultiPlatformMajor !== false);
+            const impossibleRequiredCSMajor = typeof updateIsRequiredComputerScienceMajor !== "boolean";
+            const impossibleRequiredCSMinor = typeof updateIsRequiredComputerScienceMinor !== "boolean";
+            const impossibleRequiredMultiPlatform = typeof updateIsRequiredMultiPlatformMajor !== "boolean";
 
-            const isImpossibleClass = impossibleTitle || impossibleHeader || impossibleDescription || impossibleCredits || impossibleRequiredComputerScienceMajor || impossibleRequiredComputerScienceMinor || impossibleRequiredMultiPlatformMajor
+            const isImpossibleClass =
+                impossibleTitle ||
+                impossibleHeader ||
+                impossibleDescription ||
+                impossibleCredits ||
+                impossibleRequiredCSMajor ||
+                impossibleRequiredCSMinor ||
+                impossibleRequiredMultiPlatform;
 
-            if(isImpossibleClass){
+            if (isImpossibleClass) {
                 const impossibleList = [];
-                if(impossibleTitle){
-                    impossibleList.push("Impossible List");
-                }
-                if(impossibleHeader){
-                    impossibleList.push("Impossible Header");
-                }
-                if(impossibleDescription){
-                    impossibleList.push("Impossible Description");
-                }
-                if(impossibleCredits){
-                    impossibleList.push("Impossible Credits")
-                }
-                if(impossibleRequiredComputerScienceMajor){
-                    impossibleList.push("Impossible isRequired Computer Science Major")
-                }
-                if(impossibleRequiredComputerScienceMinor){
-                    impossibleList.push("Impossible isRequired Computer Science Minor")
-                }
-                if(impossibleRequiredMultiPlatformMajor){
-                    impossibleList.push("Impossible isRequired MultiPlatform Major")
-                }
-                console.log("The following is not valid to add to the class: ",impossibleList);
+                if (impossibleTitle) impossibleList.push("title");
+                if (impossibleHeader) impossibleList.push("header");
+                if (impossibleDescription) impossibleList.push("description");
+                if (impossibleCredits) impossibleList.push("credits");
+                if (impossibleRequiredCSMajor) impossibleList.push("CS major flag");
+                if (impossibleRequiredCSMinor) impossibleList.push("CS minor flag");
+                if (impossibleRequiredMultiPlatform) impossibleList.push("multiplatform major flag");
+
+                addToast(`Invalid fields: ${impossibleList.join(", ")}`, "error");
+                setProcessingClassUpdate(false);
+                return;
             }
-            else{
-                const updateClass = await axios.put(`http://localhost:8080/test/update/class?id=${classUpdateEntry}`,mountClass);
-                console.log(updateClass.status)
+
+            const mountClass = {
+                title: updateClassTitle.trim(),
+                header: updateClassHeader.trim(),
+                description: updateClassDescription.trim(),
+                credits: creditsNum,
+                isRequiredComputerScienceMajor: updateIsRequiredComputerScienceMajor,
+                isRequiredComputerScienceMinor: updateIsRequiredComputerScienceMinor,
+                isRequiredMultiPlatformMajor: updateIsRequiredMultiPlatformMajor
+            };
+
+            try {
+                await axios.put(`http://localhost:8080/test/update/class?id=${classUpdateEntry}`, mountClass);
+                addToast("Class updated successfully", "success");
+            } catch (error) {
+                console.error("Failed to update class:", error);
+                addToast("Failed to update class", "error");
             }
+
             setProcessingClassUpdate(false);
-        }
+        };
 
         return(
             <div className={classUpdateEntry?"update-student-panel-out":isBeginning?"update-student-panel":"update-student-panel-hidden"}>
@@ -465,7 +502,7 @@ function ClassManager(){
         updateIsRequiredComputerScienceMinor, setUpdateIsRequiredComputerScienceMinor, updateIsRequiredMultiPlatformMajor, setUpdateIsRequiredMultiPlatformMajor, 
         selectedEntry, setSelectedEntry,prerequisiteMapping, addClassTitle, addClassHeader, addClassDescription,addClassCredits, addIsRequiredComputerScienceMinor,
         addIsRequiredComputerScienceMajor, addIsRequiredMultiPlatformMajor, setAddClassTitle, setAddClassHeader, setAddClassDescription, setAddClassCredits,
-        setAddIsRequiredComputerScienceMajor, setAddIsRequiredComputerScienceMinor, setAddIsRequiredMultiPlatformMajor}){
+        setAddIsRequiredComputerScienceMajor, setAddIsRequiredComputerScienceMinor, setAddIsRequiredMultiPlatformMajor, addToast}){
        
         const [warning, setWarning] = useState(null);
         const [classPool, setClassPool] = useState(null);
@@ -515,15 +552,15 @@ function ClassManager(){
 
 
         const addClass = async () => {
-            const title = addClassTitle.trim();
-            const header = addClassHeader.trim();
-            const description = addClassDescription.trim();
+            const title = (addClassTitle ?? "").trim();
+            const header = (addClassHeader ?? "").trim();
+            const description = (addClassDescription ?? "").trim();
             const creditsNum = Number(addClassCredits);
 
             const impossibleTitle = !title;
             const impossibleHeader = !header;
             const impossibleDescription = !description;
-            const impossibleCredits = addClassCredits === "" || Number.isNaN(creditsNum) || creditsNum <= 0;
+            const impossibleCredits = addClassCredits === "" || addClassCredits === null || Number.isNaN(creditsNum) || creditsNum <= 0;
             const impossibleRequiredCSMajor = typeof addIsRequiredComputerScienceMajor !== "boolean";
             const impossibleRequiredCSMinor = typeof addIsRequiredComputerScienceMinor !== "boolean";
             const impossibleRequiredMultiPlatform = typeof addIsRequiredMultiPlatformMajor !== "boolean";
@@ -539,14 +576,15 @@ function ClassManager(){
 
             if (isImpossible) {
                 const impossibleList = [];
-                if (impossibleTitle) impossibleList.push("Invalid Title");
-                if (impossibleHeader) impossibleList.push("Invalid Header");
-                if (impossibleDescription) impossibleList.push("Invalid Description");
-                if (impossibleCredits) impossibleList.push("Invalid Credits");
-                if (impossibleRequiredCSMajor) impossibleList.push("Invalid CS Major flag");
-                if (impossibleRequiredCSMinor) impossibleList.push("Invalid CS Minor flag");
-                if (impossibleRequiredMultiPlatform) impossibleList.push("Invalid Multiplatform Major flag");
-                console.log("The following is not valid to add to the class:", impossibleList);
+                if (impossibleTitle) impossibleList.push("title");
+                if (impossibleHeader) impossibleList.push("header");
+                if (impossibleDescription) impossibleList.push("description");
+                if (impossibleCredits) impossibleList.push("credits");
+                if (impossibleRequiredCSMajor) impossibleList.push("CS major flag");
+                if (impossibleRequiredCSMinor) impossibleList.push("CS minor flag");
+                if (impossibleRequiredMultiPlatform) impossibleList.push("multiplatform major flag");
+
+                addToast(`Invalid fields: ${impossibleList.join(", ")}`, "error");
                 return;
             }
 
@@ -557,7 +595,7 @@ function ClassManager(){
                 credits: creditsNum,
                 isRequiredComputerScienceMajor: addIsRequiredComputerScienceMajor,
                 isRequiredComputerScienceMinor: addIsRequiredComputerScienceMinor,
-                isRequiredMultiPlatformMajor: addIsRequiredMultiPlatformMajor,
+                isRequiredMultiPlatformMajor: addIsRequiredMultiPlatformMajor
             };
 
             try {
@@ -570,9 +608,11 @@ function ClassManager(){
                     setAddIsRequiredComputerScienceMajor(false);
                     setAddIsRequiredComputerScienceMinor(false);
                     setAddIsRequiredMultiPlatformMajor(false);
+                    addToast("Class added successfully", "success");
                 }
             } catch (error) {
                 console.error("Failed to add class:", error);
+                addToast("Failed to add class", "error");
             }
         };
 
@@ -675,7 +715,7 @@ function ClassManager(){
                             })}
                             
                         </div>
-                            <UpdateBlock isBeginning={isBeginning} setIsBeginning={setIsBeginning} classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassDescription={updateClassDescription} setUpdateClassDescription={setUpdateClassDescription} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} updateIsRequiredComputerScienceMajor={updateIsRequiredComputerScienceMajor} setUpdateIsRequiredComputerScienceMajor={setUpdateIsRequiredMultiPlatformMajor} updateIsRequiredComputerScienceMinor = {updateIsRequiredComputerScienceMinor} setUpdateIsRequiredComputerScienceMinor={setUpdateIsRequiredComputerScienceMinor} updateIsRequiredMultiPlatformMajor={updateIsRequiredMultiPlatformMajor} setUpdateIsRequiredMultiPlatformMajor={setUpdateIsRequiredMultiPlatformMajor}/>
+                            <UpdateBlock isBeginning={isBeginning} setIsBeginning={setIsBeginning} classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassDescription={updateClassDescription} setUpdateClassDescription={setUpdateClassDescription} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} updateIsRequiredComputerScienceMajor={updateIsRequiredComputerScienceMajor} setUpdateIsRequiredComputerScienceMajor={setUpdateIsRequiredMultiPlatformMajor} updateIsRequiredComputerScienceMinor = {updateIsRequiredComputerScienceMinor} setUpdateIsRequiredComputerScienceMinor={setUpdateIsRequiredComputerScienceMinor} updateIsRequiredMultiPlatformMajor={updateIsRequiredMultiPlatformMajor} setUpdateIsRequiredMultiPlatformMajor={setUpdateIsRequiredMultiPlatformMajor}  addToast={addToast}/>
                     </div>}
                 {activeTab === "delete" && 
                     <div className="placeholder">

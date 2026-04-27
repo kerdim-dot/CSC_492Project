@@ -25,8 +25,23 @@ public class MountClassEntryService {
     }
 
 
-    public void addMountClassEntryService(MountClassEntry mountClassEntry){
-        mountClassEntryRepository.save(mountClassEntry);
+    public void addMountClassEntryService(MountClassEntryDTO mountClassEntryDTO){
+       Optional<MountClass> mountClassOptional = mountClassRepository.findById(mountClassEntryDTO.getClass_id());
+
+       if (mountClassOptional.isPresent()) {
+            MountClass mountClass = mountClassOptional.get();
+            String meetingTime = mountClassEntryDTO.getMeetingTime();
+            int totalSeats = mountClassEntryDTO.getTotalSeats();
+            String professorName = mountClassEntryDTO.getProfessorName();
+            boolean isMonday = mountClassEntryDTO.getIsMonday();
+            boolean isTuesday = mountClassEntryDTO.getIsTuesday();
+            boolean isWednesday = mountClassEntryDTO.getIsWednesday();
+            boolean isThursday = mountClassEntryDTO.getIsThursday();
+            boolean isFriday = mountClassEntryDTO.getIsFriday();
+
+            MountClassEntry mountClassEntry = new MountClassEntry(mountClass, meetingTime, totalSeats, professorName, isMonday, isTuesday, isWednesday, isThursday, isFriday);
+            mountClassEntryRepository.save(mountClassEntry);
+        }
     }
 
     public List<MountClassEntryDTO> getAllMountClassEntries(){

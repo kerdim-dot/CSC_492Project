@@ -87,7 +87,7 @@ function EnrollmentManager(){
     // ]
 
     return(
-        <div>
+        <div className="">
             <SearchBar students = {students} setStudentSearchList={setStudentSearchList}/>
             <StudentList setIsBeginning = {setIsBeginning} studentSearchList={studentSearchList} selectedStudentId = {selectedStudentId} setSelectedStudentId={setSelectedStudentId} prerequisiteMapping={prerequisiteMapping}/>
             <UpdateBlock isBeginning = {isBeginning} classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId} prerequisiteMapping={prerequisiteMapping} setUpdateHappenedSwitch={setUpdateHappenedSwitch}/>
@@ -241,7 +241,7 @@ function UpdateBlock({isBeginning, classes, enrollment, selectedStudentId, setSe
                         mountClass_id: cls.class_id,
                         status: 1,
                         grade:'A',
-                        enrollment_date:new Date().toISOString().split("T")[0]
+                        enrollment_date:new Date()
                     };
                     requests.push(
                         axios.post(`http://localhost:8080/test/add/enrollment?id=${selectedStudentId}`, enrollmentDTO)

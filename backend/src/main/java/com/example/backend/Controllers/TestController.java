@@ -3,6 +3,7 @@ package com.example.backend.Controllers;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.classfile.constantpool.ClassEntry;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -177,7 +178,7 @@ public class TestController {
             for (int i = 0; i < columnSpliter.length; i++) {
                 columnSpliter[i] = columnSpliter[i].trim();
             }
-            Optional<MountClass> mountClassOptional = mountClassRepository.findById(Long.parseLong(columnSpliter[0]));
+            Long mountClassId = Long.parseLong(columnSpliter[0]);
             String meetingTime = columnSpliter[1];
             int totalSeats = Integer.parseInt(columnSpliter[2]);
             String professorName = columnSpliter[3];
@@ -186,12 +187,10 @@ public class TestController {
             boolean isWednesday = Boolean.parseBoolean(columnSpliter[6]);
             boolean isThursday = Boolean.parseBoolean(columnSpliter[7]);
             boolean isFriday = Boolean.parseBoolean(columnSpliter[8]);
-
-            if (mountClassOptional.isPresent()) {
-                MountClass mountClass = mountClassOptional.get();
-                MountClassEntry mountClassEntry = new MountClassEntry(mountClass, meetingTime, totalSeats, professorName, isMonday, isTuesday, isWednesday, isThursday, isFriday);
-                mountClassEntryService.addMountClassEntryService(mountClassEntry);
-            }
+            //long class_id, String meetingTime, int totalSeats, String professorName, boolean isMonday,boolean isTuesday, boolean isWednesDay, boolean isThursday, boolean isFriday
+            MountClassEntryDTO mountClassEntryDTO = new MountClassEntryDTO(mountClassId, meetingTime, totalSeats, professorName, isMonday, isTuesday, isWednesday, isThursday, isFriday);
+            mountClassEntryService.addMountClassEntryService(mountClassEntryDTO);
+            
         }
 
         while ((line = brPrerequisites.readLine()) != null) {
@@ -323,6 +322,29 @@ public class TestController {
     @DeleteMapping("/delete/student")
     public void deleteStudent(@RequestParam long id){
         studentService.deleteStudent(id);
+    }
+
+
+    @DeleteMapping("/delete/important/date")
+    public void deleteImportantDate(@RequestParam long id){
+        importantDataService.deleteImportantDate(id);
+    }
+
+
+    @DeleteMapping("/delete/class/entry")
+    public void deleteClassEntry(@RequestParam long id){
+        mountClassEntryService.deleteMountClassEntry(id);
+    }
+
+
+    @PostMapping("/add/important/date")
+    public void addImportantDate(@RequestBody ImportantDate importantDate){
+        importantDataService.addImportantDate(importantDate);
+    }
+
+    @PostMapping("/add/class/entry")
+    public void addClassEntry(@RequestBody MountClassEntryDTO classEntryDTO){
+        mountClassEntryService.addMountClassEntryService(classEntryDTO);
     }
 
 

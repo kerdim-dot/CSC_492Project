@@ -67,6 +67,20 @@ function StudentManager(){
 
     const [updateList, setUpdateList] = useState(false);
 
+    const [toasts, setToasts] = useState([]);
+
+    const addToast = (message, type = "warning") => {
+        const id = Date.now() + Math.random();
+        setToasts(prev => [...prev, { id, message, type }]);
+        setTimeout(() => {
+            setToasts(prev => prev.filter(t => t.id !== id));
+        }, 4000);
+    };
+
+    const removeToast = (id) => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+    };
+
     useEffect(()=>{
         
         const retriveClassData = async() =>{
@@ -244,6 +258,7 @@ useEffect(()=>{
   
   return (
     <div className="tab-pane-container">
+      <ToastContainer toasts={toasts} removeToast={removeToast} />
       {deleteConfirmationScreen && <DeleteConfirmation setDeleteConfirmationScreen={setDeleteConfirmationScreen} selectDeleteMultiple={selectDeleteMultiple} selectedDeleteEntries={selectedDeleteEntries} selectedDeleteEntry={selectedDeleteEntry} setSelectedDeleteEntries={setSelectedDeleteEntries} setSelectedDeleteEntry={setSelectedDeleteEntry} setUpdateList={setUpdateList}/>}
       <div className="top-container">
             <HeaderPanel activeTab = {activeTab} setActiveTab={setActiveTab} setSelectedDeleteEntry={setSelectedDeleteEntry} setStudentUpdateEntry={setStudentUpdateEntry} studentUpdateEntry={studentUpdateEntry} setIsBeginning={setIsBeginning}/>
@@ -265,7 +280,8 @@ useEffect(()=>{
       setSelectDeleteMultiple={setSelectDeleteMultiple} selectedDeleteEntries = {selectedDeleteEntries} setSelectedDeleteEntries={setSelectedDeleteEntries} 
       updateIsComputerScienceMajor={updateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} 
       setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} 
-      updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor} setUpdateList={setUpdateList}/>
+      updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor} setUpdateList={setUpdateList}
+      addToast={addToast}/>
 
     </div>
   );
@@ -391,8 +407,25 @@ function FilterBlock({ startDate, endDate, setStartDate, setEndDate, setShowFilt
     );
 }
 
+function ToastContainer({ toasts, removeToast }) {
+    return (
+        <div className="toast-container">
+            {toasts.map((toast) => (
+                <div key={toast.id} className={`toast toast-${toast.type}`}>
+                    <p className="toast-message">{toast.message}</p>
+                    <img
+                        className="toast-close"
+                        src={close}
+                        alt="Close"
+                        onClick={() => removeToast(toast.id)}
+                    />
+                </div>
+            ))}
+        </div>
+    );
+}
 
-function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, updateIsComputerScienceMajor, setUpdateIsComputerScienceMajor, updateIsComputerScienceMinor, setUpdateIsComputerScienceMinor, updateIsMultiPlatformMajor, setUpdateIsMultiPlatformMajor, setUpdateList}){
+function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,updateFirstNameValue, updateLastNameValue, updateGraduationValue, setUpdateFirstNameValue, setUpdateLastNameValue,setUpdateGraduationValue, updateIsComputerScienceMajor, setUpdateIsComputerScienceMajor, updateIsComputerScienceMinor, setUpdateIsComputerScienceMinor, updateIsMultiPlatformMajor, setUpdateIsMultiPlatformMajor, setUpdateList, addToast}){
     const [processingStudentUpate, setProcessingStudentUpdate] = useState(false);
 
     const updateStudentEntry = async() =>{
@@ -416,46 +449,27 @@ function UpdateBlock({isBeginning,studentUpdateEntry ,setStudentUpdateEntry,upda
         const impossibleValues = impossibleFirstName || impossibleLastName || impossibleGraduationDate || impossibleComputerScienceMajor || impossibleComputerScienceMinor ||
         impossibleMultiPlatformMajor
 
-        if(impossibleValues){
+        if (impossibleValues) {
             const impossibleValueList = [];
-            if(impossibleFirstName){
-                impossibleValueList.push("first name");
-            }
-            if(impossibleLastName){
-                impossibleValueList.push("last name");
-            }
-            if(impossibleGraduationDate){
-                impossibleValueList.push("graduation date");
-            }
-            if(impossibleComputerScienceMajor){
-                impossibleValueList.push("computer science major");
-            }
-            if(impossibleComputerScienceMinor){
-                impossibleValueList.push("computer science minor");
-            }
-            if(impossibleMultiPlatformMajor){
-                impossibleValueList.push("multiplatform major");
-            }
+            if (impossibleFirstName) impossibleValueList.push("first name");
+            if (impossibleLastName) impossibleValueList.push("last name");
+            if (impossibleGraduationDate) impossibleValueList.push("graduation date");
+            if (impossibleComputerScienceMajor) impossibleValueList.push("computer science major");
+            if (impossibleComputerScienceMinor) impossibleValueList.push("computer science minor");
+            if (impossibleMultiPlatformMajor) impossibleValueList.push("multiplatform major");
 
-            setTimeout(()=>{
-                console.log(`the following fields are incorrectly filled out: ${impossibleValueList}`)
-            },2000)
+            addToast(`Invalid fields: ${impossibleValueList.join(", ")}`, "error");
         }
-        else if(student.isComputerScienceMajor && student.isComputerScienceMinor || student.isMultiPlatformMajor){
-            setTimeout(()=>{
-                console.log("You cannot have both a major and a minor in the same classes")
-            },2000)
+        else if ((student.isComputerScienceMajor && student.isComputerScienceMinor) || student.isMultiPlatformMajor) {
+            addToast("You cannot have both a major and a minor in the same classes", "warning");
         }
-
-        else if(!student.isComputerScienceMajor && !student.isComputerScienceMinor && !student.isMultiPlatformMajor){
-            setTimeout(()=>{
-                console.log("Students must be part of the computer science program")
-            },2000)
+        else if (!student.isComputerScienceMajor && !student.isComputerScienceMinor && !student.isMultiPlatformMajor) {
+            addToast("Students must be part of the computer science program", "warning");
         }
-
-        else{
-            const updateStudent = await axios.put(`http://localhost:8080/test/update/student?id=${studentUpdateEntry}`,student);
-            setUpdateList(prev => !prev)
+        else {
+            await axios.put(`http://localhost:8080/test/update/student?id=${studentUpdateEntry}`, student);
+            addToast("Student updated successfully", "success");
+            setUpdateList(prev => !prev);
         }
         
         setProcessingStudentUpdate(false);
@@ -640,7 +654,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
     addIsComputerScienceMajor,setAddIsComputerScienceMajor,addIsComputerScienceMinor,setAddIsComputerScienceMinor,addIsMultiPlatformMajor,setAddIsMultiPlatformMajor,
     setDeleteConfirmationScreen, selectDeleteMultiple, setSelectDeleteMultiple,selectedDeleteEntries, setSelectedDeleteEntries,
     updateIsComputerScienceMajor,setUpdateIsComputerScienceMajor,updateIsComputerScienceMinor,setUpdateIsComputerScienceMinor,
-    updateIsMultiPlatformMajor,setUpdateIsMultiPlatformMajor, setUpdateList
+    updateIsMultiPlatformMajor,setUpdateIsMultiPlatformMajor, setUpdateList, addToast
     }){
     const [warning, setWarning] = useState(null);
     const [multipleStudentText, setMultipleStudentText] = useState(null);
@@ -755,44 +769,27 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         const impossibleValues = impossibleFirstName || impossibleLastName || impossibleGraduationDate || impossibleComputerScienceMajor || impossibleComputerScienceMinor ||
         impossibleMultiPlatformMajor
 
-        if(impossibleValues){
+        if (impossibleValues) {
             const impossibleValueList = [];
-            if(impossibleFirstName){
-                impossibleValueList.push("first name");
-            }
-            if(impossibleLastName){
-                impossibleValueList.push("last name");
-            }
-            if(impossibleGraduationDate){
-                impossibleValueList.push("graduation date");
-            }
-            if(impossibleComputerScienceMajor){
-                impossibleValueList.push("computer science major");
-            }
-            if(impossibleComputerScienceMinor){
-                impossibleValueList.push("computer science minor");
-            }
-            if(impossibleMultiPlatformMajor){
-                impossibleValueList.push("multiplatform major");
-            }
-            setTimeout(()=>{
-                console.log(`the following fields are incorrectly filled out: ${impossibleValueList}`)
-            },2000)
-        }
-        else if(student.isComputerScienceMajor && student.isComputerScienceMinor){
-            setTimeout(()=>{
-                console.log("You cannot have both a major and a minor in the same classes")
-            },2000)
-        }
+            if (impossibleFirstName) impossibleValueList.push("first name");
+            if (impossibleLastName) impossibleValueList.push("last name");
+            if (impossibleGraduationDate) impossibleValueList.push("graduation date");
+            if (impossibleComputerScienceMajor) impossibleValueList.push("computer science major");
+            if (impossibleComputerScienceMinor) impossibleValueList.push("computer science minor");
+            if (impossibleMultiPlatformMajor) impossibleValueList.push("multiplatform major");
 
-        else if(!student.isComputerScienceMajor && !student.isComputerScienceMinor && !student.isMultiPlatformMajor){
-            setTimeout(()=>{
-                console.log("Student must be part of the computer science program")
-            },2000)
+            addToast(`Invalid fields: ${impossibleValueList.join(", ")}`, "error");
         }
-
-        else{
-            const addStudent = await axios.post(`http://localhost:8080/test/add/student`,student);
+        else if (student.isComputerScienceMajor && student.isComputerScienceMinor) {
+            addToast("You cannot have both a major and a minor in the same classes", "warning");
+        }
+        else if (!student.isComputerScienceMajor && !student.isComputerScienceMinor && !student.isMultiPlatformMajor) {
+            addToast("Student must be part of the computer science program", "warning");
+        }
+        else {
+            await axios.post(`http://localhost:8080/test/add/student`, student);
+            addToast("Student added successfully", "success");
+            setUpdateList(prev => !prev);
         }
     }
 
@@ -911,7 +908,7 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
                             </div>)
                         })}
                     </div>
-                    {<UpdateBlock isBeginning={isBeginning} studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue} updateIsComputerScienceMajor={updateIsComputerScienceMajor} setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor} setUpdateList={setUpdateList}/>}
+                    {<UpdateBlock isBeginning={isBeginning} studentUpdateEntry={studentUpdateEntry} setStudentUpdateEntry = {setStudentUpdateEntry} updateFirstNameValue= {updateFirstNameValue} updateLastNameValue = {updateLastNameValue} updateGraduationValue={updateGraduationValue} setUpdateFirstNameValue = {setUpdateFirstNameValue} setUpdateLastNameValue = {setUpdateLastNameValue} setUpdateGraduationValue = {setUpdateGraduationValue} updateIsComputerScienceMajor={updateIsComputerScienceMajor} setUpdateIsComputerScienceMajor={setUpdateIsComputerScienceMajor} updateIsComputerScienceMinor={updateIsComputerScienceMinor} setUpdateIsComputerScienceMinor={setUpdateIsComputerScienceMinor} updateIsMultiPlatformMajor={updateIsMultiPlatformMajor} setUpdateIsMultiPlatformMajor={setUpdateIsMultiPlatformMajor} setUpdateList={setUpdateList} addToast={addToast}/>}
                 </div>}
             {activeTab === "delete" && 
                 <div className="placeholder">
