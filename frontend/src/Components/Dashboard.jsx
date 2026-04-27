@@ -72,21 +72,9 @@ function getSemestersLeft(student, currentYear, currentSemester) {
 
 
 
-function AdviseesBoard() {
+function AdviseesBoard({ students = [] }) {
+    
     const navigate = useNavigate();
-
-    const students = [
-        {
-            name: "Student 1",
-            classes: [
-                { code: "CSC120", grade: "A", colorClass: "status-good" },
-                { code: "CSC220", grade: "B", colorClass: "status-good-soft" },
-                { code: "CSC320", grade: "C", colorClass: "status-warn" },
-                { code: "CSC330", grade: "D", colorClass: "status-warn-soft" },
-                { code: "CSC340", grade: "F", colorClass: "status-bad" },
-            ],
-        },
-    ];
 
     return (
         <section className="dashboard-surface advisees-board">
@@ -203,7 +191,7 @@ function processStudents(students, classes, enrollment, currentYear, currentSeme
   Replace this later with real major/minor requirement data from backend.
 */
 function getMockRequirementData() {
-    
+
     return [
         {
             label: "Major",
@@ -320,7 +308,8 @@ const semesterData = [
     },
 ];
 
-function SemesterPlanBoard() {
+function SemesterPlanBoard({ semesterData = [] }) {
+    
     const navigate = useNavigate();
 
     const getTotalCredits = (courses) =>
@@ -418,102 +407,6 @@ function SemesterPlanBoard() {
         </section>
     );
 }
-/* -------------------------------- dashboard -------------------------------- */
-
-function Dashboard() {
-    const [classes, setClasses] = useState([]);
-    const [enrollment, setEnrollment] = useState([]);
-    const [students, setStudents] = useState([]);
-
-    const role = localStorage.getItem("role") || "user";
-    const isAdmin = role === "admin";
-    const isSupervisor = role === "supervisor";
-    const isStudent = role === "user"
-
-    const [showAlter, setShowAlter] = useState(false);
-
-    const [currentYear] = useState(2026);
-    const [currentSemester] = useState(2);
-
-    useEffect(() => {
-        async function fetchDashboardData() {
-            try {
-                const [classRes, studentRes, enrollmentRes] = await Promise.all([
-                    axios.get("http://localhost:8080/test/get/classes"),
-                    axios.get("http://localhost:8080/test/get/students"),
-                    axios.get("http://localhost:8080/test/get/enrollments")
-                ]);
-
-                setClasses(classRes.data);
-
-                const updatedStudents = studentRes.data.map((item) => ({
-                    ...item,
-                    graduationFormula: GraduationConverter(item.graduationDate)
-                }));
-                setStudents(updatedStudents);
-
-                setEnrollment(enrollmentRes.data);
-
-                console.log("class fetch:", classRes.data);
-                console.log("enrollment fetch:", enrollmentRes.data);
-            } catch (error) {
-                console.error("Failed to fetch dashboard data:", error);
-            }
-        }
-
-        fetchDashboardData();
-    }, []);
-
-    const dashboardStats = useMemo(() => {
-        if (!classes.length || !students.length || !enrollment.length) {
-            return {
-                processedStudents: [],
-                behindCount: null,
-                onTimeCount: null
-            };
-        }
-
-        return processStudents(
-            students,
-            classes,
-            enrollment,
-            currentYear,
-            currentSemester
-        );
-    }, [classes, students, enrollment, currentYear, currentSemester]);
-
-    const requirementData = useMemo(() => getMockRequirementData(), []);
-
-    return (
-        <div className="dashboard-page">
-            <span className="dashboard-page-title">
-                Dashboard
-            </span>
-            <div className="dashboard-top-section">
-                {(role === "user") && (
-                    <>
-                        <RequirementProgressCard rows={requirementData} />
-                        <CreditRingWidget />
-                        <GradeMeterWidget />
-                    </>
-                )}
-                {(role === "admin" || role === "supervisor") && (
-                    <>
-                        <AdviseesBoard />
-                        <SemesterPlanBoard />
-                        <AdviseeStatusBoard />
-                        <GraphComparison
-                            behindCount={dashboardStats.behindCount}
-                            onTimeCount={dashboardStats.onTimeCount}
-                        />
-                    </>
-                )}
-            </div>
-        </div>
-    );
-}
-
-export default Dashboard;
 
 /* --------------------------- requirement progress -------------------------- */
 
@@ -945,14 +838,6 @@ const GRADE_LINES = [
     { label: "D", fill: 20 },
 ];
 
-function getGradeStatusClass(grade) {
-    if (grade >= 90) return "status-good";
-    if (grade >= 80) return "status-good-soft";
-    if (grade >= 70) return "status-warn";
-    if (grade >= 60) return "status-warn-soft";
-    return "status-bad";
-}
-
 function GradeMeterCard({ course, isLast }) {
     const navigate = useNavigate();
 
@@ -1043,29 +928,8 @@ function GradeMeterWidget({ classes }) {
     );
 }
 
-function AdviseeStatusBoard() {
+function AdviseeStatusBoard({ advisees = [] }) {
     const navigate = useNavigate();
-
-    const advisees = [
-        {
-            id: 1,
-            name: "Student 1",
-            yearLabel: "Year 3",
-            warningCourse: null,
-            summaryText: "No Warning Courses",
-            summaryStatus: "good",
-            inProgress: ["CSC220", "CSC320", "CSC360"],
-        },
-        {
-            id: 2,
-            name: "Student 2",
-            yearLabel: "Year 2",
-            warningCourse: "CSC120",
-            summaryText: null,
-            summaryStatus: "bad",
-            inProgress: ["CSC220", "CSC320", "CSC360"],
-        },
-    ];
 
     return (
         <section className="dashboard-surface advisee-status-board">
@@ -1144,3 +1008,957 @@ function AdviseeStatusBoard() {
         </section>
     );
 }
+
+/* -------------------------------- dashboard helpers -------------------------------- */
+
+const CURRENT_YEAR = 2026;
+const CURRENT_SEMESTER = 2;
+
+// TODO: replace once your backend/status enum is finalized.
+const ENROLLMENT_STATUS = {
+    PLANNED: 0,
+    IN_PROGRESS: 1,
+    COMPLETED: 2,
+    DROPPED: 3,
+};
+
+// TODO: replace if minimum grade differs by course.
+const DEFAULT_REQUIRED_MINIMUM = 70;
+
+// TODO: replace once you know actual semester offering rules.
+// Example future shape:
+// {
+//     "CSC120": ["fall", "spring"],
+//     "CSC220": ["spring"],
+//     "CSC320": ["fall"]
+// }
+const COURSE_OFFERING_MAP = null;
+
+// TODO: replace once schedule/term information is fully available.
+const CURRENT_TERM_INDEX = null;
+const GRADUATION_TERM_INDEX_BY_STUDENT_ID = null;
+
+
+/* ----------------------------- normalization helpers ----------------------------- */
+
+function normalizeClass(rawClass) {
+    return {
+        ...rawClass,
+
+        // flexible aliases
+        id: rawClass.id ?? rawClass.class_id ?? rawClass.classId,
+        classId: rawClass.classId ?? rawClass.class_id ?? rawClass.id,
+
+        code: rawClass.code ?? rawClass.header ?? rawClass.classCode,
+        header: rawClass.header ?? rawClass.code ?? rawClass.classCode,
+        name: rawClass.name ?? rawClass.title ?? rawClass.className,
+
+        credits: Number(rawClass.credits ?? 0),
+
+        isCSMajor: Boolean(rawClass.isCSMajor),
+        isCSMinor: Boolean(rawClass.isCSMinor),
+        isMultiPlatformMajor: Boolean(rawClass.isMultiPlatformMajor),
+
+        requiredMinimum: rawClass.requiredMinimum ?? DEFAULT_REQUIRED_MINIMUM,
+    };
+}
+
+function normalizeStudent(rawStudent) {
+    const graduationFormula = rawStudent.graduationFormula
+        ?? GraduationConverter(rawStudent.graduationDate);
+
+    return {
+        ...rawStudent,
+
+        id: rawStudent.id ?? rawStudent.student_id ?? rawStudent.studentId,
+        studentId: rawStudent.studentId ?? rawStudent.student_id ?? rawStudent.id,
+
+        firstName: rawStudent.firstName ?? "",
+        lastName: rawStudent.lastName ?? "",
+        name:
+            rawStudent.name
+            ?? `${rawStudent.firstName ?? ""} ${rawStudent.lastName ?? ""}`.trim(),
+
+        graduationDate: rawStudent.graduationDate,
+        graduationFormula,
+    };
+}
+
+function normalizeEnrollment(rawEnrollment) {
+    return {
+        ...rawEnrollment,
+
+        id: rawEnrollment.id ?? rawEnrollment.enrollmentId,
+        studentId:
+            rawEnrollment.studentId
+            ?? rawEnrollment.student_id,
+
+        classId:
+            rawEnrollment.classId
+            ?? rawEnrollment.class_id
+            ?? rawEnrollment.mountClass_id,
+
+        status: Number(rawEnrollment.status),
+        grade:
+            rawEnrollment.grade === null || rawEnrollment.grade === undefined || rawEnrollment.grade === ""
+                ? null
+                : Number(rawEnrollment.grade),
+    };
+}
+
+
+/* ----------------------------- generic data helpers ----------------------------- */
+
+function buildClassById(classes) {
+    return Object.fromEntries(classes.map((classItem) => [classItem.classId, classItem]));
+}
+
+function buildEnrollmentsByStudent(enrollments) {
+    const map = {};
+
+    enrollments.forEach((enrollment) => {
+        if (!map[enrollment.studentId]) {
+            map[enrollment.studentId] = [];
+        }
+
+        map[enrollment.studentId].push(enrollment);
+    });
+
+    return map;
+}
+
+function getStudentEnrollments(student, enrollmentsByStudent) {
+    return enrollmentsByStudent[student.studentId] ?? [];
+}
+
+function getEnrollmentForClass(studentEnrollments, classId) {
+    return studentEnrollments.find((enrollment) => enrollment.classId === classId) ?? null;
+}
+
+function isCompletedEnrollment(enrollment) {
+    return enrollment?.status === ENROLLMENT_STATUS.COMPLETED;
+}
+
+function isInProgressEnrollment(enrollment) {
+    return enrollment?.status === ENROLLMENT_STATUS.IN_PROGRESS;
+}
+
+function isPlannedEnrollment(enrollment) {
+    return enrollment?.status === ENROLLMENT_STATUS.PLANNED;
+}
+
+function getLetterGrade(score) {
+    if (score === null || score === undefined || Number.isNaN(score)) return "—";
+    if (score >= 90) return "A";
+    if (score >= 80) return "B";
+    if (score >= 70) return "C";
+    if (score >= 60) return "D";
+    return "F";
+}
+
+function getGradeStatusClass(score) {
+    if (score === null || score === undefined || Number.isNaN(score)) return "status-planned";
+    if (score >= 90) return "status-good";
+    if (score >= 80) return "status-good-soft";
+    if (score >= 70) return "status-warn";
+    if (score >= 60) return "status-warn-soft";
+    return "status-bad";
+}
+
+function getCourseRequirementStatus(classItem, enrollment) {
+    if (!enrollment) return null;
+
+    if (isCompletedEnrollment(enrollment)) {
+        return "completed";
+    }
+
+    if (isInProgressEnrollment(enrollment)) {
+        if (
+            enrollment.grade !== null
+            && enrollment.grade < (classItem.requiredMinimum ?? DEFAULT_REQUIRED_MINIMUM)
+        ) {
+            return "warning";
+        }
+
+        return "in_progress";
+    }
+
+    if (isPlannedEnrollment(enrollment)) {
+        return "planned";
+    }
+
+    return null;
+}
+
+
+/* ----------------------------- warning-course helpers ----------------------------- */
+
+function getPrerequisiteIdsForClass(classItem, prerequisites) {
+    const targetClassId = classItem.classId;
+
+    return prerequisites
+        .filter((item) => {
+            const classId =
+                item.classId
+                ?? item.class_id
+                ?? item.class_id_id;
+
+            return classId === targetClassId;
+        })
+        .map((item) => {
+            return (
+                item.prerequisiteId
+                ?? item.prequisiteId // keep this typo because your CSV may use it
+                ?? item.prereqId
+                ?? item.requiredClassId
+            );
+        })
+        .filter(Boolean);
+}
+
+function hasCompletedClass(studentEnrollments, classId) {
+    const enrollment = getEnrollmentForClass(studentEnrollments, classId);
+    return isCompletedEnrollment(enrollment);
+}
+
+function getMissingPrerequisites(classItem, studentEnrollments, prerequisites) {
+    const prereqIds = getPrerequisiteIdsForClass(classItem, prerequisites);
+
+    return prereqIds.filter((prereqId) => {
+        return !hasCompletedClass(studentEnrollments, prereqId);
+    });
+}
+
+function getOpportunitiesToTakeCourse(classItem, student, scheduleData) {
+    /*
+      UNIMPLEMENTED VARIABLES NEEDED:
+      - COURSE_OFFERING_MAP
+      - CURRENT_TERM_INDEX
+      - GRADUATION_TERM_INDEX_BY_STUDENT_ID
+      - scheduleData, if you want this based on actual future schedules instead of static offering rules
+
+      Intended output:
+      return number of future terms where this class is offered before the student graduates.
+    */
+
+    if (
+        !COURSE_OFFERING_MAP
+        || CURRENT_TERM_INDEX === null
+        || !GRADUATION_TERM_INDEX_BY_STUDENT_ID
+    ) {
+        return null;
+    }
+
+    const graduationTermIndex = GRADUATION_TERM_INDEX_BY_STUDENT_ID[student.studentId];
+    const offeredTerms = COURSE_OFFERING_MAP[classItem.code] ?? [];
+
+    if (graduationTermIndex === undefined) {
+        return null;
+    }
+
+    let opportunities = 0;
+
+    for (let termIndex = CURRENT_TERM_INDEX; termIndex <= graduationTermIndex; termIndex++) {
+        const termName = getTermNameFromIndex(termIndex);
+
+        if (offeredTerms.includes(termName)) {
+            opportunities += 1;
+        }
+    }
+
+    return opportunities;
+}
+
+function getTermNameFromIndex(termIndex) {
+    // Example convention only.
+    // Even = spring, odd = fall.
+    return termIndex % 2 === 0 ? "spring" : "fall";
+}
+
+function getWarningReason({
+    classItem,
+    student,
+    enrollment,
+    studentEnrollments,
+    prerequisites,
+    scheduleData,
+}) {
+    const missingPrerequisites = getMissingPrerequisites(
+        classItem,
+        studentEnrollments,
+        prerequisites
+    );
+
+    const opportunitiesLeft = getOpportunitiesToTakeCourse(
+        classItem,
+        student,
+        scheduleData
+    );
+
+    const hasGradeWarning =
+        enrollment
+        && enrollment.grade !== null
+        && enrollment.grade < (classItem.requiredMinimum ?? DEFAULT_REQUIRED_MINIMUM);
+
+    const hasMissingPrereqWarning = missingPrerequisites.length > 0;
+
+    const hasOpportunityWarning =
+        opportunitiesLeft !== null
+        && opportunitiesLeft <= 1
+        && !isCompletedEnrollment(enrollment);
+
+    if (hasGradeWarning) {
+        return "grade";
+    }
+
+    if (hasMissingPrereqWarning) {
+        return "missing_prerequisite";
+    }
+
+    if (hasOpportunityWarning) {
+        return "limited_opportunities";
+    }
+
+    return null;
+}
+
+function isWarningCourse({
+    classItem,
+    student,
+    enrollment,
+    studentEnrollments,
+    prerequisites,
+    scheduleData,
+}) {
+    return Boolean(
+        getWarningReason({
+            classItem,
+            student,
+            enrollment,
+            studentEnrollments,
+            prerequisites,
+            scheduleData,
+        })
+    );
+}
+
+
+/* ----------------------------- widget-data builders ----------------------------- */
+
+function buildRequirementRows({
+    selectedStudent,
+    classes,
+    enrollmentsByStudent,
+    prerequisites,
+    scheduleData,
+}) {
+    if (!selectedStudent) return [];
+
+    const studentEnrollments = getStudentEnrollments(selectedStudent, enrollmentsByStudent);
+
+    const requirementGroups = [
+        {
+            label: "Major",
+            totalRequired: classes.filter((classItem) => classItem.isCSMajor).length,
+            classes: classes.filter((classItem) => classItem.isCSMajor),
+        },
+        {
+            label: "Minor",
+            totalRequired: classes.filter((classItem) => classItem.isCSMinor).length,
+            classes: classes.filter((classItem) => classItem.isCSMinor),
+        },
+        {
+            label: "Multi-Platform",
+            totalRequired: classes.filter((classItem) => classItem.isMultiPlatformMajor).length,
+            classes: classes.filter((classItem) => classItem.isMultiPlatformMajor),
+        },
+    ];
+
+    return requirementGroups
+        .filter((group) => group.totalRequired > 0)
+        .map((group) => ({
+            label: group.label,
+            totalRequired: group.totalRequired,
+            courses: group.classes.map((classItem) => {
+                const enrollment = getEnrollmentForClass(studentEnrollments, classItem.classId);
+
+                const warning = isWarningCourse({
+                    classItem,
+                    student: selectedStudent,
+                    enrollment,
+                    studentEnrollments,
+                    prerequisites,
+                    scheduleData,
+                });
+
+                const baseStatus = getCourseRequirementStatus(classItem, enrollment);
+
+                return {
+                    id: classItem.classId,
+                    code: classItem.code,
+                    name: classItem.name,
+                    status: warning ? "warning" : baseStatus,
+                    warningReason: warning
+                        ? getWarningReason({
+                            classItem,
+                            student: selectedStudent,
+                            enrollment,
+                            studentEnrollments,
+                            prerequisites,
+                            scheduleData,
+                        })
+                        : null,
+                };
+            }),
+        }));
+}
+
+function buildCreditStats({
+    selectedStudent,
+    classes,
+    enrollmentsByStudent,
+}) {
+    if (!selectedStudent) {
+        return {
+            totalCredits: 0,
+            completedCredits: 0,
+            inProgressCredits: 0,
+        };
+    }
+
+    const studentEnrollments = getStudentEnrollments(selectedStudent, enrollmentsByStudent);
+    const requiredClasses = classes.filter((classItem) => classItem.isCSMajor);
+
+    const totalCredits = requiredClasses.reduce(
+        (sum, classItem) => sum + classItem.credits,
+        0
+    );
+
+    const completedCredits = requiredClasses.reduce((sum, classItem) => {
+        const enrollment = getEnrollmentForClass(studentEnrollments, classItem.classId);
+        return isCompletedEnrollment(enrollment) ? sum + classItem.credits : sum;
+    }, 0);
+
+    const inProgressCredits = requiredClasses.reduce((sum, classItem) => {
+        const enrollment = getEnrollmentForClass(studentEnrollments, classItem.classId);
+        return isInProgressEnrollment(enrollment) ? sum + classItem.credits : sum;
+    }, 0);
+
+    return {
+        totalCredits,
+        completedCredits,
+        inProgressCredits,
+    };
+}
+
+function buildGradeSnapshot({
+    selectedStudent,
+    classes,
+    enrollmentsByStudent,
+}) {
+    if (!selectedStudent) return [];
+
+    const studentEnrollments = getStudentEnrollments(selectedStudent, enrollmentsByStudent);
+    const classById = buildClassById(classes);
+
+    return studentEnrollments
+        .filter((enrollment) => isInProgressEnrollment(enrollment))
+        .map((enrollment) => {
+            const classItem = classById[enrollment.classId];
+
+            return {
+                id: enrollment.classId,
+                name: classItem?.code ?? `Class ${enrollment.classId}`,
+                grade: enrollment.grade ?? 0,
+                requiredMinimum: classItem?.requiredMinimum ?? DEFAULT_REQUIRED_MINIMUM,
+            };
+        });
+}
+
+function buildAdviseeGradeCards({
+    students,
+    classes,
+    enrollmentsByStudent,
+}) {
+    const classById = buildClassById(classes);
+
+    return students.map((student) => {
+        const studentEnrollments = getStudentEnrollments(student, enrollmentsByStudent);
+
+        const displayClasses = studentEnrollments
+            .filter((enrollment) => isInProgressEnrollment(enrollment))
+            .map((enrollment) => {
+                const classItem = classById[enrollment.classId];
+
+                return {
+                    code: classItem?.code ?? `Class ${enrollment.classId}`,
+                    grade: getLetterGrade(enrollment.grade),
+                    colorClass: getGradeStatusClass(enrollment.grade),
+                };
+            });
+
+        return {
+            id: student.studentId,
+            name: student.name,
+            classes: displayClasses,
+        };
+    });
+}
+
+function buildAdviseeStatusCards({
+    students,
+    classes,
+    enrollmentsByStudent,
+    prerequisites,
+    scheduleData,
+}) {
+    const classById = buildClassById(classes);
+
+    return students.map((student) => {
+        const studentEnrollments = getStudentEnrollments(student, enrollmentsByStudent);
+
+        const inProgress = studentEnrollments
+            .filter((enrollment) => isInProgressEnrollment(enrollment))
+            .map((enrollment) => {
+                const classItem = classById[enrollment.classId];
+                return classItem?.code ?? `Class ${enrollment.classId}`;
+            });
+
+        const warningEnrollment = studentEnrollments.find((enrollment) => {
+            const classItem = classById[enrollment.classId];
+
+            if (!classItem) return false;
+
+            return isWarningCourse({
+                classItem,
+                student,
+                enrollment,
+                studentEnrollments,
+                prerequisites,
+                scheduleData,
+            });
+        });
+
+        const warningClass = warningEnrollment
+            ? classById[warningEnrollment.classId]
+            : null;
+
+        return {
+            id: student.studentId,
+            name: student.name,
+
+            // derivable, but may be inaccurate depending on your graduation-date logic
+            yearLabel: getApproximateYearLabel(student),
+
+            warningCourse: warningClass?.code ?? null,
+            summaryText: warningClass ? null : "No Warning Courses",
+            summaryStatus: warningClass ? "bad" : "good",
+            inProgress,
+        };
+    });
+}
+
+function getApproximateYearLabel(student) {
+    /*
+      Derivable from graduationDate/graduationFormula, but this is approximate.
+      Replace with student.currentYear/classStanding if your backend adds it.
+    */
+
+    const semestersLeft = getSemestersLeft(student, CURRENT_YEAR, CURRENT_SEMESTER);
+
+    if (semestersLeft >= 7) return "Year 1";
+    if (semestersLeft >= 5) return "Year 2";
+    if (semestersLeft >= 3) return "Year 3";
+    return "Year 4";
+}
+
+function buildSemesterPlan({
+    selectedStudent,
+    schedules,
+    scheduleEntries,
+    classes,
+    enrollmentsByStudent,
+}) {
+    /*
+      This depends on your actual schedule.csv and scheduleEntry.csv shapes.
+      The variables are included, but if your backend does not expose them yet,
+      this will safely return [].
+    */
+
+    if (!selectedStudent || !schedules.length || !scheduleEntries.length) {
+        return [];
+    }
+
+    const classById = buildClassById(classes);
+    const studentEnrollments = getStudentEnrollments(selectedStudent, enrollmentsByStudent);
+
+    const studentSchedules = schedules.filter((schedule) => {
+        const studentId =
+            schedule.studentId
+            ?? schedule.student_id;
+
+        return studentId === selectedStudent.studentId;
+    });
+
+    return studentSchedules.map((schedule, index) => {
+        const scheduleId =
+            schedule.id
+            ?? schedule.scheduleId
+            ?? schedule.schedule_id;
+
+        const entries = scheduleEntries.filter((entry) => {
+            const entryScheduleId =
+                entry.scheduleId
+                ?? entry.schedule_id;
+
+            return entryScheduleId === scheduleId;
+        });
+
+        const courses = entries.map((entry) => {
+            const classId =
+                entry.classId
+                ?? entry.class_id
+                ?? entry.mountClass_id;
+
+            const classItem = classById[classId];
+            const enrollment = getEnrollmentForClass(studentEnrollments, classId);
+
+            const grade = enrollment?.grade ?? null;
+            const letterGrade = getLetterGrade(grade);
+
+            return {
+                code: classItem?.code ?? `Class ${classId}`,
+                credits: classItem?.credits ?? 0,
+                points: grade === null ? null : getGradePoints(grade) * (classItem?.credits ?? 0),
+                grade: letterGrade === "—" ? null : letterGrade,
+                status: getSemesterCourseStatus(enrollment),
+            };
+        });
+
+        return {
+            id: scheduleId,
+            term: schedule.term ?? `Semester ${index + 1}`,
+            label: schedule.label ?? buildScheduleLabel(schedule),
+            courses,
+        };
+    });
+}
+
+function getGradePoints(score) {
+    if (score === null || score === undefined || Number.isNaN(score)) return 0;
+    if (score >= 90) return 4;
+    if (score >= 80) return 3;
+    if (score >= 70) return 2;
+    if (score >= 60) return 1;
+    return 0;
+}
+
+function getSemesterCourseStatus(enrollment) {
+    if (!enrollment) return "planned";
+    if (isCompletedEnrollment(enrollment)) return "good";
+    if (isInProgressEnrollment(enrollment)) {
+        if (
+            enrollment.grade !== null
+            && enrollment.grade < DEFAULT_REQUIRED_MINIMUM
+        ) {
+            return "bad";
+        }
+
+        return "warn";
+    }
+
+    if (isPlannedEnrollment(enrollment)) return "planned";
+
+    return "planned";
+}
+
+function buildScheduleLabel(schedule) {
+    const start =
+        schedule.scheduleStartDate
+        ?? schedule.startDate
+        ?? schedule.start;
+
+    if (!start) return "Unscheduled Term";
+
+    const date = new Date(start);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+
+    const season = month < 6 ? "Spring" : "Fall";
+
+    return `${season} ${year}`;
+}
+
+
+/* -------------------------------- dashboard -------------------------------- */
+
+function Dashboard() {
+    const [rawClasses, setRawClasses] = useState([]);
+    const [rawEnrollments, setRawEnrollments] = useState([]);
+    const [rawStudents, setRawStudents] = useState([]);
+
+    const [rawPrerequisites, setRawPrerequisites] = useState([]);
+    const [rawSchedules, setRawSchedules] = useState([]);
+    const [rawScheduleEntries, setRawScheduleEntries] = useState([]);
+
+    const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
+    const [dashboardError, setDashboardError] = useState(null);
+
+    const role = localStorage.getItem("role") || "user";
+    const isAdmin = role === "admin";
+    const isSupervisor = role === "supervisor";
+    const isStudent = role === "user";
+
+    useEffect(() => {
+        async function fetchDashboardData() {
+            try {
+                setIsLoadingDashboard(true);
+                setDashboardError(null);
+
+                const [
+                    classRes,
+                    studentRes,
+                    enrollmentRes,
+
+                    // These endpoints may not exist yet.
+                    // Keep them here as the intended variables.
+                    prerequisiteRes,
+                    scheduleRes,
+                    scheduleEntryRes,
+                ] = await Promise.all([
+                    axios.get("http://localhost:8080/test/get/classes"),
+                    axios.get("http://localhost:8080/test/get/students"),
+                    axios.get("http://localhost:8080/test/get/enrollments"),
+
+                    axios.get("http://localhost:8080/test/get/prerequisites").catch(() => ({ data: [] })),
+                    axios.get("http://localhost:8080/test/get/schedules").catch(() => ({ data: [] })),
+                    axios.get("http://localhost:8080/test/get/scheduleEntries").catch(() => ({ data: [] })),
+                ]);
+
+                setRawClasses(classRes.data ?? []);
+                setRawStudents(studentRes.data ?? []);
+                setRawEnrollments(enrollmentRes.data ?? []);
+
+                setRawPrerequisites(prerequisiteRes.data ?? []);
+                setRawSchedules(scheduleRes.data ?? []);
+                setRawScheduleEntries(scheduleEntryRes.data ?? []);
+            } catch (error) {
+                console.error("Failed to fetch dashboard data:", error);
+                setDashboardError(error);
+            } finally {
+                setIsLoadingDashboard(false);
+            }
+        }
+
+        fetchDashboardData();
+    }, []);
+
+    const classes = useMemo(() => {
+        return rawClasses.map(normalizeClass);
+    }, [rawClasses]);
+
+    const students = useMemo(() => {
+        return rawStudents
+            .map(normalizeStudent)
+            .sort((a, b) => a.lastName.localeCompare(b.lastName));
+    }, [rawStudents]);
+
+    const enrollments = useMemo(() => {
+        return rawEnrollments.map(normalizeEnrollment);
+    }, [rawEnrollments]);
+
+    const prerequisites = useMemo(() => {
+        return rawPrerequisites;
+    }, [rawPrerequisites]);
+
+    const schedules = useMemo(() => {
+        return rawSchedules;
+    }, [rawSchedules]);
+
+    const scheduleEntries = useMemo(() => {
+        return rawScheduleEntries;
+    }, [rawScheduleEntries]);
+
+    const enrollmentsByStudent = useMemo(() => {
+        return buildEnrollmentsByStudent(enrollments);
+    }, [enrollments]);
+
+    /*
+      TODO:
+      For now, this picks the first student.
+      Later, this should come from logged-in user identity or selected advisee.
+    */
+    const selectedStudent = useMemo(() => {
+        if (!students.length) return null;
+
+        if (isStudent) {
+            return students[0];
+        }
+
+        return students[0];
+    }, [students, isStudent]);
+
+    const dashboardStats = useMemo(() => {
+        if (!classes.length || !students.length || !enrollments.length) {
+            return {
+                processedStudents: [],
+                behindCount: 0,
+                onTimeCount: 0,
+            };
+        }
+
+        return processStudents(
+            students,
+            classes,
+            enrollments,
+            CURRENT_YEAR,
+            CURRENT_SEMESTER
+        );
+    }, [classes, students, enrollments]);
+
+    const requirementData = useMemo(() => {
+        return buildRequirementRows({
+            selectedStudent,
+            classes,
+            enrollmentsByStudent,
+            prerequisites,
+            scheduleData: {
+                schedules,
+                scheduleEntries,
+            },
+        });
+    }, [
+        selectedStudent,
+        classes,
+        enrollmentsByStudent,
+        prerequisites,
+        schedules,
+        scheduleEntries,
+    ]);
+
+    const creditStats = useMemo(() => {
+        return buildCreditStats({
+            selectedStudent,
+            classes,
+            enrollmentsByStudent,
+        });
+    }, [selectedStudent, classes, enrollmentsByStudent]);
+
+    const gradeSnapshotData = useMemo(() => {
+        return buildGradeSnapshot({
+            selectedStudent,
+            classes,
+            enrollmentsByStudent,
+        });
+    }, [selectedStudent, classes, enrollmentsByStudent]);
+
+    const adviseeGradeCards = useMemo(() => {
+        return buildAdviseeGradeCards({
+            students,
+            classes,
+            enrollmentsByStudent,
+        });
+    }, [students, classes, enrollmentsByStudent]);
+
+    const adviseeStatusCards = useMemo(() => {
+        return buildAdviseeStatusCards({
+            students,
+            classes,
+            enrollmentsByStudent,
+            prerequisites,
+            scheduleData: {
+                schedules,
+                scheduleEntries,
+            },
+        });
+    }, [
+        students,
+        classes,
+        enrollmentsByStudent,
+        prerequisites,
+        schedules,
+        scheduleEntries,
+    ]);
+
+    const semesterPlanData = useMemo(() => {
+        return buildSemesterPlan({
+            selectedStudent,
+            schedules,
+            scheduleEntries,
+            classes,
+            enrollmentsByStudent,
+        });
+    }, [
+        selectedStudent,
+        schedules,
+        scheduleEntries,
+        classes,
+        enrollmentsByStudent,
+    ]);
+
+    if (isLoadingDashboard) {
+        return (
+            <div className="dashboard-page">
+                <span className="dashboard-page-title">Dashboard</span>
+                <div className="dashboard-surface">
+                    <p className="dashboard-surface-subtitle">Loading dashboard data...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (dashboardError) {
+        return (
+            <div className="dashboard-page">
+                <span className="dashboard-page-title">Dashboard</span>
+                <div className="dashboard-surface">
+                    <h2 className="dashboard-surface-title">Dashboard failed to load</h2>
+                    <p className="dashboard-surface-subtitle">
+                        Check that the backend is running and that the dashboard endpoints are available.
+                    </p>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="dashboard-page">
+            <span className="dashboard-page-title">
+                Dashboard
+            </span>
+
+            <div className="dashboard-top-section">
+                {isStudent && (
+                    <>
+                        <RequirementProgressCard rows={requirementData} />
+
+                        <SemesterPlanBoard semesterData={semesterPlanData} />
+
+                        <CreditRingWidget
+                            totalCredits={creditStats.totalCredits}
+                            completedCredits={creditStats.completedCredits}
+                            inProgressCredits={creditStats.inProgressCredits}
+                        />
+
+                        <GradeMeterWidget classes={gradeSnapshotData} />
+                    </>
+                )}
+
+                {(isAdmin || isSupervisor) && (
+                    <>
+                        <AdviseesBoard students={adviseeGradeCards} />
+
+                        <AdviseeStatusBoard advisees={adviseeStatusCards} />
+
+                        <GraphComparison
+                            behindCount={dashboardStats.behindCount}
+                            onTimeCount={dashboardStats.onTimeCount}
+                        />
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
+export default Dashboard;
