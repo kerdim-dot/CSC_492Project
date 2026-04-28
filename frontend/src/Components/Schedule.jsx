@@ -1,17 +1,34 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
-import "../schedule.css"
-import down_arrow from './../assets/down_arrow.svg'
+import "../schedule.css";
+import down_arrow from "./../assets/down_arrow.svg";
 import axios from "axios";
 
+const API_BASE = "http://localhost:8080/test";
+
+const ENROLLMENT_STATUS = {
+    PLANNED: 0,
+    IN_PROGRESS: 1,
+    COMPLETED: 2,
+    DROPPED: 3,
+};
 
 function Schedule() {
     const DEMO_STUDENT_ID = 1;
 
+    const role = localStorage.getItem("role") || "user";
+    const isAdmin = role === "admin" || role === "supervisor";
+
     const [rawClasses, setRawClasses] = useState([]);
+    const [rawStudents, setRawStudents] = useState([]);
     const [rawEnrollments, setRawEnrollments] = useState([]);
     const [rawPrerequisites, setRawPrerequisites] = useState([]);
     const [rawClassEntries, setRawClassEntries] = useState([]);
     const [rawImportantDates, setRawImportantDates] = useState([]);
+
+    const [rawSchedules, setRawSchedules] = useState([]);
+    const [rawScheduleEntries, setRawScheduleEntries] = useState([]);
+
+    const [selectedStudentId, setSelectedStudentId] = useState(null);
 
     const [isLoadingSchedule, setIsLoadingSchedule] = useState(true);
     const [scheduleError, setScheduleError] = useState(null);
@@ -28,7 +45,7 @@ function Schedule() {
             const previousMeeting = prev[source];
 
             const sameMeeting =
-                previousMeeting?.courseCode === meeting?.courseCode &&
+                previousMeeting?.classId === meeting?.classId &&
                 previousMeeting?.sectionNumber === meeting?.sectionNumber &&
                 previousMeeting?.days === meeting?.days &&
                 previousMeeting?.startTime === meeting?.startTime &&
@@ -43,13 +60,19 @@ function Schedule() {
         });
     }, []);
 
-    const handleRequiredPreviewChange = useCallback((meeting) => {
-        updatePreviewMeeting("required", meeting);
-    }, [updatePreviewMeeting]);
+    const handleRequiredPreviewChange = useCallback(
+        (meeting) => {
+            updatePreviewMeeting("required", meeting);
+        },
+        [updatePreviewMeeting]
+    );
 
-    const handleElectivePreviewChange = useCallback((meeting) => {
-        updatePreviewMeeting("elective", meeting);
-    }, [updatePreviewMeeting]);
+    const handleElectivePreviewChange = useCallback(
+        (meeting) => {
+            updatePreviewMeeting("elective", meeting);
+        },
+        [updatePreviewMeeting]
+    );
 
     useEffect(() => {
         async function fetchScheduleData() {
@@ -59,19 +82,22 @@ function Schedule() {
 
                 const [
                     classRes,
+                    studentRes,
                     enrollmentRes,
                     prerequisiteRes,
                     classEntryRes,
                     importantDateRes,
                 ] = await Promise.all([
-                    axios.get("http://localhost:8080/test/get/classes"),
-                    axios.get("http://localhost:8080/test/get/enrollments"),
-                    axios.get("http://localhost:8080/test/get/prerequisites").catch(() => ({ data: [] })),
-                    axios.get("http://localhost:8080/test/get/class/entries").catch(() => ({ data: [] })),
-                    axios.get("http://localhost:8080/test/get/important/dates").catch(() => ({ data: [] })),
+                    axios.get(`${API_BASE}/get/classes`),
+                    axios.get(`${API_BASE}/get/students`),
+                    axios.get(`${API_BASE}/get/enrollments`),
+                    axios.get(`${API_BASE}/get/prequisiteMapping`).catch(() => ({ data: [] })),
+                    axios.get(`${API_BASE}/get/class/entries`).catch(() => ({ data: [] })),
+                    axios.get(`${API_BASE}/get/important/dates`).catch(() => ({ data: [] })),
                 ]);
 
                 setRawClasses(classRes.data ?? []);
+                setRawStudents(studentRes.data ?? []);
                 setRawEnrollments(enrollmentRes.data ?? []);
                 setRawPrerequisites(prerequisiteRes.data ?? []);
                 setRawClassEntries(classEntryRes.data ?? []);
@@ -91,6 +117,10 @@ function Schedule() {
         return rawClasses.map(normalizeScheduleClass);
     }, [rawClasses]);
 
+    const students = useMemo(() => {
+        return rawStudents.map(normalizeScheduleStudent);
+    }, [rawStudents]);
+
     const enrollments = useMemo(() => {
         return rawEnrollments.map(normalizeScheduleEnrollment);
     }, [rawEnrollments]);
@@ -103,11 +133,92 @@ function Schedule() {
         return rawClassEntries.map(normalizeClassEntry);
     }, [rawClassEntries]);
 
-    const studentEnrollments = useMemo(() => {
-        return enrollments.filter(
-            (enrollment) => Number(enrollment.studentId) === Number(DEMO_STUDENT_ID)
+    const [demoAddedMeetings, setDemoAddedMeetings] = useState([]);
+    const [demoRemovedMeetingKeys, setDemoRemovedMeetingKeys] = useState([]);
+
+    useEffect(() => {
+        if (!students.length) return;
+
+        setSelectedStudentId((prev) => {
+            if (prev) return prev;
+
+            const demoStudent =
+                students.find((student) => Number(student.studentId) === Number(DEMO_STUDENT_ID)) ??
+                students[0];
+
+            return demoStudent?.studentId ?? null;
+        });
+    }, [students]);
+
+    const selectedStudent = useMemo(() => {
+        if (!students.length) return null;
+
+        return (
+            students.find((student) => Number(student.studentId) === Number(selectedStudentId)) ??
+            students[0]
         );
-    }, [enrollments]);
+    }, [students, selectedStudentId]);
+
+    const studentEnrollments = useMemo(() => {
+        if (!selectedStudent) return [];
+
+        return enrollments.filter(
+            (enrollment) => Number(enrollment.studentId) === Number(selectedStudent.studentId)
+        );
+    }, [enrollments, selectedStudent]);
+
+    useEffect(() => {
+        async function fetchSelectedStudentSchedule() {
+            if (!selectedStudent) {
+                setRawSchedules([]);
+                setRawScheduleEntries([]);
+                return;
+            }
+
+            try {
+                const scheduleRes = await axios.get(
+                    `${API_BASE}/get/schedules?studentId=${selectedStudent.studentId}`
+                );
+
+                const schedules = scheduleRes.data ?? [];
+                setRawSchedules(schedules);
+
+                const firstSchedule =
+                    schedules[0] ??
+                    schedules.find((schedule) => {
+                        const scheduleStudentId =
+                            schedule.studentId ??
+                            schedule.student_id ??
+                            schedule.student?.id;
+
+                        return Number(scheduleStudentId) === Number(selectedStudent.studentId);
+                    });
+
+                const scheduleId = getScheduleId(firstSchedule);
+
+                if (!scheduleId) {
+                    setRawScheduleEntries([]);
+                    return;
+                }
+
+                const entryRes = await axios.get(
+                    `${API_BASE}/get/schedule/entries?scheduleId=${scheduleId}`
+                );
+
+                setRawScheduleEntries(entryRes.data ?? []);
+            } catch (error) {
+                console.error("Failed to fetch selected student schedule:", error);
+                setRawSchedules([]);
+                setRawScheduleEntries([]);
+            }
+        }
+
+        fetchSelectedStudentSchedule();
+    }, [selectedStudent]);
+
+    const scheduleEntries = useMemo(() => {
+        return rawScheduleEntries.map(normalizeStudentScheduleEntry);
+    }, [rawScheduleEntries]);
 
     const completedCourses = useMemo(() => {
         return buildCompletedCourseCodes(studentEnrollments, classes);
@@ -115,6 +226,10 @@ function Schedule() {
 
     const inProgressCourses = useMemo(() => {
         return buildInProgressCourseCodes(studentEnrollments, classes);
+    }, [studentEnrollments, classes]);
+
+    const warningCourses = useMemo(() => {
+        return buildWarningCourseCodes(studentEnrollments, classes);
     }, [studentEnrollments, classes]);
 
     const allCarouselCourses = useMemo(() => {
@@ -132,6 +247,117 @@ function Schedule() {
     const electiveCourses = useMemo(() => {
         return allCarouselCourses.filter((course) => !course.isRequired);
     }, [allCarouselCourses]);
+
+    const selectedSchedule = useMemo(() => {
+        return rawSchedules[0] ?? null;
+    }, [rawSchedules]);
+
+    const selectedScheduleId = useMemo(() => {
+        return getScheduleId(selectedSchedule);
+    }, [selectedSchedule]);
+
+    const baseScheduledMeetings = useMemo(() => {
+        return buildScheduledMeetingsFromEnrollments({
+            studentEnrollments,
+            classes,
+            classEntries,
+        });
+    }, [studentEnrollments, classes, classEntries]);
+
+    const scheduledMeetings = useMemo(() => {
+        const filteredBase = baseScheduledMeetings.filter((meeting) => {
+            return !demoRemovedMeetingKeys.includes(getMeetingKey(meeting));
+        });
+
+        return [...filteredBase, ...demoAddedMeetings];
+    }, [baseScheduledMeetings, demoAddedMeetings, demoRemovedMeetingKeys]);
+
+    const isPreviewScheduled = useMemo(() => {
+        if (!previewMeeting) return false;
+
+        return scheduleEntries.some((entry) => {
+            const sameClass =
+                Number(entry.classId) === Number(previewMeeting.classId);
+
+            const sameDays =
+                normalizeDays(entry.days) === normalizeDays(previewMeeting.days);
+
+            const sameStart =
+                normalizeComparableTime(entry.startTime) ===
+                normalizeComparableTime(previewMeeting.startTime);
+
+            const sameEnd =
+                normalizeComparableTime(entry.endTime) ===
+                normalizeComparableTime(previewMeeting.endTime);
+
+            return sameClass && sameDays && sameStart && sameEnd;
+        });
+    }, [scheduleEntries, previewMeeting]);
+
+    const studentTiles = useMemo(() => {
+        return students.map((student) => {
+            const studentSpecificEnrollments = enrollments.filter(
+                (enrollment) => Number(enrollment.studentId) === Number(student.studentId)
+            );
+
+            return buildScheduleStudentTile({
+                student,
+                enrollments: studentSpecificEnrollments,
+                classes,
+            });
+        });
+    }, [students, enrollments, classes]);
+
+    async function refreshSelectedScheduleEntries() {
+        if (!selectedScheduleId) return;
+
+        const entryRes = await axios.get(
+            `${API_BASE}/get/schedule/entries?scheduleId=${selectedScheduleId}`
+        );
+
+        setRawScheduleEntries(entryRes.data ?? []);
+    }
+
+    function handleAddPreviewMeeting(meeting) {
+        const key = getMeetingKey(meeting);
+
+        setDemoRemovedMeetingKeys((prev) => prev.filter((item) => item !== key));
+
+        setDemoAddedMeetings((prev) => {
+            const alreadyExists = prev.some((item) => getMeetingKey(item) === key);
+
+            if (alreadyExists) return prev;
+
+            return [
+                ...prev,
+                {
+                    ...meeting,
+                    source: "scheduled",
+                },
+            ];
+        });
+    }
+
+    function handleRemovePreviewMeeting(meeting) {
+        const key = getMeetingKey(meeting);
+
+        setDemoAddedMeetings((prev) =>
+            prev.filter((item) => getMeetingKey(item) !== key)
+        );
+
+        setDemoRemovedMeetingKeys((prev) => {
+            if (prev.includes(key)) return prev;
+            return [...prev, key];
+        });
+    }
+
+    function handleSelectStudent(studentId) {
+        setSelectedStudentId(studentId);
+        setPreviewMeetings({
+            required: null,
+            elective: null,
+        });
+    }
 
     if (isLoadingSchedule) {
         return (
@@ -158,54 +384,173 @@ function Schedule() {
 
     return (
         <div className="schedule-container">
-            <RequiredCourseCarousel
-                courses={requiredCourses}
-                completedCourses={completedCourses}
-                inProgressCourses={inProgressCourses}
-                onPreviewChange={handleRequiredPreviewChange}
+            {isAdmin ? (
+                <AdminStudentSelector
+                    students={studentTiles}
+                    selectedStudentId={selectedStudent?.studentId}
+                    onSelectStudent={handleSelectStudent}
+                />
+            ) : (
+                <>
+                    <RequiredCourseCarousel
+                        courses={requiredCourses}
+                        completedCourses={completedCourses}
+                        inProgressCourses={inProgressCourses}
+                        warningCourses={warningCourses}
+                        scheduledMeetings={scheduledMeetings}
+                        onPreviewChange={handleRequiredPreviewChange}
+                    />
+
+                    <ElectivesCarousel
+                        courses={electiveCourses}
+                        completedCourses={completedCourses}
+                        inProgressCourses={inProgressCourses}
+                        warningCourses={warningCourses}
+                        scheduledMeetings={scheduledMeetings}
+                        onPreviewChange={handleElectivePreviewChange}
+                    />
+                </>
+            )}
+
+            <ScheduleBlock
+                selectedStudent={selectedStudent}
+                scheduledMeetings={scheduledMeetings}
+                previewMeeting={isAdmin ? null : previewMeeting}
+                isPreviewScheduled={isPreviewScheduled}
+                onAddPreviewMeeting={handleAddPreviewMeeting}
+                onRemovePreviewMeeting={handleRemovePreviewMeeting}
             />
 
-            <ElectivesCarousel
-                courses={electiveCourses}
-                completedCourses={completedCourses}
-                inProgressCourses={inProgressCourses}
-                onPreviewChange={handleElectivePreviewChange}
+            <AdminControls
+                importantDates={rawImportantDates}
+                existingCourses={allCarouselCourses}
             />
-
-            <ScheduleBlock previewMeeting={previewMeeting} />
-
-            <AdminControls importantDates={rawImportantDates} existingCourses={allCarouselCourses} />
         </div>
     );
 }
 
-const ENROLLMENT_STATUS = {
-    PLANNED: 0,
-    IN_PROGRESS: 1,
-    COMPLETED: 2,
-    DROPPED: 3,
-};
+/* ----------------------------- Normalizers ----------------------------- */
+
+function getScheduleId(schedule) {
+    return (
+        schedule?.scheduleId ??
+        schedule?.schedule_id ??
+        schedule?.id ??
+        null
+    );
+}
+
+function cleanCsvDescription(value) {
+    return String(value ?? "")
+        .replaceAll("\\;", ",")
+        .replaceAll(";", ",");
+}
+
+function normalizeCourseCode(value) {
+    return String(value ?? "")
+        .replace(/\s+/g, "")
+        .replaceAll("-", "")
+        .toUpperCase();
+}
+
+function normalizeDisplayCode(value) {
+    const clean = normalizeCourseCode(value);
+    const match = clean.match(/^([A-Z]+)(\d+[A-Z]*)$/);
+
+    if (!match) return clean;
+
+    return `${match[1]}-${match[2]}`;
+}
+
+function normalizeDays(days) {
+    return String(days ?? "")
+        .toUpperCase()
+        .replace(/\s+/g, "")
+        .split("")
+        .sort()
+        .join("");
+}
+
+function normalizeComparableTime(time) {
+    return String(time ?? "")
+        .toLowerCase()
+        .replace(/\s+/g, "")
+        .replace(/^0/, "");
+}
+
+function normalizeScheduleStudent(rawStudent) {
+    return {
+        ...rawStudent,
+        id: Number(rawStudent.id ?? rawStudent.student_id ?? rawStudent.studentId),
+        studentId: Number(rawStudent.studentId ?? rawStudent.student_id ?? rawStudent.id),
+        firstName: rawStudent.firstName ?? rawStudent.first_name ?? "",
+        lastName: rawStudent.lastName ?? rawStudent.last_name ?? "",
+        name:
+            rawStudent.name ??
+            `${rawStudent.firstName ?? rawStudent.first_name ?? ""} ${rawStudent.lastName ?? rawStudent.last_name ?? ""}`.trim(),
+        isComputerScienceMajor: Boolean(
+            rawStudent.isComputerScienceMajor ??
+            rawStudent.is_computer_science_major
+        ),
+        isComputerScienceMinor: Boolean(
+            rawStudent.isComputerScienceMinor ??
+            rawStudent.is_computer_science_minor
+        ),
+        isMultiPlatformMajor: Boolean(
+            rawStudent.isMultiPlatformMajor ??
+            rawStudent.is_multi_platform_major
+        ),
+        graduationDate:
+            rawStudent.graduationDate ??
+            rawStudent.graduation_date,
+    };
+}
+
+function getMeetingKey(meeting) {
+    return [
+        meeting.classId,
+        normalizeDays(meeting.days),
+        normalizeComparableTime(meeting.startTime),
+        normalizeComparableTime(meeting.endTime),
+    ].join("|");
+}
 
 function normalizeScheduleClass(rawClass) {
     const classId =
-        rawClass.classId
-        ?? rawClass.class_id
-        ?? rawClass.id;
+        rawClass.classId ??
+        rawClass.class_id ??
+        rawClass.id;
+
+    const rawCode =
+        rawClass.code ??
+        rawClass.header ??
+        rawClass.classCode;
 
     return {
         ...rawClass,
+
         id: Number(classId),
         classId: Number(classId),
 
-        code: rawClass.code ?? rawClass.header ?? rawClass.classCode,
-        title: rawClass.title ?? rawClass.name ?? rawClass.className ?? rawClass.header,
+        code: normalizeDisplayCode(rawCode),
+        normalizedCode: normalizeCourseCode(rawCode),
+
+        title:
+            rawClass.title ??
+            rawClass.name ??
+            rawClass.className ??
+            rawClass.header,
+
         credits: Number(rawClass.credits ?? 0),
-        description: rawClass.description ?? "",
+        description: cleanCsvDescription(rawClass.description ?? ""),
 
         isRequired:
             Boolean(rawClass.isRequiredComputerScienceMajor)
+            || Boolean(rawClass.is_required_computer_science_major)
             || Boolean(rawClass.isRequiredComputerScienceMinor)
+            || Boolean(rawClass.is_required_computer_science_minor)
             || Boolean(rawClass.isRequiredMultiPlatformMajor)
+            || Boolean(rawClass.is_required_multi_platform_major)
             || Boolean(rawClass.isCSMajor)
             || Boolean(rawClass.isCSMinor)
             || Boolean(rawClass.isMultiPlatformMajor),
@@ -216,24 +561,28 @@ function normalizeScheduleEnrollment(rawEnrollment) {
     return {
         ...rawEnrollment,
 
-        id: rawEnrollment.enrollment_id ?? rawEnrollment.enrollmentId ?? rawEnrollment.id,
+        id:
+            rawEnrollment.enrollment_id ??
+            rawEnrollment.enrollmentId ??
+            rawEnrollment.id,
 
         studentId:
-            rawEnrollment.student_id
-            ?? rawEnrollment.studentId
-            ?? rawEnrollment.student?.id,
+            rawEnrollment.student_id ??
+            rawEnrollment.studentId ??
+            rawEnrollment.student?.id,
 
         classId:
-            rawEnrollment.mountClass_id
-            ?? rawEnrollment.class_id
-            ?? rawEnrollment.classId
-            ?? rawEnrollment.mountClass?.id,
+            rawEnrollment.mountClass_id ??
+            rawEnrollment.class_id ??
+            rawEnrollment.classId ??
+            rawEnrollment.mountClass?.id,
 
         status: Number(rawEnrollment.status),
+
         grade:
-            rawEnrollment.grade === null
-                || rawEnrollment.grade === undefined
-                || rawEnrollment.grade === ""
+            rawEnrollment.grade === null ||
+                rawEnrollment.grade === undefined ||
+                rawEnrollment.grade === ""
                 ? null
                 : Number(rawEnrollment.grade),
     };
@@ -242,75 +591,149 @@ function normalizeScheduleEnrollment(rawEnrollment) {
 function normalizeSchedulePrerequisite(rawPrereq) {
     return {
         classId:
-            rawPrereq.class_id
-            ?? rawPrereq.classId
-            ?? rawPrereq.mountClass_id,
+            rawPrereq.class_id ??
+            rawPrereq.classId ??
+            rawPrereq.mountClass_id,
 
         prerequisiteId:
-            rawPrereq.prerequisiteId
-            ?? rawPrereq.prequisiteId
-            ?? rawPrereq.prereqId,
+            rawPrereq.prerequisiteId ??
+            rawPrereq.prequisiteId ??
+            rawPrereq.prereqId ??
+            rawPrereq.prerequisite_class_id,
     };
 }
 
 function normalizeClassEntry(rawEntry) {
+    const classId =
+        rawEntry.mountClass_id ??
+        rawEntry.mount_class_id ??
+        rawEntry.class_id ??
+        rawEntry.classId ??
+        rawEntry.mountClass?.id;
+
+    const meetingTime =
+        rawEntry.meetingTime ??
+        rawEntry.meeting_time ??
+        rawEntry.time ??
+        "";
+
     return {
         ...rawEntry,
 
-        id: rawEntry.classEntry_id ?? rawEntry.classEntryId ?? rawEntry.id,
+        id:
+            rawEntry.classEntry_id ??
+            rawEntry.classEntryId ??
+            rawEntry.id,
 
-        classId:
-            rawEntry.mountClass_id
-            ?? rawEntry.class_id
-            ?? rawEntry.classId
-            ?? rawEntry.mountClass?.id,
+        classId: Number(classId),
 
         sectionNumber:
-            rawEntry.sectionNumber
-            ?? rawEntry.section_number
-            ?? rawEntry.section
-            ?? "01",
+            rawEntry.sectionNumber ??
+            rawEntry.section_number ??
+            rawEntry.section ??
+            rawEntry.id ??
+            "01",
 
         days:
-            rawEntry.days
-            ?? buildDaysString(rawEntry),
+            rawEntry.days ??
+            buildDaysString(rawEntry),
+
+        meetingTime,
 
         startTime:
-            rawEntry.startTime
-            ?? rawEntry.start_time
-            ?? parseStartFromRange(rawEntry.time),
+            rawEntry.startTime ??
+            rawEntry.start_time ??
+            parseStartFromRange(meetingTime),
 
         endTime:
-            rawEntry.endTime
-            ?? rawEntry.end_time
-            ?? parseEndFromRange(rawEntry.time),
+            rawEntry.endTime ??
+            rawEntry.end_time ??
+            parseEndFromRange(meetingTime),
 
         seatsFilled:
-            rawEntry.seatsFilled
-            ?? rawEntry.seats_filled
-            ?? 0,
+            rawEntry.seatsFilled ??
+            rawEntry.seats_filled ??
+            0,
 
         totalSeats:
-            rawEntry.totalSeats
-            ?? rawEntry.total_seats
-            ?? rawEntry.capacity
-            ?? 0,
+            rawEntry.totalSeats ??
+            rawEntry.total_seats ??
+            rawEntry.capacity ??
+            0,
 
         professor:
-            rawEntry.professor
-            ?? rawEntry.instructor
-            ?? "TBA",
+            rawEntry.professor ??
+            rawEntry.professorName ??
+            rawEntry.professor_name ??
+            rawEntry.instructor ??
+            "TBA",
+    };
+}
+
+function normalizeStudentScheduleEntry(rawEntry) {
+    const classId =
+        rawEntry.classId ??
+        rawEntry.class_id ??
+        rawEntry.mountClassId ??
+        rawEntry.mountClass_id ??
+        rawEntry.mountClass?.id;
+
+    const time =
+        rawEntry.time ??
+        rawEntry.meetingTime ??
+        rawEntry.meeting_time ??
+        "";
+
+    return {
+        ...rawEntry,
+
+        id:
+            rawEntry.id ??
+            rawEntry.scheduleEntryId ??
+            rawEntry.schedule_entry_id,
+
+        scheduleId:
+            rawEntry.scheduleId ??
+            rawEntry.schedule_id ??
+            rawEntry.schedule?.id,
+
+        classId: Number(classId),
+
+        days:
+            rawEntry.days ??
+            buildDaysString(rawEntry),
+
+        time,
+
+        startTime:
+            rawEntry.startTime ??
+            rawEntry.start_time ??
+            parseStartFromRange(time),
+
+        endTime:
+            rawEntry.endTime ??
+            rawEntry.end_time ??
+            parseEndFromRange(time),
     };
 }
 
 function buildDaysString(entry) {
     const days = [];
 
-    if (entry.isMonday) days.push("M");
-    if (entry.isTuesday) days.push("T");
-    if (entry.isWednesDay || entry.isWednesday) days.push("W");
-    if (entry.isThursday) days.push("R");
-    if (entry.isFriday) days.push("F");
+    if (entry.isMonday ?? entry.is_monday) days.push("M");
+    if (entry.isTuesday ?? entry.is_tuesday) days.push("T");
+
+    if (
+        entry.isWednesDay ??
+        entry.isWednesday ??
+        entry.is_wednes_day ??
+        entry.is_wednesday
+    ) {
+        days.push("W");
+    }
+
+    if (entry.isThursday ?? entry.is_thursday) days.push("R");
+    if (entry.isFriday ?? entry.is_friday) days.push("F");
 
     return days.join("");
 }
@@ -333,9 +756,9 @@ function normalizeTimeString(value) {
     if (!value) return null;
 
     const cleaned = String(value).trim().toLowerCase();
-
     const match = cleaned.match(/^(\d{1,2})(?::?(\d{2}))?\s*(am|pm)$/);
-    if (!match) return value;
+
+    if (!match) return String(value).trim();
 
     const hour = match[1];
     const minute = match[2] ?? "00";
@@ -343,6 +766,8 @@ function normalizeTimeString(value) {
 
     return `${hour}:${minute} ${meridian}`;
 }
+
+/* ----------------------------- Data builders ----------------------------- */
 
 function buildCompletedCourseCodes(studentEnrollments, classes) {
     const classById = Object.fromEntries(
@@ -362,6 +787,22 @@ function buildInProgressCourseCodes(studentEnrollments, classes) {
 
     return studentEnrollments
         .filter((enrollment) => enrollment.status === ENROLLMENT_STATUS.IN_PROGRESS)
+        .map((enrollment) => classById[Number(enrollment.classId)]?.code)
+        .filter(Boolean);
+}
+
+function buildWarningCourseCodes(studentEnrollments, classes) {
+    const classById = Object.fromEntries(
+        classes.map((course) => [Number(course.classId), course])
+    );
+
+    return studentEnrollments
+        .filter((enrollment) => {
+            if (enrollment.status !== ENROLLMENT_STATUS.IN_PROGRESS) return false;
+            if (enrollment.grade === null || enrollment.grade === undefined) return false;
+
+            return Number(enrollment.grade) < 70;
+        })
         .map((enrollment) => classById[Number(enrollment.classId)]?.code)
         .filter(Boolean);
 }
@@ -393,9 +834,15 @@ function buildCarouselCourses({
             .map((prereq) => classById[Number(prereq.prerequisiteId)]?.code)
             .filter(Boolean);
 
-        const sections = (entriesByClassId[Number(course.classId)] ?? []).map((entry) => ({
-            sectionNumber: entry.sectionNumber,
+        const sections = (entriesByClassId[Number(course.classId)] ?? []).map((entry, index) => ({
+            id: entry.id ?? `${course.classId}-${index}`,
+            classId: course.classId,
+            sectionNumber:
+                entry.sectionNumber && entry.sectionNumber !== "01"
+                    ? entry.sectionNumber
+                    : String(index + 1).padStart(2, "0"),
             days: entry.days,
+            meetingTime: entry.meetingTime,
             startTime: entry.startTime,
             endTime: entry.endTime,
             seatsFilled: entry.seatsFilled,
@@ -404,7 +851,9 @@ function buildCarouselCourses({
         }));
 
         return {
+            classId: course.classId,
             code: course.code,
+            normalizedCode: course.normalizedCode,
             title: course.title,
             credits: course.credits,
             description: course.description,
@@ -415,38 +864,310 @@ function buildCarouselCourses({
     });
 }
 
-function RequiredCourseCarousel({
+function buildScheduledMeetings({
+    scheduleEntries,
+    classes,
+    classEntries,
+}) {
+    const classById = Object.fromEntries(
+        classes.map((course) => [Number(course.classId), course])
+    );
+
+    return scheduleEntries
+        .map((entry) => {
+            const course = classById[Number(entry.classId)];
+            if (!course) return null;
+
+            const matchingClassEntry =
+                classEntries.find((classEntry) => {
+                    return (
+                        Number(classEntry.classId) === Number(entry.classId) &&
+                        normalizeComparableTime(classEntry.startTime) === normalizeComparableTime(entry.startTime) &&
+                        normalizeComparableTime(classEntry.endTime) === normalizeComparableTime(entry.endTime)
+                    );
+                }) ??
+                classEntries.find((classEntry) => Number(classEntry.classId) === Number(entry.classId));
+
+            return {
+                source: "scheduled",
+                classId: course.classId,
+                courseCode: course.code,
+                courseTitle: course.title,
+                sectionNumber: matchingClassEntry?.sectionNumber ?? "—",
+                days: entry.days || matchingClassEntry?.days,
+                meetingTime: entry.time || matchingClassEntry?.meetingTime,
+                startTime: entry.startTime || matchingClassEntry?.startTime,
+                endTime: entry.endTime || matchingClassEntry?.endTime,
+                professor: matchingClassEntry?.professor ?? "TBA",
+            };
+        })
+        .filter(Boolean);
+}
+
+function buildScheduledMeetingsFromEnrollments({
+    studentEnrollments,
+    classes,
+    classEntries,
+}) {
+    const classById = Object.fromEntries(
+        classes.map((course) => [Number(course.classId), course])
+    );
+
+    const entriesByClassId = {};
+
+    classEntries.forEach((entry) => {
+        const classId = Number(entry.classId);
+
+        if (!entriesByClassId[classId]) {
+            entriesByClassId[classId] = [];
+        }
+
+        entriesByClassId[classId].push(entry);
+    });
+
+    return studentEnrollments
+        .filter((enrollment) => enrollment.status === ENROLLMENT_STATUS.IN_PROGRESS)
+        .map((enrollment) => {
+            const course = classById[Number(enrollment.classId)];
+
+            if (!course) return null;
+
+            const firstSection = entriesByClassId[Number(course.classId)]?.[0];
+
+            if (!firstSection) {
+                return {
+                    source: "scheduled",
+                    classId: course.classId,
+                    courseCode: course.code,
+                    courseTitle: course.title,
+                    sectionNumber: "—",
+                    days: "",
+                    meetingTime: "",
+                    startTime: null,
+                    endTime: null,
+                    professor: "TBA",
+                };
+            }
+
+            return {
+                source: "scheduled",
+                classId: course.classId,
+                courseCode: course.code,
+                courseTitle: course.title,
+                sectionNumber: firstSection.sectionNumber,
+                days: firstSection.days,
+                meetingTime: firstSection.meetingTime,
+                startTime: firstSection.startTime,
+                endTime: firstSection.endTime,
+                professor: firstSection.professor,
+            };
+        })
+        .filter(Boolean);
+}
+
+function getStudentProgramLabel(student) {
+    const programs = [];
+
+    if (student.isComputerScienceMajor) programs.push("CS Major");
+    if (student.isComputerScienceMinor) programs.push("CS Minor");
+    if (student.isMultiPlatformMajor) programs.push("Multi-Platform Major");
+
+    return programs.length ? programs.join(" + ") : "Program unavailable";
+}
+
+function getStudentYearLabel(student) {
+    if (!student.graduationDate) return "Year unavailable";
+
+    const gradYear = Number(String(student.graduationDate).slice(0, 4));
+    if (!Number.isFinite(gradYear)) return "Year unavailable";
+
+    const currentYear = new Date().getFullYear();
+    const yearsUntilGrad = gradYear - currentYear;
+
+    if (yearsUntilGrad <= 0) return "Senior";
+    if (yearsUntilGrad === 1) return "Junior";
+    if (yearsUntilGrad === 2) return "Sophomore";
+    return "First Year";
+}
+
+function timeToMinutes(timeString) {
+    if (!timeString) return null;
+
+    const cleaned = String(timeString).trim().toLowerCase();
+    const match = cleaned.match(/^(\d{1,2})(?::(\d{2}))?\s*(am|pm)$/);
+
+    if (!match) return null;
+
+    let hours = Number(match[1]);
+    const minutes = Number(match[2] ?? 0);
+    const meridian = match[3];
+
+    if (meridian === "pm" && hours !== 12) hours += 12;
+    if (meridian === "am" && hours === 12) hours = 0;
+
+    return hours * 60 + minutes;
+}
+
+function expandMeetingDays(daysString) {
+    if (!daysString) return [];
+
+    const normalized = String(daysString).toUpperCase().replace(/\s/g, "");
+
+    if (normalized === "MWF") return ["M", "W", "F"];
+    if (normalized === "TR" || normalized === "TTH") return ["T", "R"];
+
+    const days = [];
+
+    if (normalized.includes("M")) days.push("M");
+    if (normalized.includes("T")) days.push("T");
+    if (normalized.includes("W")) days.push("W");
+    if (normalized.includes("R")) days.push("R");
+    if (normalized.includes("F")) days.push("F");
+
+    return days;
+}
+
+function meetingsOverlap(a, b) {
+    const aStart = timeToMinutes(a.startTime);
+    const aEnd = timeToMinutes(a.endTime);
+    const bStart = timeToMinutes(b.startTime);
+    const bEnd = timeToMinutes(b.endTime);
+
+    if (aStart === null || aEnd === null || bStart === null || bEnd === null) {
+        return false;
+    }
+
+    const aDays = expandMeetingDays(a.days);
+    const bDays = expandMeetingDays(b.days);
+
+    const sharesDay = aDays.some((day) => bDays.includes(day));
+    if (!sharesDay) return false;
+
+    return aStart < bEnd && bStart < aEnd;
+}
+
+function isSameMeeting(a, b) {
+    return (
+        Number(a.classId) === Number(b.classId) &&
+        normalizeDays(a.days) === normalizeDays(b.days) &&
+        normalizeComparableTime(a.startTime) === normalizeComparableTime(b.startTime) &&
+        normalizeComparableTime(a.endTime) === normalizeComparableTime(b.endTime)
+    );
+}
+
+function getSectionAvailability(sectionMeeting, scheduledMeetings) {
+    const exactMatch = scheduledMeetings.find((scheduled) =>
+        isSameMeeting(sectionMeeting, scheduled)
+    );
+
+    if (exactMatch) {
+        return {
+            state: "scheduled",
+            label: "Already scheduled",
+            conflict: exactMatch,
+        };
+    }
+
+    const conflict = scheduledMeetings.find((scheduled) =>
+        meetingsOverlap(sectionMeeting, scheduled)
+    );
+
+    if (conflict) {
+        return {
+            state: "conflict",
+            label: `Conflicts with ${conflict.courseCode}`,
+            conflict,
+        };
+    }
+
+    return {
+        state: "available",
+        label: "Preview section",
+        conflict: null,
+    };
+}
+
+function buildScheduleStudentTile({ student, enrollments, classes }) {
+    const classById = Object.fromEntries(
+        classes.map((course) => [Number(course.classId), course])
+    );
+
+    const currentEnrollments = enrollments.filter(
+        (enrollment) => enrollment.status === ENROLLMENT_STATUS.IN_PROGRESS
+    );
+
+    const completedCount = enrollments.filter(
+        (enrollment) => enrollment.status === ENROLLMENT_STATUS.COMPLETED
+    ).length;
+
+    const warningCount = currentEnrollments.filter((enrollment) => {
+        if (enrollment.grade === null || enrollment.grade === undefined) return false;
+        return Number(enrollment.grade) < 70;
+    }).length;
+
+    const currentCourses = currentEnrollments
+        .map((enrollment) => classById[Number(enrollment.classId)]?.code)
+        .filter(Boolean);
+
+    return {
+        studentId: student.studentId,
+        name: student.name || `${student.firstName} ${student.lastName}`.trim(),
+        programLabel: getStudentProgramLabel(student),
+        yearLabel: getStudentYearLabel(student),
+        currentCourses,
+        completedCount,
+        warningCount,
+        status: warningCount > 0 ? "warning" : "good",
+    };
+}
+
+/* ----------------------------- Carousels ----------------------------- */
+
+function CourseCarousel({
+    label,
+    sectionClassName,
     courses = [],
     completedCourses = [],
     inProgressCourses = [],
+    warningCourses = [],
+    scheduledMeetings = [],
     onPreviewChange,
+    source,
 }) {
-
-    const requiredCourses = courses;
-
 
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [selectedSectionIndex, setSelectedSectionIndex] = useState(0);
     const [slideDirection, setSlideDirection] = useState("");
+    const [isOpen, setIsOpen] = useState(false);
 
-    const selectedCourse = requiredCourses[selectedIndex];
-    const prevCourse = selectedIndex > 0 ? requiredCourses[selectedIndex - 1] : null;
+    useEffect(() => {
+        if (selectedIndex >= courses.length) {
+            setSelectedIndex(0);
+        }
+    }, [courses.length, selectedIndex]);
+
+    const selectedCourse = courses[selectedIndex];
+
+    const prevCourse = selectedIndex > 0 ? courses[selectedIndex - 1] : null;
     const nextCourse =
-        selectedIndex < requiredCourses.length - 1
-            ? requiredCourses[selectedIndex + 1]
+        selectedIndex < courses.length - 1
+            ? courses[selectedIndex + 1]
             : null;
 
-    const sections = Array.isArray(selectedCourse.sections) ? selectedCourse.sections : [];
+    const sections = selectedCourse && Array.isArray(selectedCourse.sections)
+        ? selectedCourse.sections
+        : [];
+
     const selectedSection = sections[selectedSectionIndex] ?? sections[0];
 
     const courseMap = useMemo(
-        () => Object.fromEntries(requiredCourses.map((course) => [course.code, course])),
-        [requiredCourses]
+        () => Object.fromEntries(courses.map((course) => [course.code, course])),
+        [courses]
     );
 
     const completedSet = useMemo(() => new Set(completedCourses), [completedCourses]);
     const inProgressSet = useMemo(() => new Set(inProgressCourses), [inProgressCourses]);
-
+    const warningSet = useMemo(() => new Set(warningCourses), [warningCourses]);
 
     function isCompleted(code) {
         return completedSet.has(code);
@@ -456,20 +1177,25 @@ function RequiredCourseCarousel({
         return inProgressSet.has(code);
     }
 
+    function isWarning(code) {
+        return warningSet.has(code);
+    }
+
     function getCourseState(course) {
+        if (!course) return "locked";
         if (isCompleted(course.code)) return "completed";
+        if (isWarning(course.code)) return "warning";
         if (isInProgress(course.code)) return "in-progress";
 
         const prereqsMet = course.prerequisites.every((prereq) => isCompleted(prereq));
         return prereqsMet ? "available" : "locked";
     }
 
-    const selectedCourseState = getCourseState(selectedCourse);
-
     function getStatusText(course) {
         const state = getCourseState(course);
 
         if (state === "completed") return "Completed";
+        if (state === "warning") return "At risk";
         if (state === "in-progress") return "Currently taking";
         if (state === "available") return "Eligible to take";
 
@@ -477,27 +1203,29 @@ function RequiredCourseCarousel({
         return `Missing ${missingCount} prerequisite${missingCount === 1 ? "" : "s"}`;
     }
 
+    const selectedCourseState = getCourseState(selectedCourse);
+
     function goPrev() {
         if (selectedIndex === 0) return;
+
         setSlideDirection("slide-right");
         setSelectedIndex((prev) => Math.max(prev - 1, 0));
     }
 
     function goNext() {
-        if (selectedIndex === requiredCourses.length - 1) return;
+        if (selectedIndex === courses.length - 1) return;
+
         setSlideDirection("slide-left");
-        setSelectedIndex((prev) => Math.min(prev + 1, requiredCourses.length - 1));
+        setSelectedIndex((prev) => Math.min(prev + 1, courses.length - 1));
     }
 
     function jumpToCourse(code) {
-        const newIndex = requiredCourses.findIndex((course) => course.code === code);
+        const newIndex = courses.findIndex((course) => course.code === code);
         if (newIndex === -1 || newIndex === selectedIndex) return;
 
         setSlideDirection(newIndex > selectedIndex ? "slide-left" : "slide-right");
         setSelectedIndex(newIndex);
     }
-
-    const [isOpen, setIsOpen] = useState(false);
 
     useEffect(() => {
         if (!onPreviewChange) return;
@@ -508,16 +1236,18 @@ function RequiredCourseCarousel({
         }
 
         onPreviewChange({
-            source: "required",
+            source,
+            classId: selectedCourse.classId,
             courseCode: selectedCourse.code,
             courseTitle: selectedCourse.title,
             sectionNumber: selectedSection.sectionNumber,
             days: selectedSection.days,
+            meetingTime: selectedSection.meetingTime,
             startTime: selectedSection.startTime,
             endTime: selectedSection.endTime,
             professor: selectedSection.professor,
         });
-    }, [isOpen, selectedCourse, selectedSection, onPreviewChange]);
+    }, [isOpen, selectedCourse, selectedSection, onPreviewChange, source]);
 
     useEffect(() => {
         if (!slideDirection) return;
@@ -533,348 +1263,47 @@ function RequiredCourseCarousel({
         setSelectedSectionIndex(0);
     }, [selectedIndex]);
 
-    return (
-        <section className="required-carousel-section">
-            <button
-                type="button"
-                className={`required-carousel-toggle ${isOpen ? "open" : ""}`}
-                onClick={() => setIsOpen((prev) => !prev)}
-                aria-expanded={isOpen}
-                aria-controls="required-course-carousel-panel"
-            >
-                <span>Required Courses</span>
-                <img
-                    src={down_arrow}
-                    className={`dropdown-arrow ${isOpen ? "dropdown-arrow-open" : ""}`}
-                    alt=""
-                />
-            </button>
+    useEffect(() => {
+        if (!selectedCourse || sections.length === 0) return;
 
-            <div
-                id="required-course-carousel-panel"
-                className={`required-carousel-collapse ${isOpen ? "open" : ""}`}
-            >
-                <div className="required-carousel-collapse-inner">
-                    <div className="required-carousel-shell">
-                        {prevCourse ? (
-                            <button
-                                type="button"
-                                className="carousel-arrow"
-                                onClick={goPrev}
-                                aria-label="Previous required course"
-                            >
-                                ‹
-                            </button>
-                        ) : (
-                            <div className="carousel-arrow-placeholder" aria-hidden="true" />
-                        )}
+        const currentSection = sections[selectedSectionIndex];
 
-                        <div className="required-carousel-center">
-                            <div className="carousel-position">
-                                {selectedIndex + 1} of {requiredCourses.length}
-                            </div>
-
-                            <div className="carousel-track-preview">
-                                {prevCourse ? (
-                                    <div className="course-preview preview-left" aria-hidden="true">
-                                        <span className="preview-code">{prevCourse.code}</span>
-                                        <span className="preview-title">{prevCourse.title}</span>
-                                    </div>
-                                ) : (
-                                    <div className="course-preview-placeholder" aria-hidden="true" />
-                                )}
-
-                                <article className={`focused-course-card ${selectedCourseState} ${slideDirection}`}>
-                                    <div className="focused-course-main">
-                                        <div className="focused-course-top">
-                                            <div className="focused-course-header-box">
-                                                <div className="course-code-pill">{selectedCourse.code}</div>
-                                                <div className="course-name-pill">{selectedCourse.title}</div>
-                                                <div className="course-card-credits">{selectedCourse.credits} credits</div>
-                                                <div className={`focused-course-badge ${selectedCourseState}`}>
-                                                    {getStatusText(selectedCourse)}
-                                                </div>
-                                            </div>
-
-                                            <div className="focused-course-sections-area">
-                                                {sections.map((section, index) => (
-                                                    <button
-                                                        key={section.sectionNumber}
-                                                        type="button"
-                                                        className={`section-choice-card ${index === selectedSectionIndex ? "active" : ""}`}
-                                                        onClick={() => setSelectedSectionIndex(index)}
-                                                    >
-                                                        <div className="section-number-badge">{section.sectionNumber}</div>
-                                                        <div className="section-choice-stack">{section.days}</div>
-                                                        <div className="section-choice-stack">
-                                                            {section.startTime} - {section.endTime}
-                                                        </div>
-                                                        <div className="section-choice-stack">
-                                                            {section.seatsFilled}/{section.totalSeats}
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        <div className="focused-course-professor-description-row">
-                                            <div className="course-professor-box">
-                                                <div className="course-professor-label">Professor</div>
-                                                <div className="course-card-professor">
-                                                    {selectedSection?.professor ?? "TBA"}
-                                                </div>
-                                            </div>
-
-                                            <div className="focused-course-description-box">
-                                                <span className="focused-course-description-text">
-                                                    {selectedCourse.description}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="focused-course-footer">
-                                        <div className="prereq-label">Prerequisites</div>
-
-                                        {selectedCourse.prerequisites.length === 0 ? (
-                                            <div className="no-prereqs-chip">No prerequisites</div>
-                                        ) : (
-                                            <div className="prereq-chip-row">
-                                                {selectedCourse.prerequisites.map((prereqCode) => {
-                                                    const prereqCourse = courseMap[prereqCode];
-                                                    const prereqCompleted = isCompleted(prereqCode);
-
-                                                    return (
-                                                        <button
-                                                            key={prereqCode}
-                                                            type="button"
-                                                            className={`prereq-chip ${prereqCompleted ? "completed" : "missing"}`}
-                                                            onClick={() => jumpToCourse(prereqCode)}
-                                                            title={prereqCourse ? prereqCourse.title : prereqCode}
-                                                        >
-                                                            <span className="prereq-chip-code">
-                                                                {prereqCode}
-                                                            </span>
-                                                            {prereqCourse && (
-                                                                <span className="prereq-chip-title">
-                                                                    {prereqCourse.title}
-                                                                </span>
-                                                            )}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                </article>
-
-                                {nextCourse ? (
-                                    <div className="course-preview preview-right" aria-hidden="true">
-                                        <span className="preview-code">{nextCourse.code}</span>
-                                        <span className="preview-title">{nextCourse.title}</span>
-                                    </div>
-                                ) : (
-                                    <div className="course-preview-placeholder" aria-hidden="true" />
-                                )}
-                            </div>
-                        </div>
-
-                        {nextCourse ? (
-                            <button
-                                type="button"
-                                className="carousel-arrow"
-                                onClick={goNext}
-                                aria-label="Next required course"
-                            >
-                                ›
-                            </button>
-                        ) : (
-                            <div className="carousel-arrow-placeholder" aria-hidden="true" />
-                        )}
-                    </div>
-                </div>
-            </div>
-        </section>
-    );
-}
-
-function ElectivesCarousel({
-    completedCourses = [],
-    inProgressCourses = [],
-    onPreviewChange,
-}) {
-
-    const requiredCourses = [
-        {
-            code: "CSC-120",
-            title: "Programming Problem Solving I",
-            credits: 4,
-            description:
-                "Introduction to programming fundamentals, structured problem solving, and basic software development practices.",
-            prerequisites: [],
-            sections: [
-                {
-                    sectionNumber: "01",
-                    days: "MWF",
-                    startTime: "7:30 AM",
-                    endTime: "8:35 AM",
-                    seatsFilled: 18,
-                    totalSeats: 24,
-                    professor: "Dr. Smith",
-                },
-            ],
-        },
-        {
-            code: "CSC-130",
-            title: "Programming Problem Solving II",
-            credits: 4,
-            description:
-                "Continuation of introductory programming with more complex data structures, abstraction, and program design.",
-            prerequisites: ["CSC-120"],
-            sections: [
-                {
-                    sectionNumber: "01",
-                    days: "MWF",
-                    startTime: "8:45 AM",
-                    endTime: "9:50 AM",
-                    seatsFilled: 20,
-                    totalSeats: 24,
-                    professor: "Dr. Allen",
-                },
-                {
-                    sectionNumber: "02",
-                    days: "TR",
-                    startTime: "2:20 PM",
-                    endTime: "3:35 PM",
-                    seatsFilled: 16,
-                    totalSeats: 24,
-                    professor: "Dr. Allen",
-                },
-            ],
-        },
-        {
-            code: "CSC-220",
-            title: "Discrete Structures",
-            credits: 3,
-            description:
-                "Logic, sets, functions, counting, relations, graphs, and proof techniques used in computer science.",
-            prerequisites: ["CSC-120"],
-            sections: [
-                {
-                    sectionNumber: "01",
-                    days: "MWF",
-                    startTime: "10:00 AM",
-                    endTime: "11:05 AM",
-                    seatsFilled: 15,
-                    totalSeats: 24,
-                    professor: "Dr. Brown",
-                },
-            ],
-        },
-        {
-            code: "CSC-320",
-            title: "Algorithms and Data Structures",
-            credits: 4,
-            description:
-                "Study of algorithm design, asymptotic analysis, linear and non-linear data structures, and implementation techniques.",
-            prerequisites: ["CSC-130", "CSC-220"],
-            sections: [
-                {
-                    sectionNumber: "01",
-                    days: "MWF",
-                    startTime: "10:00 AM",
-                    endTime: "11:05 AM",
-                    seatsFilled: 22,
-                    totalSeats: 30,
-                    professor: "Dr. Jones",
-                },
-                {
-                    sectionNumber: "02",
-                    days: "TR",
-                    startTime: "2:20 PM",
-                    endTime: "4:00 PM",
-                    seatsFilled: 28,
-                    totalSeats: 28,
-                    professor: "Dr. Patel",
-                },
-            ],
-        },
-    ];
-
-
-    const [selectedIndex, setSelectedIndex] = useState(0);
-    const [selectedSectionIndex, setSelectedSectionIndex] = useState(0);
-    const [slideDirection, setSlideDirection] = useState("");
-
-    const selectedCourse = requiredCourses[selectedIndex];
-    const prevCourse = selectedIndex > 0 ? requiredCourses[selectedIndex - 1] : null;
-    const nextCourse =
-        selectedIndex < requiredCourses.length - 1
-            ? requiredCourses[selectedIndex + 1]
+        const currentMeeting = currentSection
+            ? {
+                classId: selectedCourse.classId,
+                courseCode: selectedCourse.code,
+                courseTitle: selectedCourse.title,
+                sectionNumber: currentSection.sectionNumber,
+                days: currentSection.days,
+                startTime: currentSection.startTime,
+                endTime: currentSection.endTime,
+                professor: currentSection.professor,
+            }
             : null;
 
-    const sections = Array.isArray(selectedCourse.sections) ? selectedCourse.sections : [];
-    const selectedSection = sections[selectedSectionIndex] ?? sections[0];
+        const currentAvailability = currentMeeting
+            ? getSectionAvailability(currentMeeting, scheduledMeetings)
+            : { state: "available" };
 
-    const courseMap = useMemo(
-        () => Object.fromEntries(requiredCourses.map((course) => [course.code, course])),
-        []
-    );
+        if (currentAvailability.state === "available") return;
 
-    const completedSet = useMemo(() => new Set(completedCourses), [completedCourses]);
-    const inProgressSet = useMemo(() => new Set(inProgressCourses), [inProgressCourses]);
+        const firstAvailableIndex = sections.findIndex((section) => {
+            const meeting = {
+                classId: selectedCourse.classId,
+                courseCode: selectedCourse.code,
+                courseTitle: selectedCourse.title,
+                sectionNumber: section.sectionNumber,
+                days: section.days,
+                startTime: section.startTime,
+                endTime: section.endTime,
+                professor: section.professor,
+            };
 
+            return getSectionAvailability(meeting, scheduledMeetings).state === "available";
+        });
 
-    function isCompleted(code) {
-        return completedSet.has(code);
-    }
-
-    function isInProgress(code) {
-        return inProgressSet.has(code);
-    }
-
-    function getCourseState(course) {
-        if (isCompleted(course.code)) return "completed";
-        if (isInProgress(course.code)) return "in-progress";
-
-        const prereqsMet = course.prerequisites.every((prereq) => isCompleted(prereq));
-        return prereqsMet ? "available" : "locked";
-    }
-
-    const selectedCourseState = getCourseState(selectedCourse);
-
-    function getStatusText(course) {
-        const state = getCourseState(course);
-
-        if (state === "completed") return "Completed";
-        if (state === "in-progress") return "Currently taking";
-        if (state === "available") return "Eligible to take";
-
-        const missingCount = course.prerequisites.filter((code) => !isCompleted(code)).length;
-        return `Missing ${missingCount} prerequisite${missingCount === 1 ? "" : "s"}`;
-    }
-
-    function goPrev() {
-        if (selectedIndex === 0) return;
-        setSlideDirection("slide-right");
-        setSelectedIndex((prev) => Math.max(prev - 1, 0));
-    }
-
-    function goNext() {
-        if (selectedIndex === requiredCourses.length - 1) return;
-        setSlideDirection("slide-left");
-        setSelectedIndex((prev) => Math.min(prev + 1, requiredCourses.length - 1));
-    }
-
-    function jumpToCourse(code) {
-        const newIndex = requiredCourses.findIndex((course) => course.code === code);
-        if (newIndex === -1 || newIndex === selectedIndex) return;
-
-        setSlideDirection(newIndex > selectedIndex ? "slide-left" : "slide-right");
-        setSelectedIndex(newIndex);
-    }
-
-    const [isOpen, setIsOpen] = useState(false);
+        setSelectedSectionIndex(firstAvailableIndex >= 0 ? firstAvailableIndex : 0);
+    }, [selectedCourse, sections, selectedSectionIndex, scheduledMeetings]);
 
     useEffect(() => {
         if (!onPreviewChange) return;
@@ -884,42 +1313,45 @@ function ElectivesCarousel({
             return;
         }
 
-        onPreviewChange({
-            source: "elective",
+        const meeting = {
+            source,
+            classId: selectedCourse.classId,
             courseCode: selectedCourse.code,
             courseTitle: selectedCourse.title,
             sectionNumber: selectedSection.sectionNumber,
             days: selectedSection.days,
+            meetingTime: selectedSection.meetingTime,
             startTime: selectedSection.startTime,
             endTime: selectedSection.endTime,
             professor: selectedSection.professor,
-        });
-    }, [isOpen, selectedCourse, selectedSection, onPreviewChange]);
+        };
 
-    useEffect(() => {
-        if (!slideDirection) return;
+        const availability = getSectionAvailability(meeting, scheduledMeetings);
 
-        const timer = setTimeout(() => {
-            setSlideDirection("");
-        }, 320);
+        if (availability.state !== "available") {
+            onPreviewChange(null);
+            return;
+        }
 
-        return () => clearTimeout(timer);
-    }, [slideDirection]);
-
-    useEffect(() => {
-        setSelectedSectionIndex(0);
-    }, [selectedIndex]);
+        onPreviewChange(meeting);
+    }, [
+        isOpen,
+        selectedCourse,
+        selectedSection,
+        scheduledMeetings,
+        onPreviewChange,
+        source,
+    ]);
 
     return (
-        <section className="required-carousel-section-2">
+        <section className={sectionClassName}>
             <button
                 type="button"
                 className={`required-carousel-toggle ${isOpen ? "open" : ""}`}
                 onClick={() => setIsOpen((prev) => !prev)}
                 aria-expanded={isOpen}
-                aria-controls="required-course-carousel-panel"
             >
-                <span>Electives</span>
+                <span>{label}</span>
                 <img
                     src={down_arrow}
                     className={`dropdown-arrow ${isOpen ? "dropdown-arrow-open" : ""}`}
@@ -927,157 +1359,323 @@ function ElectivesCarousel({
                 />
             </button>
 
-            <div
-                id="required-course-carousel-panel"
-                className={`required-carousel-collapse ${isOpen ? "open" : ""}`}
-            >
+            <div className={`required-carousel-collapse ${isOpen ? "open" : ""}`}>
                 <div className="required-carousel-collapse-inner">
-                    <div className="required-carousel-shell">
-                        {prevCourse ? (
-                            <button
-                                type="button"
-                                className="carousel-arrow"
-                                onClick={goPrev}
-                                aria-label="Previous required course"
-                            >
-                                ‹
-                            </button>
-                        ) : (
-                            <div className="carousel-arrow-placeholder" aria-hidden="true" />
-                        )}
-
-                        <div className="required-carousel-center">
-                            <div className="carousel-position">
-                                {selectedIndex + 1} of {requiredCourses.length}
-                            </div>
-
-                            <div className="carousel-track-preview">
-                                {prevCourse ? (
-                                    <div className="course-preview preview-left" aria-hidden="true">
-                                        <span className="preview-code">{prevCourse.code}</span>
-                                        <span className="preview-title">{prevCourse.title}</span>
-                                    </div>
-                                ) : (
-                                    <div className="course-preview-placeholder" aria-hidden="true" />
-                                )}
-
-                                <article className={`focused-course-card ${selectedCourseState} ${slideDirection}`}>
-                                    <div className="focused-course-main">
-                                        <div className="focused-course-top">
-                                            <div className="focused-course-header-box">
-                                                <div className="course-code-pill">{selectedCourse.code}</div>
-                                                <div className="course-name-pill">{selectedCourse.title}</div>
-                                                <div className="course-card-credits">{selectedCourse.credits} credits</div>
-                                                <div className={`focused-course-badge ${selectedCourseState}`}>
-                                                    {getStatusText(selectedCourse)}
-                                                </div>
-                                            </div>
-
-                                            <div className="focused-course-sections-area">
-                                                {sections.map((section, index) => (
-                                                    <button
-                                                        key={section.sectionNumber}
-                                                        type="button"
-                                                        className={`section-choice-card ${index === selectedSectionIndex ? "active" : ""}`}
-                                                        onClick={() => setSelectedSectionIndex(index)}
-                                                    >
-                                                        <div className="section-number-badge">{section.sectionNumber}</div>
-                                                        <div className="section-choice-stack">{section.days}</div>
-                                                        <div className="section-choice-stack">
-                                                            {section.startTime} - {section.endTime}
-                                                        </div>
-                                                        <div className="section-choice-stack">
-                                                            {section.seatsFilled}/{section.totalSeats}
-                                                        </div>
-                                                    </button>
-                                                ))}
-                                            </div>
-                                        </div>
-
-                                        <div className="focused-course-professor-description-row">
-                                            <div className="course-professor-box">
-                                                <div className="course-professor-label">Professor</div>
-                                                <div className="course-card-professor">
-                                                    {selectedSection?.professor ?? "TBA"}
-                                                </div>
-                                            </div>
-
-                                            <div className="focused-course-description-box">
-                                                <span className="focused-course-description-text">
-                                                    {selectedCourse.description}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="focused-course-footer">
-                                        <div className="prereq-label">Prerequisites</div>
-
-                                        {selectedCourse.prerequisites.length === 0 ? (
-                                            <div className="no-prereqs-chip">No prerequisites</div>
-                                        ) : (
-                                            <div className="prereq-chip-row">
-                                                {selectedCourse.prerequisites.map((prereqCode) => {
-                                                    const prereqCourse = courseMap[prereqCode];
-                                                    const prereqCompleted = isCompleted(prereqCode);
-
-                                                    return (
-                                                        <button
-                                                            key={prereqCode}
-                                                            type="button"
-                                                            className={`prereq-chip ${prereqCompleted ? "completed" : "missing"}`}
-                                                            onClick={() => jumpToCourse(prereqCode)}
-                                                            title={prereqCourse ? prereqCourse.title : prereqCode}
-                                                        >
-                                                            <span className="prereq-chip-code">
-                                                                {prereqCode}
-                                                            </span>
-                                                            {prereqCourse && (
-                                                                <span className="prereq-chip-title">
-                                                                    {prereqCourse.title}
-                                                                </span>
-                                                            )}
-                                                        </button>
-                                                    );
-                                                })}
-                                            </div>
-                                        )}
-                                    </div>
-                                </article>
-
-                                {nextCourse ? (
-                                    <div className="course-preview preview-right" aria-hidden="true">
-                                        <span className="preview-code">{nextCourse.code}</span>
-                                        <span className="preview-title">{nextCourse.title}</span>
-                                    </div>
-                                ) : (
-                                    <div className="course-preview-placeholder" aria-hidden="true" />
-                                )}
-                            </div>
+                    {!selectedCourse ? (
+                        <div className="required-carousel-empty">
+                            No courses available.
                         </div>
+                    ) : (
+                        <div className="required-carousel-shell">
+                            {prevCourse ? (
+                                <button
+                                    type="button"
+                                    className="carousel-arrow"
+                                    onClick={goPrev}
+                                    aria-label={`Previous ${label}`}
+                                >
+                                    ‹
+                                </button>
+                            ) : (
+                                <div className="carousel-arrow-placeholder" aria-hidden="true" />
+                            )}
 
-                        {nextCourse ? (
-                            <button
-                                type="button"
-                                className="carousel-arrow"
-                                onClick={goNext}
-                                aria-label="Next required course"
-                            >
-                                ›
-                            </button>
-                        ) : (
-                            <div className="carousel-arrow-placeholder" aria-hidden="true" />
-                        )}
-                    </div>
+                            <div className="required-carousel-center">
+                                <div className="carousel-position">
+                                    {selectedIndex + 1} of {courses.length}
+                                </div>
+
+                                <div className="carousel-track-preview">
+                                    {prevCourse ? (
+                                        <div className="course-preview preview-left" aria-hidden="true">
+                                            <span className="preview-code">{prevCourse.code}</span>
+                                            <span className="preview-title">{prevCourse.title}</span>
+                                        </div>
+                                    ) : (
+                                        <div className="course-preview-placeholder" aria-hidden="true" />
+                                    )}
+
+                                    <article className={`focused-course-card ${selectedCourseState} ${slideDirection}`}>
+                                        <div className="focused-course-main">
+                                            <div className="focused-course-top">
+                                                <div className="focused-course-header-box">
+                                                    <div className="course-code-pill">{selectedCourse.code}</div>
+                                                    <div className="course-name-pill">{selectedCourse.title}</div>
+                                                    <div className="course-card-credits">{selectedCourse.credits} credits</div>
+                                                    <div className={`focused-course-badge ${selectedCourseState}`}>
+                                                        {getStatusText(selectedCourse)}
+                                                    </div>
+                                                </div>
+
+                                                <div className="focused-course-sections-area">
+                                                    {sections.length === 0 ? (
+                                                        <div className="section-choice-empty">
+                                                            No section data
+                                                        </div>
+                                                    ) : (
+                                                        sections.map((section, index) => {
+                                                            const sectionMeeting = {
+                                                                classId: selectedCourse.classId,
+                                                                courseCode: selectedCourse.code,
+                                                                courseTitle: selectedCourse.title,
+                                                                sectionNumber: section.sectionNumber,
+                                                                days: section.days,
+                                                                startTime: section.startTime,
+                                                                endTime: section.endTime,
+                                                                professor: section.professor,
+                                                            };
+
+                                                            const availability = getSectionAvailability(
+                                                                sectionMeeting,
+                                                                scheduledMeetings
+                                                            );
+
+                                                            const isBlocked = availability.state !== "available";
+
+                                                            return (
+                                                                <button
+                                                                    key={section.id ?? `${section.sectionNumber}-${section.startTime}-${section.endTime}`}
+                                                                    type="button"
+                                                                    className={`section-choice-card ${index === selectedSectionIndex ? "active" : ""
+                                                                        } section-${availability.state}`}
+                                                                    disabled={isBlocked}
+                                                                    title={
+                                                                        availability.state === "conflict"
+                                                                            ? `This section overlaps with ${availability.conflict?.courseCode}`
+                                                                            : availability.label
+                                                                    }
+                                                                    onClick={() => {
+                                                                        if (isBlocked) return;
+                                                                        setSelectedSectionIndex(index);
+                                                                    }}
+                                                                >
+                                                                    <div className="section-number-badge">
+                                                                        {section.sectionNumber}
+                                                                    </div>
+
+                                                                    <div className="section-choice-stack">
+                                                                        {section.days || "—"}
+                                                                    </div>
+
+                                                                    <div className="section-choice-stack">
+                                                                        {section.startTime ?? "—"} - {section.endTime ?? "—"}
+                                                                    </div>
+
+                                                                    <div className="section-choice-stack">
+                                                                        {section.seatsFilled}/{section.totalSeats}
+                                                                    </div>
+
+                                                                    {availability.state !== "available" && (
+                                                                        <div className="section-blocked-reason">
+                                                                            {availability.label}
+                                                                        </div>
+                                                                    )}
+                                                                </button>
+                                                            );
+                                                        })
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="focused-course-professor-description-row">
+                                                <div className="course-professor-box">
+                                                    <div className="course-professor-label">Professor</div>
+                                                    <div className="course-card-professor">
+                                                        {selectedSection?.professor ?? "TBA"}
+                                                    </div>
+                                                </div>
+
+                                                <div className="focused-course-description-box">
+                                                    <span className="focused-course-description-text">
+                                                        {selectedCourse.description}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="focused-course-footer">
+                                            <div className="prereq-label">Prerequisites</div>
+
+                                            {selectedCourse.prerequisites.length === 0 ? (
+                                                <div className="no-prereqs-chip">No prerequisites</div>
+                                            ) : (
+                                                <div className="prereq-chip-row">
+                                                    {selectedCourse.prerequisites.map((prereqCode) => {
+                                                        const prereqCourse = courseMap[prereqCode];
+                                                        const prereqCompleted = isCompleted(prereqCode);
+
+                                                        return (
+                                                            <button
+                                                                key={prereqCode}
+                                                                type="button"
+                                                                className={`prereq-chip ${prereqCompleted ? "completed" : "missing"}`}
+                                                                onClick={() => jumpToCourse(prereqCode)}
+                                                                title={prereqCourse ? prereqCourse.title : prereqCode}
+                                                            >
+                                                                <span className="prereq-chip-code">
+                                                                    {prereqCode}
+                                                                </span>
+                                                                {prereqCourse && (
+                                                                    <span className="prereq-chip-title">
+                                                                        {prereqCourse.title}
+                                                                    </span>
+                                                                )}
+                                                            </button>
+                                                        );
+                                                    })}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </article>
+
+                                    {nextCourse ? (
+                                        <div className="course-preview preview-right" aria-hidden="true">
+                                            <span className="preview-code">{nextCourse.code}</span>
+                                            <span className="preview-title">{nextCourse.title}</span>
+                                        </div>
+                                    ) : (
+                                        <div className="course-preview-placeholder" aria-hidden="true" />
+                                    )}
+                                </div>
+                            </div>
+
+                            {nextCourse ? (
+                                <button
+                                    type="button"
+                                    className="carousel-arrow"
+                                    onClick={goNext}
+                                    aria-label={`Next ${label}`}
+                                >
+                                    ›
+                                </button>
+                            ) : (
+                                <div className="carousel-arrow-placeholder" aria-hidden="true" />
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
         </section>
     );
 }
 
+function RequiredCourseCarousel(props) {
+    return (
+        <CourseCarousel
+            {...props}
+            label="Required Courses"
+            source="required"
+            sectionClassName="required-carousel-section"
+        />
+    );
+}
 
+function ElectivesCarousel(props) {
+    return (
+        <CourseCarousel
+            {...props}
+            label="Electives"
+            source="elective"
+            sectionClassName="required-carousel-section-2"
+        />
+    );
+}
 
-function ScheduleBlock({ previewMeeting }) {
+/* ----------------------------- Admin student tiles ----------------------------- */
+
+function AdminStudentSelector({
+    students = [],
+    selectedStudentId,
+    onSelectStudent,
+}) {
+    return (
+        <section className="schedule-admin-students-surface">
+            <div className="schedule-surface-header">
+                <div>
+                    <h2 className="schedule-surface-title">Student Schedules</h2>
+                    <p className="schedule-surface-subtitle">
+                        Select a student to view their current weekly schedule.
+                    </p>
+                </div>
+            </div>
+
+            <div className="schedule-student-tile-scroll">
+                <div className="schedule-student-tile-grid">
+                    {students.map((student) => {
+                        const isSelected =
+                            Number(student.studentId) === Number(selectedStudentId);
+
+                        return (
+                            <button
+                                key={student.studentId}
+                                type="button"
+                                className={`schedule-student-tile ${student.status} ${isSelected ? "selected" : ""
+                                    }`}
+                                onClick={() => onSelectStudent?.(student.studentId)}
+                            >
+                                <div className="schedule-student-tile-top">
+                                    <div>
+                                        <div className="schedule-student-name">
+                                            {student.name || "Unnamed Student"}
+                                        </div>
+                                        <div className="schedule-student-meta">
+                                            {student.programLabel}
+                                        </div>
+                                        <div className="schedule-student-meta">
+                                            {student.yearLabel}
+                                        </div>
+                                    </div>
+
+                                    <div className={`schedule-student-status-pill ${student.status}`}>
+                                        {student.warningCount > 0
+                                            ? `${student.warningCount} warning`
+                                            : "On track"}
+                                    </div>
+                                </div>
+
+                                <div className="schedule-student-course-row">
+                                    {student.currentCourses.length > 0 ? (
+                                        student.currentCourses.slice(0, 4).map((courseCode) => (
+                                            <span
+                                                key={courseCode}
+                                                className="schedule-student-course-pill"
+                                            >
+                                                {courseCode}
+                                            </span>
+                                        ))
+                                    ) : (
+                                        <span className="schedule-student-empty-courses">
+                                            No current courses
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="schedule-student-footer">
+                                    <span>{student.completedCount} completed</span>
+                                    <span>{student.currentCourses.length} active</span>
+                                </div>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+        </section>
+    );
+}
+
+/* ----------------------------- Schedule grid ----------------------------- */
+
+function ScheduleBlock({
+    selectedStudent,
+    scheduledMeetings = [],
+    previewMeeting,
+    isPreviewScheduled = false,
+    onAddPreviewMeeting,
+    onRemovePreviewMeeting,
+}) {
+    const [openPreviewMenu, setOpenPreviewMenu] = useState(null);
+    const [openScheduledMenu, setOpenScheduledMenu] = useState(null);
+
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
     const startHour = 7;
@@ -1130,15 +1728,13 @@ function ScheduleBlock({ previewMeeting }) {
         if (normalized.includes("M")) parsedDays.push("Monday");
         if (normalized.includes("W")) parsedDays.push("Wednesday");
         if (normalized.includes("F")) parsedDays.push("Friday");
-
-        // Treat R as Thursday so T can safely mean Tuesday.
         if (normalized.includes("T")) parsedDays.push("Tuesday");
         if (normalized.includes("R")) parsedDays.push("Thursday");
 
         return parsedDays;
     }
 
-    function buildPreviewBlocks(meeting) {
+    function buildBlocks(meeting) {
         if (!meeting) return [];
 
         const start = parseTimeToMinutes(meeting.startTime);
@@ -1171,15 +1767,19 @@ function ScheduleBlock({ previewMeeting }) {
             .filter(Boolean);
     }
 
-    const previewBlocks = buildPreviewBlocks(previewMeeting);
+    const previewBlocks = buildBlocks(previewMeeting);
 
     return (
         <section className="schedule-surface">
             <div className="schedule-surface-header">
                 <div>
-                    <h2 className="schedule-surface-title">Weekly Schedule</h2>
+                    <h2 className="schedule-surface-title">
+                        Weekly Schedule
+                    </h2>
                     <p className="schedule-surface-subtitle">
-                        Selected sections preview temporarily while their dropdown is open.
+                        {selectedStudent
+                            ? `Viewing ${selectedStudent.name || "selected student"}`
+                            : "No student selected"}
                     </p>
                 </div>
 
@@ -1231,30 +1831,156 @@ function ScheduleBlock({ previewMeeting }) {
                     ))
                 )}
 
-                {previewBlocks.map((block) => (
-                    <div
-                        key={`${previewMeeting.courseCode}-${previewMeeting.sectionNumber}-${block.day}`}
-                        className="schedule-preview-block"
-                        style={{
-                            gridColumn: block.gridColumn,
-                            gridRow: block.gridRow,
-                        }}
-                    >
-                        <div className="schedule-preview-code">
-                            {previewMeeting.courseCode}
+                {scheduledMeetings.flatMap((meeting) => {
+                    const blocks = buildBlocks(meeting);
+
+                    return blocks.map((block) => {
+                        const menuKey = `scheduled-${meeting.courseCode}-${block.day}`;
+                        const isMenuOpen = openScheduledMenu === menuKey;
+
+                        return (
+                            <div
+                                key={menuKey}
+                                className={`schedule-scheduled-block-shell ${isMenuOpen ? "menu-open" : ""}`}
+                                style={{
+                                    gridColumn: block.gridColumn,
+                                    gridRow: block.gridRow,
+                                }}
+                            >
+                                <button
+                                    type="button"
+                                    className="schedule-scheduled-block temporary-clickable-block"
+                                    onClick={() => {
+                                        setOpenScheduledMenu((prev) =>
+                                            prev === menuKey ? null : menuKey
+                                        );
+                                    }}
+                                >
+                                    <div className="schedule-preview-code">
+                                        {meeting.courseCode}
+                                    </div>
+                                    <div className="schedule-preview-meta">
+                                        Scheduled
+                                    </div>
+                                    <div className="schedule-preview-time">
+                                        {meeting.startTime} – {meeting.endTime}
+                                    </div>
+                                </button>
+
+                                {isMenuOpen && (
+                                    <ScheduleMeetingMenu
+                                        meeting={meeting}
+                                        actionLabel="Remove course"
+                                        danger
+                                        onAction={() => {
+                                            onRemovePreviewMeeting?.(meeting);
+                                            setOpenScheduledMenu(null);
+                                        }}
+                                    />
+                                )}
+                            </div>
+                        );
+                    });
+                })}
+
+                {previewBlocks.map((block) => {
+                    const menuKey = `preview-${previewMeeting.courseCode}-${previewMeeting.sectionNumber}-${block.day}`;
+                    const isMenuOpen = openPreviewMenu === menuKey;
+
+                    return (
+                        <div
+                            key={menuKey}
+                            className={`schedule-preview-block-shell ${isMenuOpen ? "menu-open" : ""}`}
+                            style={{
+                                gridColumn: block.gridColumn,
+                                gridRow: block.gridRow,
+                            }}
+                        >
+                            <button
+                                type="button"
+                                className="schedule-preview-block temporary-clickable-block"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    setOpenPreviewMenu((prev) =>
+                                        prev === menuKey ? null : menuKey
+                                    );
+                                }}
+                            >
+                                <div className="schedule-preview-code">
+                                    {previewMeeting.courseCode}
+                                </div>
+                                <div className="schedule-preview-meta">
+                                    Sec. {previewMeeting.sectionNumber}
+                                </div>
+                                <div className="schedule-preview-time">
+                                    {previewMeeting.startTime} – {previewMeeting.endTime}
+                                </div>
+                            </button>
+
+                            {isMenuOpen && (
+                                <ScheduleMeetingMenu
+                                    meeting={previewMeeting}
+                                    actionLabel={isPreviewScheduled ? "Remove course" : "Add course to schedule"}
+                                    danger={isPreviewScheduled}
+                                    onAction={() => {
+                                        if (isPreviewScheduled) {
+                                            onRemovePreviewMeeting?.(previewMeeting);
+                                        } else {
+                                            onAddPreviewMeeting?.(previewMeeting);
+                                        }
+
+                                        setOpenPreviewMenu(null);
+                                    }}
+                                />
+                            )}
                         </div>
-                        <div className="schedule-preview-meta">
-                            Sec. {previewMeeting.sectionNumber}
-                        </div>
-                        <div className="schedule-preview-time">
-                            {previewMeeting.startTime} – {previewMeeting.endTime}
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
         </section>
     );
 }
+
+function ScheduleMeetingMenu({
+    meeting,
+    actionLabel,
+    danger = false,
+    onAction,
+}) {
+    return (
+        <div className="schedule-temp-menu">
+            <div className="schedule-temp-menu-title">
+                {meeting.courseCode}
+            </div>
+
+            <div className="schedule-temp-menu-subtitle">
+                {meeting.courseTitle}
+            </div>
+
+            <div className="schedule-temp-menu-line">
+                Professor: {meeting.professor ?? "TBA"}
+            </div>
+
+            <div className="schedule-temp-menu-line">
+                Time: {meeting.startTime} – {meeting.endTime}
+            </div>
+
+            <div className="schedule-temp-menu-line">
+                Days: {meeting.days}
+            </div>
+
+            <button
+                type="button"
+                className={`schedule-temp-menu-action ${danger ? "danger" : ""}`}
+                onClick={onAction}
+            >
+                {actionLabel}
+            </button>
+        </div>
+    );
+}
+
+/* ----------------------------- Admin controls ----------------------------- */
 
 function AdminAssign({ isAdmin = false }) {
     const [isOpen, setIsOpen] = useState(false);
@@ -1280,8 +2006,6 @@ function AdminAssign({ isAdmin = false }) {
             >
                 Assign
             </button>
-
-
         </div>
     );
 }
@@ -1301,14 +2025,10 @@ function AlterCoursesModal({ isAdmin = false, courses = [], onClose }) {
     const [selectedSectionId, setSelectedSectionId] = useState("");
 
     const selectedCourse = courses.find(
-        (course) => course.courseCode === selectedCourseCode
+        (course) => course.code === selectedCourseCode
     );
 
     const hasMultipleSections = selectedCourse?.sections?.length > 1;
-
-    const selectedSection = selectedCourse?.sections?.find(
-        (section) => section.sectionId === selectedSectionId
-    );
 
     const [courseCode, setCourseCode] = useState("");
     const [courseName, setCourseName] = useState("");
@@ -1321,18 +2041,23 @@ function AlterCoursesModal({ isAdmin = false, courses = [], onClose }) {
         setSelectedCourseCode(code);
         setSelectedSectionId("");
 
-        const course = courses.find((c) => c.courseCode === code);
+        const course = courses.find((c) => c.code === code);
         if (!course) return;
 
-        setCourseCode(course.courseCode);
-        setCourseName(course.courseName);
+        setCourseCode(course.code);
+        setCourseName(course.title);
 
         if (course.sections.length === 1) {
             const onlySection = course.sections[0];
-            setSelectedSectionId(onlySection.sectionId);
-            setMeetingTimes(onlySection.meetingTimes);
-            setTotalSeats(onlySection.totalSeats);
-            setProfessor(onlySection.professor);
+            const sectionId = String(onlySection.id ?? onlySection.sectionNumber);
+
+            setSelectedSectionId(sectionId);
+            setMeetingTimes(
+                onlySection.meetingTime ??
+                `${onlySection.startTime ?? ""}-${onlySection.endTime ?? ""}`
+            );
+            setTotalSeats(onlySection.totalSeats ?? "");
+            setProfessor(onlySection.professor ?? "");
         } else {
             setMeetingTimes("");
             setTotalSeats("");
@@ -1345,14 +2070,17 @@ function AlterCoursesModal({ isAdmin = false, courses = [], onClose }) {
         setSelectedSectionId(sectionId);
 
         const section = selectedCourse?.sections.find(
-            (s) => s.sectionId === sectionId
+            (s) => String(s.id ?? s.sectionNumber) === String(sectionId)
         );
 
         if (!section) return;
 
-        setMeetingTimes(section.meetingTimes);
-        setTotalSeats(section.totalSeats);
-        setProfessor(section.professor);
+        setMeetingTimes(
+            section.meetingTime ??
+            `${section.startTime ?? ""}-${section.endTime ?? ""}`
+        );
+        setTotalSeats(section.totalSeats ?? "");
+        setProfessor(section.professor ?? "");
     }
 
     if (!isAdmin) return null;
@@ -1373,8 +2101,8 @@ function AlterCoursesModal({ isAdmin = false, courses = [], onClose }) {
                         <select value={selectedCourseCode} onChange={handleCourseSelect}>
                             <option value="">Select a course</option>
                             {courses.map((course) => (
-                                <option key={course.courseCode} value={course.courseCode}>
-                                    {course.courseCode}
+                                <option key={course.code} value={course.code}>
+                                    {course.code}
                                 </option>
                             ))}
                         </select>
@@ -1405,11 +2133,15 @@ function AlterCoursesModal({ isAdmin = false, courses = [], onClose }) {
                                     Section
                                     <select value={selectedSectionId} onChange={handleSectionSelect}>
                                         <option value="">Select a section</option>
-                                        {selectedCourse.sections.map((section) => (
-                                            <option key={section.sectionId} value={section.sectionId}>
-                                                Section {section.sectionId}
-                                            </option>
-                                        ))}
+                                        {selectedCourse.sections.map((section) => {
+                                            const sectionId = String(section.id ?? section.sectionNumber);
+
+                                            return (
+                                                <option key={sectionId} value={sectionId}>
+                                                    Section {section.sectionNumber}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
                                 </label>
                             )}
@@ -1470,15 +2202,6 @@ function AdminControls({ importantDates = [], existingCourses = [] }) {
         );
     }
 
-    function getImportantTimeValue(item) {
-        return (
-            item.timeOfEvent ??
-            item.time_of_event ??
-            item.timeStart ??
-            item.time
-        );
-    }
-
     function parseDate(dateStr) {
         if (!dateStr) return new Date(0);
 
@@ -1494,18 +2217,6 @@ function AdminControls({ importantDates = [], existingCourses = [] }) {
         }
 
         return new Date(dateStr);
-    }
-
-    function formatImportantDate(dateStr) {
-        const date = parseDate(dateStr);
-
-        if (Number.isNaN(date.getTime())) return dateStr ?? "";
-
-        return date.toLocaleDateString("en-US", {
-            month: "short",
-            day: "numeric",
-            year: "numeric",
-        });
     }
 
     const sortedDates = [...importantDates].sort(
