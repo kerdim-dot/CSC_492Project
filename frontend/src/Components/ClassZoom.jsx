@@ -5,7 +5,7 @@ import axios from 'axios';
 import { GraduationConverter } from "../tools/GraduationConverter";
 import { useNavigate } from "react-router-dom";
 
-function ClassZoom(){
+function ClassZoom() {
 
     const path_class_header = useLocation().pathname.split("/").pop();
     console.log(path_class_header)
@@ -15,10 +15,14 @@ function ClassZoom(){
     const [enrollmentData, setEnrollmentData] = useState([]);
     const [selectedClass, setSelectedClass] = useState(null);
     const [pairedEnrollments, setPairedEnrollments] = useState([]);
-    
+
     // im keeping these just so if we want to eventually make the browser check data when we load
     const [currentYear, setCurrentYear] = useState(2026);
     const [currentSemester, setCurrentSemester] = useState(2);
+
+    const role = localStorage.getItem("role") || "user";
+    const isAdmin = role === "admin" || role === "supervisor";
+
 
     useEffect(() => {
         const fetchAllData = async () => {
@@ -47,14 +51,14 @@ function ClassZoom(){
     }, []);
 
     // fetches enrollments based on classId
-    useEffect(()=>{
+    useEffect(() => {
         const class_id = 1;
-        const fetchCertainClassEnrollments = async() =>{
+        const fetchCertainClassEnrollments = async () => {
             const enrollmentData = await axios.get(`http://localhost:8080/test/get/class/enrollment?id=${class_id}`);
             console.log("Enrollment Example for calss with id 1: ", enrollmentData.data)
         }
         fetchCertainClassEnrollments();
-    },[enrollmentData])
+    }, [enrollmentData])
 
     useEffect(() => {
         if (!studentData.length || !classData.length || !enrollmentData.length) return;
@@ -82,8 +86,13 @@ function ClassZoom(){
             <ClassInfo selectedClass={selectedClass} />
 
             <InProgress pairedEnrollments={pairedEnrollments} />
-            <Completed pairedEnrollments={pairedEnrollments} />
-            <Incomplete pairedEnrollments={pairedEnrollments} />
+
+            {isAdmin && (
+                <>
+                    <Completed pairedEnrollments={pairedEnrollments} />
+                    <Incomplete pairedEnrollments={pairedEnrollments} />
+                </>
+            )}
         </div>
     );
 }
@@ -114,7 +123,7 @@ function InProgress({ pairedEnrollments }) {
             <p className="section-title">Students In Progress</p>
             <div className="student-list">
                 {inProgress?.map(e => (
-                    <div key={`${e.student?.student_id ?? e.id}`} className="student-item" onClick={()=>{navigate(`/students/${e.student?.student_id}`)}}>
+                    <div key={`${e.student?.student_id ?? e.id}`} className="student-item" onClick={() => { navigate(`/students/${e.student?.student_id}`) }}>
                         <p className="student-name">{e.student?.firstName} {e.student?.lastName}</p>
                         <p className="student-status">Graduation: {e.student?.graduationFormula}</p>
                     </div>
@@ -133,7 +142,7 @@ function Completed({ pairedEnrollments }) {
             <p className="section-title">Students Completed</p>
             <div className="student-list">
                 {completed?.map(e => (
-                    <div key={`${e.student?.student_id ?? e.id}`} className="student-item" onClick={()=>{navigate(`/students/${e.student?.student_id}`)}}>
+                    <div key={`${e.student?.student_id ?? e.id}`} className="student-item" onClick={() => { navigate(`/students/${e.student?.student_id}`) }}>
                         <p className="student-name">{e.student?.firstName} {e.student?.lastName}</p>
                         <p className="student-status">Graduation: {e.student?.graduationFormula}</p>
                     </div>
@@ -152,7 +161,7 @@ function Incomplete({ pairedEnrollments }) {
             <p className="section-title">Students Incomplete</p>
             <div className="student-list">
                 {incomplete?.map(e => (
-                    <div key={`${e.student?.student_id ?? e.id}`} className="student-item" onClick={()=>{navigate(`/students/${e.student?.student_id}`)}}   x>
+                    <div key={`${e.student?.student_id ?? e.id}`} className="student-item" onClick={() => { navigate(`/students/${e.student?.student_id}`) }} x>
                         <p className="student-name">{e.student?.firstName} {e.student?.lastName}</p>
                         <p className="student-status">Graduation: {e.student?.graduationFormula}</p>
                     </div>

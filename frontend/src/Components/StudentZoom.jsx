@@ -11,8 +11,24 @@ import { useNavigate } from "react-router-dom";
 
 function StudentZoom(){
     
+    const navigate = useNavigate();
+
     // grab my student's id from the path
     const path_student_id = useLocation().pathname.split("/").pop();
+
+    const role = localStorage.getItem("role") || "user";
+    const isAdmin = role === "admin";
+    const isSupervisor = role === "supervisor";
+    const isStudent = role === "user";
+
+    // Demo account: Bill Johnson
+    const CURRENT_USER_STUDENT_ID = 1;
+    const requestedStudentId = Number(path_student_id);
+
+    const canViewStudent =
+        isAdmin ||
+        isSupervisor ||
+        (isStudent && requestedStudentId === CURRENT_USER_STUDENT_ID);
 
     const [studentData, setStudentData] = useState([]);
     const [classData, setClassData] = useState([]);
@@ -20,14 +36,39 @@ function StudentZoom(){
     const [student, setStudent] = useState(null);
     const [pairedEnrollments, setPairedEnrollments] = useState([]);
 
-    // im keeping these just so if we want to eventually make the browser check data when we load
     const [currentYear, setCurrentYear] = useState(2026);
     const [currentSemester, setCurrentSemester] = useState(2);
 
-    useEffect(()=>{
-        
+    if (!canViewStudent) {
+        return (
+            <div className="student-zoom-container">
+                <div className="access-denied-card">
+                    <p className="access-denied-title">Access Denied</p>
+                    <p className="access-denied-message">
+                        You cannot view another student's full academic profile.
+                    </p>
 
-        // here im getting all the responses all neat-like
+                    <button
+                        type="button"
+                        className="access-denied-button"
+                        onClick={() => navigate(`/students/${CURRENT_USER_STUDENT_ID}`)}
+                    >
+                        Go to My Profile
+                    </button>
+                </div>
+            </div>
+        );
+    }
+
+    useEffect(() => {
+        if (!canViewStudent) {
+            navigate(`/students/${CURRENT_USER_STUDENT_ID}`, { replace: true });
+        }
+    }, [canViewStudent, navigate]);
+
+    useEffect(()=>{
+        if (!canViewStudent) return;
+
         const fetchAllData = async () => {
             try {
                 const [classesRes, studentsRes, enrollmentsRes] = await Promise.all([
@@ -38,54 +79,48 @@ function StudentZoom(){
 
                 setClassData(classesRes.data);
 
-                // adding graduationFormula to students
                 const studentsWithGraduation = studentsRes.data.map(s => ({
                     ...s,
                     graduationFormula: GraduationConverter(s.graduationDate)
                 }));
-                setStudentData(studentsWithGraduation);
 
+                setStudentData(studentsWithGraduation);
                 setEnrollmentData(enrollmentsRes.data);
             } catch (error) {
                 console.error("Error fetching data:", error);
             }
         };
 
-    // alright go do it
-    fetchAllData();
-    },[])
+        fetchAllData();
+    }, [canViewStudent]);
 
-    // this is necessary for the user type, where only they can see their certain enrollments
-    // fetches enrollments based on studentId
     useEffect(()=>{
+        if (!canViewStudent) return;
+
         const student_id = 1;
+
         const fetchCertainStudentEnrollments = async() =>{
             const enrollmentData = await axios.get(`http://localhost:8080/test/get/student/enrollment?id=${student_id}`);
             console.log("Enrollment Example for student with id 1: ", enrollmentData.data)
         }
+
         fetchCertainStudentEnrollments();
-    },[enrollmentData])
+    }, [canViewStudent, enrollmentData]);
 
-
-    // time to grab our student.. beautiful student number :{id}
     useEffect(() => {
-        // making sure this data isnt null
+        if (!canViewStudent) return;
         if (!studentData.length || !classData.length || !enrollmentData.length) return;
 
-        // grab the specific student
         const foundStudent = studentData.find(s => String(s.student_id) === String(path_student_id));
         if (!foundStudent) return;
 
-        // grab this student's enrollments
         const studentEnrolls = enrollmentData.filter(e => String(e.student_id) === String(path_student_id));
 
-        // pair the enrollments with class info
         const paired = studentEnrolls.map(e => ({
             ...e,
             class: classData.find(c => c.class_id === e.mountClass_id)
         }));
 
-        // check if the student is behind
         const takenClassIds = new Set(studentEnrolls.map(e => e.mountClass_id));
         const [gradSemesterStr, gradYearStr] = foundStudent.graduationFormula.split("/");
         const semestersLeft = (Number(gradYearStr) - currentYear) * 2 +
@@ -100,15 +135,15 @@ function StudentZoom(){
         setStudent({ ...foundStudent, isBehind });
         setPairedEnrollments(paired);
 
-    }, [studentData, classData, enrollmentData, path_student_id, currentYear, currentSemester]);
+    }, [canViewStudent, studentData, classData, enrollmentData, path_student_id, currentYear, currentSemester]);
 
-    console.log("Student:", student);
-    console.log("Paired Enrollments:", pairedEnrollments);
+    if (!canViewStudent) {
+        return null;
+    }
 
     return (
         <div className="student-zoom-container">
             <StudentInfo student={student} />
-            {/* <ScheduleSection student={student} pairedEnrollments={pairedEnrollments} /> */}
             <InProgress student={student} pairedEnrollments={pairedEnrollments} />
             <Completed student={student} pairedEnrollments={pairedEnrollments} />
             <Incomplete student={student} pairedEnrollments={pairedEnrollments} />
