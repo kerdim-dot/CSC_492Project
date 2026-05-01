@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.backend.Services.MountClassService;
 
 @RestController
-@RequestMapping("class")
+@RequestMapping("/class")
 public class MountClassController {
 
     private MountClassService mountClassService;

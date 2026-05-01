@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from 'axios'
 import { GraduationConverter } from "../tools/GraduationConverter";
+import { computerScienceMajorRequirements,computerScienceMinorRequirements,multiPlatformMajorRequirements } from "../tools/FlagFormula";
+import { DisplayDate } from "../tools/DisplayDate";
 
 function Students(){
 
@@ -24,6 +26,10 @@ function Students(){
     const [enrollment, setEnrollment] = useState([]);
     const [students, setStudents] = useState([]);
 
+    const [requiredComputerScienceMajorHeaders, setRequiredComputerScienceMajorHeaders] = useState(null);
+    const [requiredComputerScienceMinorHeaders, setRequiredComputerScienceMinorHeaders] = useState(null);
+    const [requiredMultiPlatformMajorHeaders, setRequiredMultiPlatformMajorHeaders] = useState(null);
+
 
     useEffect(()=>{
         
@@ -35,11 +41,11 @@ function Students(){
 
         const retriveStudentData = async() =>{
             const studentData = await axios.get('http://localhost:8080/test/get/students');
-            const updatedStudents = studentData.data.map((item) => ({
-                ...item,
-                graduationFormula: GraduationConverter(item.graduationDate)
-            }));
-            setStudents(updatedStudents);
+            // const updatedStudents = studentData.data.map((item) => ({
+            //     ...item,
+            //     graduationFormula: GraduationConverter(item.graduationDate)
+            // }));
+            setStudents(studentData.data);
             //console.log("student fetch:", updatedStudents)
         }
 
@@ -78,9 +84,37 @@ function Students(){
     //         {studentId:2,firstName:"John" , lastName:"Doe", graduation: "2/2028", isMajor:true ,classes:null, credits:0}
     // ]
 
-     useEffect(()=>{
+    useEffect(()=>{
+        if(classes.length > 0){
+            const CSMajorRequirementMapping = []
+            const CSMinorRequirementMapping = []
+            const MPMajorRequirementMapping = []
 
-        if(enrollment.length > 0 && classes.length > 0 && students.length > 0){
+            classes.forEach((item)=>{
+                if(item.isRequiredComputerScienceMajor){
+                    CSMajorRequirementMapping.push(item.header);
+                }
+
+                if(item.isRequiredComputerScienceMinor){
+                    CSMinorRequirementMapping.push(item.header);
+                }
+
+                if(item.isRequiredMultiPlatformMajor){
+                    MPMajorRequirementMapping.push(item.header);
+                }
+            })
+
+            console.log(CSMajorRequirementMapping)
+            
+            setRequiredComputerScienceMajorHeaders(CSMajorRequirementMapping);
+            setRequiredComputerScienceMinorHeaders(CSMinorRequirementMapping);
+            setRequiredMultiPlatformMajorHeaders(MPMajorRequirementMapping);
+        }
+    },[classes])
+     
+    useEffect(()=>{
+
+        if(enrollment.length > 0 && classes.length > 0 && students.length > 0 && requiredComputerScienceMajorHeaders && requiredComputerScienceMinorHeaders && requiredMultiPlatformMajorHeaders){
 
             const enrollmentMap = {};
 
@@ -99,13 +133,6 @@ function Students(){
 
             students.sort((a,b)=>{return a.lastName.localeCompare(b.lastName)})
 
-            // checks how many semesters a student has, not including the current semester
-            function timeCalculator(student){
-                const graduationSemester = student.graduationFormula.substring(0,student.graduationFormula.indexOf("/"));
-                const graduationYear = student.graduationFormula.substring(1+student.graduationFormula.indexOf("/"));
-                const timerFormula =  ((graduationYear - currentYear)*2) + (graduationSemester - currentSemester)
-                return timerFormula;
-            }
 
             // checks if the student is behind in any classes and adds the isBehind field to the student object
             // used to flag if a student is behind on any classes
@@ -113,18 +140,21 @@ function Students(){
             */
             students.map((studentItem)=>{
                 let isBehind = false;
-                const studentSemestersLeft = timeCalculator(studentItem);
-                classes.forEach((classItem)=>{
-                    const headerNumber = Number(classItem.header.substring(classItem.header.indexOf("-")+1,classItem.header.indexOf("-")+2));
-                    const hasTakenClass = enrollmentMap[studentItem.student_id].includes(classItem.class_id);
-                    const classSemesters = 8-(headerNumber*2)
-                    if(!hasTakenClass && studentSemestersLeft<=classSemesters){
-                        //console.log(classItem.header,classSemesters,studentSemestersLeft);
-                        isBehind = true;
-                    }
-                })
+                if(studentItem.isComputerScienceMajor){
+                    isBehind = isBehind || computerScienceMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester,requiredComputerScienceMajorHeaders)
+                }
+
+                if(studentItem.isComputerScienceMinor){
+                    isBehind = isBehind || computerScienceMinorRequirements(studentItem, enrollmentMap,currentYear,currentSemester,requiredComputerScienceMinorHeaders)
+                }
+
+                if(studentItem.isMultiPlatformMajor){
+                    isBehind = isBehind || multiPlatformMajorRequirements(studentItem, enrollmentMap,currentYear,currentSemester,requiredMultiPlatformMajorHeaders)
+                }
                 studentItem.isBehind = isBehind;
+                console.log(studentItem)
             })
+            
             setStudentsActive(students);
         }
          // replace this with a fetch students method
@@ -133,7 +163,7 @@ function Students(){
 
         // key is studentsId, value is a list of classes they have taken
         
-    },[enrollment, students, classes])
+    },[enrollment, students, classes,requiredComputerScienceMajorHeaders,requiredComputerScienceMinorHeaders,requiredMultiPlatformMajorHeaders])
 
     useEffect(() => {
     if (!studentsActive) return;
@@ -294,7 +324,7 @@ function StudentList({studentSearchList}){
                     return(
                     <div className= {item.isBehind? "entry behind" : "entry"} onClick={()=>{navigate(`/students/${item.student_id}`)}}>
                         <p>{item.firstName} {item.lastName}</p>
-                        <p>{item.graduationDate}</p>
+                        <p>{DisplayDate(item.graduationDate)}</p>
                     </div>
                     )
                 })}

@@ -24,10 +24,25 @@ public class ScheduleEntryDTO {
     private boolean isFriday;
     private String time;
 
+    // used to get schedule entries
     public ScheduleEntryDTO(long entry_id, long schedule_id, long mountClass_id, boolean isMonday, boolean isTuesday,
         boolean isWednesDay, boolean isThursday, boolean isFriday, String time
     ){
         this.entry_id = entry_id;
+        this.schedule_id = schedule_id;
+        this.mountClass_id = mountClass_id;
+        this.isMonday = isMonday;
+        this.isTuesday = isTuesday;
+        this.isWednesDay = isWednesDay;
+        this.isThursday = isThursday;
+        this.isFriday = isFriday;
+        this.time = time;
+    }
+
+    // used to add schedule entries
+    public ScheduleEntryDTO(long schedule_id, long mountClass_id, boolean isMonday, boolean isTuesday,
+        boolean isWednesDay, boolean isThursday, boolean isFriday, String time
+    ){
         this.schedule_id = schedule_id;
         this.mountClass_id = mountClass_id;
         this.isMonday = isMonday;
@@ -66,43 +81,43 @@ public class ScheduleEntryDTO {
         this.mountClass_id = mountClass_id;
     }
 
-    public boolean isMonday() {
+    public boolean getIsMonday() {
         return isMonday;
     }
 
-    public void setMonday(boolean isMonday) {
+    public void setIsMonday(boolean isMonday) {
         this.isMonday = isMonday;
     }
 
-    public boolean isTuesday() {
+    public boolean getIsTuesday() {
         return isTuesday;
     }
 
-    public void setTuesday(boolean isTuesday) {
+    public void setIsTuesday(boolean isTuesday) {
         this.isTuesday = isTuesday;
     }
 
-    public boolean isWednesDay() {
+    public boolean getIsWednesDay() {
         return isWednesDay;
     }
 
-    public void setWednesDay(boolean isWednesDay) {
+    public void setIsWednesDay(boolean isWednesDay) {
         this.isWednesDay = isWednesDay;
     }
 
-    public boolean isThursday() {
+    public boolean getIsThursday() {
         return isThursday;
     }
 
-    public void setThursday(boolean isThursday) {
+    public void setIsThursday(boolean isThursday) {
         this.isThursday = isThursday;
     }
 
-    public boolean isFriday() {
+    public boolean getIsFriday() {
         return isFriday;
     }
 
-    public void setFriday(boolean isFriday) {
+    public void setIsFriday(boolean isFriday) {
         this.isFriday = isFriday;
     }
 

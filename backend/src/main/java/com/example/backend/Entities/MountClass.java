@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -13,14 +14,23 @@ import jakarta.persistence.OneToMany;
 
 @Entity
 public class MountClass {
-@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long class_id;
+    @Column(nullable = false)
     private String title;
+    @Column(nullable = false, unique = true)
     private String header;
+    @Column(nullable = false)
     private Integer credits;
-    private boolean isActive;
-    private String description; 
+    @Column(nullable = false)
+    private String description;
+    @Column(nullable = false) 
+    private Boolean isRequiredComputerScienceMajor;
+    @Column(nullable = false) 
+    private Boolean isRequiredComputerScienceMinor;
+    @Column(nullable = false) 
+    private Boolean isRequiredMultiPlatformMajor;
 
     @OneToMany(mappedBy = "mountClass", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <Enrollment> enrollments = new ArrayList<>();
@@ -41,12 +51,14 @@ public class MountClass {
     public MountClass() {
     }
 
-    public MountClass(String title, String header, Integer credits, boolean isActive, String description) {
+    public MountClass(String title, String header, Integer credits, String description,Boolean isRequiredComputerScienceMajor,Boolean isRequiredComputerScienceMinor,Boolean isRequiredMultiPlatformMajor) {
         this.title = title;
         this.header = header;
         this.credits = credits;
-        this.isActive = isActive;
         this.description = description;
+        this.isRequiredComputerScienceMajor = isRequiredComputerScienceMajor;
+        this.isRequiredComputerScienceMinor = isRequiredComputerScienceMinor;
+        this.isRequiredMultiPlatformMajor = isRequiredMultiPlatformMajor;
     }
 
     public Long getClass_id() {
@@ -81,14 +93,6 @@ public class MountClass {
         this.credits = credits;
     }
 
-    public boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
-    }
-
     public String getDescription() {
         return description;
     }
@@ -97,6 +101,27 @@ public class MountClass {
         this.description = description;
     }
 
+    public void setIsRequiredComputerScienceMajor(Boolean isRequiredComputerScienceMajor){
+        this.isRequiredComputerScienceMajor = isRequiredComputerScienceMajor;
+    }
 
+    public Boolean getIsRequiredComputerScienceMajor(){
+        return this.isRequiredComputerScienceMajor;
+    }
 
+    public void setIsRequiredComputerScienceMinor(Boolean isRequiredComputerScienceMinor){
+        this.isRequiredComputerScienceMajor = isRequiredComputerScienceMinor;
+    }
+
+    public Boolean getIsRequiredComputerScienceMinor(){
+        return this.isRequiredComputerScienceMinor;
+    }
+
+    public void setIsRequiredMultiPlatformMajor(Boolean isRequiredMutliPlatformMajor){
+        this.isRequiredMultiPlatformMajor = isRequiredMutliPlatformMajor;
+    }
+
+    public Boolean getIsRequiredMultiPlatformMajor(){
+        return this.isRequiredComputerScienceMajor;
+    }
 }

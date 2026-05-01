@@ -33,11 +33,21 @@ public class ScheduleDTO {
     private long schedule_id;
     private long student_id;
     private LocalDate scheduleStartDate;
+    private LocalDate scheduleEndDate;
 
-    public ScheduleDTO(long schedule_id, long student_id, LocalDate scheduleStartDate){
+    // this to get a schedule
+    public ScheduleDTO(long schedule_id, long student_id, LocalDate scheduleStartDate, LocalDate scheduleEndDate){
         this.schedule_id = schedule_id;
         this.student_id = student_id;
         this.scheduleStartDate = scheduleStartDate;
+        this.scheduleEndDate = scheduleEndDate;
+    }
+
+    // this to add a schedule
+    public ScheduleDTO(long student_id, LocalDate scheduleStartDate, LocalDate scheduleEndDate){
+        this.student_id = student_id;
+        this.scheduleStartDate = scheduleStartDate;
+        this.scheduleEndDate = scheduleEndDate;
     }
 
     public ScheduleDTO(){
@@ -66,6 +76,15 @@ public class ScheduleDTO {
 
     public void setScheduleStartDate(LocalDate scheduleStartDate) {
         this.scheduleStartDate = scheduleStartDate;
+    }
+
+
+    public LocalDate getScheduleEndDate() {
+        return scheduleEndDate;
+    }
+
+    public void setScheduleEndDate(LocalDate scheduleEndDate) {
+        this.scheduleEndDate = scheduleEndDate;
     }
 
 }

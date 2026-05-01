@@ -1,5 +1,6 @@
 package com.example.backend.Entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -18,20 +19,28 @@ public class MountClassEntry {
     @JoinColumn(name = "class_id")
     private MountClass mountClass;
 
+    @Column(nullable = false)
     String meetingTime;
 
+    @Column(nullable = false)
     int totalSeats;
 
+    @Column(nullable = false)
     String professorName;
 
+    @Column(nullable = false)
     boolean isMonday;
 
+    @Column(nullable = false)
     boolean isTuesday;
 
+    @Column(nullable = false)
     boolean isWednesday;
 
+    @Column(nullable = false)
     boolean isThursday;
 
+    @Column(nullable = false)
     boolean isFriday;
 
     public MountClassEntry() {

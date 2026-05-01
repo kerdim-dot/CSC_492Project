@@ -1,5 +1,5 @@
-scheduleId, studentId, scheduleStartDate
-         1,         1, 2025-08-25
-         2,         1, 2026-01-12
-         3,         1, 2026-08-24
-         4,         1, 2027-01-11
+scheduleId, studentId, scheduleStartDate, scheduleEndDate
+         1,         1, 2025-08-25,2025-11-25
+         2,         1, 2026-01-12,2026-11-25
+         3,         1, 2026-08-24,2027-11-25
+         4,         1, 2027-01-11,2028-11-25

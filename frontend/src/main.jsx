@@ -21,7 +21,11 @@ import EnrollementManagerPage from './Pages/Admin_Pages/EnrollmentManagerPage.js
 import StudentManager from './Pages/Admin_Pages/StudentManager.jsx'
 import ProgressPage from './Pages/ProgressPage.jsx'
 import DashboardPage from './Pages/DashboardPage.jsx'
-
+import ScheduleManagerPage from './Pages/Admin_Pages/ScheduleManagerPage.jsx'
+import ForeignLanguagePage from "./Pages/ForeignLanguagePage";
+import ElectivesPage from "./Pages/ElectivesPage";
+import CscUpperLevelPage from "./Pages/CscUpperLevelPage";
+import DeclaredMinorElectivesPage from './Pages/DeclaredMinorElectivesPage.jsx'
 
 const router = createBrowserRouter([
     {path:"/", element:<LandingPage/>},
@@ -36,8 +40,12 @@ const router = createBrowserRouter([
     {path:"/admin/manager", element:<AdminManager/>},
     {path:"/test", element:<TestPage/>},
     {path:"/students/:id/", element:<StudentZoomPage/>},
-    {path:"/classes/:header", element:<ClassZoomPage/>}
-
+    {path:"/classes/:header", element:<ClassZoomPage/>},
+    {path:"/schedule/manager", element: <ScheduleManagerPage/>},
+    {path:"/foreign-languages", element: <ForeignLanguagePage/>},
+    {path:"/electives", element: <ElectivesPage/>},
+    {path:"/csc-upper-level", element: <CscUpperLevelPage/>},
+    {path:"/declared-minor-electives", element: <DeclaredMinorElectivesPage/>},
     
 ])
 

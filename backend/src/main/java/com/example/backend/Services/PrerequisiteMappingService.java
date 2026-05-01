@@ -1,6 +1,7 @@
 package com.example.backend.Services;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
@@ -23,6 +24,14 @@ public class PrerequisiteMappingService {
 
     public List<PrerequisiteDTO> getAllPrerequisiteMapping(){
         return prerequisiteMappingRepository.findAllPrerequisiteDTOs();
+    }
+
+    public void deletePrerequisite(Long id){
+        Optional <PrerequisiteMapping> prerequisiteMappingOptional = prerequisiteMappingRepository.findById(id);
+
+        if(prerequisiteMappingOptional.isPresent()){
+            prerequisiteMappingRepository.delete(prerequisiteMappingOptional.get());
+        }
     }
 
 }

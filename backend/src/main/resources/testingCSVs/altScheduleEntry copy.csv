@@ -1,0 +1,3 @@
+entryId, classHeader, sectionNumber, professorName, seatsFilled, seatsTotal,  days, startTime, endTime, startDate, endDate, term
+1, CSC-120, 01, Dr. John Smith, 20, 24, MWF, 0930, 1035, 2027-08-28, 2028-05-04, fall2027
+# feel free to delete or alter this alternate version of structuring a schedule entry

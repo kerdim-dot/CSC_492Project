@@ -33,7 +33,14 @@ public class Student {
     private LocalDate graduation_date;
 
     @Column(nullable = false)
-    private Boolean is_major;
+    private Boolean is_computer_science_major;
+
+    @Column(nullable = false)
+    private Boolean is_computer_science_minor;
+    
+    @Column(nullable = false)
+    private Boolean is_multi_platform_major;
+    
     
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
     private List <Enrollment> enrollments = new ArrayList<>();
@@ -50,11 +57,13 @@ public class Student {
 
     }
 
-    public Student(String firstName, String lastName,LocalDate graduationDate, Boolean isMajor){
+    public Student(String firstName, String lastName,LocalDate graduationDate, Boolean isComputerScienceMajor,Boolean isComputerScienceMinor,Boolean isMultiPlatformMajor){
         this.first_name = firstName;
         this.last_name = lastName;
         this.graduation_date = graduationDate;
-        this.is_major = isMajor;
+        this.is_computer_science_major = isComputerScienceMajor;
+        this.is_computer_science_minor = isComputerScienceMinor;
+        this.is_multi_platform_major = isMultiPlatformMajor;
     }
 
     public Long getStudent_id(){
@@ -72,8 +81,15 @@ public class Student {
         return graduation_date;
     }
 
-    public Boolean getIsMajor(){
-        return is_major;
+    public Boolean getIsComputerScienceMajor(){
+        return is_computer_science_major;
+    }
+
+    public Boolean getIsComputerScienceMinor(){
+        return is_computer_science_minor;
+    }
+    public Boolean getIsMultiPlatformMajor(){
+        return is_multi_platform_major;
     }
 
     public void setFirstName(String firstName){
@@ -88,7 +104,17 @@ public class Student {
         this.graduation_date = date;
     }
 
-    public void setIsMajor(Boolean isMajor){
-        this.is_major = isMajor;
+    public void setIsComputerScienceMajor(Boolean isComputerScienceMajor){
+        this.is_computer_science_major = isComputerScienceMajor;
     }
+
+    public void setIsComputerScienceMinor(Boolean isComputerScienceMinor){
+        this.is_computer_science_minor = isComputerScienceMinor;
+    }
+
+    public void setIsMultiPlatformMajor(Boolean isMultiPlatformMajor){
+        this.is_multi_platform_major = isMultiPlatformMajor;
+    } 
+
+
 }   

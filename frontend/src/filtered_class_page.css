@@ -1,0 +1,112 @@
+.filtered-class-page-shell {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+    background: #f7fafc;
+}
+
+.filtered-class-page-content {
+    width: 100%;
+    min-width: 0;
+    padding: 1.5rem;
+}
+
+.filtered-class-surface {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.filtered-class-count-pill {
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background: rgba(119, 48, 151, 0.1);
+    color: rgb(119, 48, 151);
+    font-size: 0.82rem;
+    font-weight: 850;
+    white-space: nowrap;
+}
+
+.filtered-class-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+    gap: 1rem;
+}
+
+.filtered-class-card {
+    width: 100%;
+    border: 1px solid rgba(148, 163, 184, 0.32);
+    border-radius: 1.1rem;
+    background: #ffffff;
+    padding: 1rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.filtered-class-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 34px rgba(15, 23, 42, 0.13);
+    border-color: rgba(119, 48, 151, 0.42);
+}
+
+.filtered-class-card-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.filtered-class-code {
+    font-size: 1rem;
+    font-weight: 950;
+    color: rgb(119, 48, 151);
+}
+
+.filtered-class-credits {
+    padding: 0.25rem 0.55rem;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.filtered-class-title {
+    font-size: 0.92rem;
+    font-weight: 800;
+    line-height: 1.25;
+    color: #1e293b;
+}
+
+.filtered-class-empty-state {
+    border: 1px dashed rgba(148, 163, 184, 0.5);
+    border-radius: 1rem;
+    background: rgba(248, 250, 252, 0.8);
+    padding: 1.25rem;
+}
+
+.filtered-class-empty-state h3 {
+    margin: 0 0 0.35rem;
+    font-size: 1rem;
+    font-weight: 900;
+    color: #1e293b;
+}
+
+.filtered-class-empty-state p {
+    margin: 0;
+    font-size: 0.88rem;
+    font-weight: 650;
+    color: #64748b;
+}

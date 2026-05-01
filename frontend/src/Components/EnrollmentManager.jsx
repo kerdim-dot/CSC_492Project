@@ -3,6 +3,7 @@ import filter from "./../assets/filter.svg"
 import close from "./../assets/close.svg"
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { findPreReqs } from "../tools/treeBuilder";
 
 function EnrollmentManager(){
 
@@ -13,6 +14,17 @@ function EnrollmentManager(){
     const [classes, setClasses] = useState([]);
     const [students, setStudents] = useState([]);
     const [enrollment, setEnrollment] = useState([]);
+    const [prerequisiteMapping, setPrerequisiteMapping] = useState([]);
+
+    const [updateHappenedSwitch, setUpdateHappenedSwitch] = useState(true);
+
+    /* Backend Needs
+    - Fetch students c
+    - Fetch classes c
+    - Fetch Enrollment c
+    - delete Enrollment
+    - update Enrollment
+    */
 
     useEffect(()=>{
         
@@ -34,11 +46,18 @@ function EnrollmentManager(){
             console.log("enrollment fetch:",enrollmentData.data)
         }
 
+        const retrivePrerequisiteMappingData = async() =>{
+            const prerequisiteMappingData = await axios.get('http://localhost:8080/test/get/prequisiteMapping');
+            setPrerequisiteMapping(prerequisiteMappingData.data)
+            console.log("prerequisite fetch:",prerequisiteMappingData.data)
+        }
+
         retriveClassData();
         retriveStudentData();
         retriveEnrollmentData();
+        retrivePrerequisiteMappingData();
 
-    },[])
+    },[updateHappenedSwitch])
 
 
     // const classes = [
@@ -68,10 +87,10 @@ function EnrollmentManager(){
     // ]
 
     return(
-        <div>
+        <div className="">
             <SearchBar students = {students} setStudentSearchList={setStudentSearchList}/>
-            <StudentList setIsBeginning = {setIsBeginning} studentSearchList={studentSearchList} selectedStudentId = {selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
-            <UpdateBlock isBeginning = {isBeginning} classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId}/>
+            <StudentList setIsBeginning = {setIsBeginning} studentSearchList={studentSearchList} selectedStudentId = {selectedStudentId} setSelectedStudentId={setSelectedStudentId} prerequisiteMapping={prerequisiteMapping}/>
+            <UpdateBlock isBeginning = {isBeginning} classes={classes} enrollment={enrollment} selectedStudentId={selectedStudentId} setSelectedStudentId={setSelectedStudentId} prerequisiteMapping={prerequisiteMapping} setUpdateHappenedSwitch={setUpdateHappenedSwitch}/>
         </div>
     )
 }
@@ -118,11 +137,14 @@ function SearchBar({students, setStudentSearchList}){
     )
 }
 
-function UpdateBlock({isBeginning,classes, enrollment, selectedStudentId, setSelectedStudentId}){
+
+
+function UpdateBlock({isBeginning, classes, enrollment, selectedStudentId, setSelectedStudentId, prerequisiteMapping, setUpdateHappenedSwitch}){
     const [studentEnrollmentMap, setStudentEnrollmentMap] = useState({});
+    const [selectedClasses, setSelectedClasses] = useState([]);
 
     useEffect(()=>{
-        if(enrollment.length > 0 && classes.length >0){
+        if(enrollment.length > 0 && classes.length > 0){
             const enrollmentMap = {};
 
             enrollment.forEach((item)=>{
@@ -148,33 +170,136 @@ function UpdateBlock({isBeginning,classes, enrollment, selectedStudentId, setSel
             });
 
             setStudentEnrollmentMap(result);
-            console.log(result)
         }
-    },[classes,enrollment]);
+    },[classes, enrollment]);
+
+    // clear selections when switching students or closing the panel
+    useEffect(() => {
+        setSelectedClasses([]);
+    }, [selectedStudentId]);
+
+    const codeClasses = (currentClass) => {
+        if(prerequisiteMapping){
+            const prereqs = findPreReqs(prerequisiteMapping, classes, currentClass.header);
+            const enrolledHeaders = (studentEnrollmentMap[selectedStudentId] || [])
+                .map(e => e.classHeader);
+
+            if (
+                selectedStudentId &&
+                studentEnrollmentMap[selectedStudentId] &&
+                studentEnrollmentMap[selectedStudentId].some(
+                    enrollment => enrollment.classHeader === currentClass.header
+                )
+            ) {
+                return "class-complete";
+            } else if (
+                selectedStudentId &&
+                prereqs.every(prereq => enrolledHeaders.includes(prereq))
+            ) {
+                return "class-available";
+            } else if (selectedStudentId) {
+                return "class-blocked";
+            }
+        }
+    }
+
+    const toggleClassSelection = (classHeader, status) => {
+        if (status !== "class-available") return;
+
+        setSelectedClasses(prev =>
+            prev.includes(classHeader)
+                ? prev.filter(h => h !== classHeader)
+                : [...prev, classHeader]
+        );
+    };
+
+    const buildClassName = (status, isSelected) => {
+        let base = "class-pool";
+        if (isSelected){
+            base += " highlight";
+        } 
+        else if (status === "class-complete"){
+            base += " completedClass";
+        } 
+        else if (status === "class-available"){
+            base += " availableClass";
+        } 
+        else if (status === "class-blocked"){
+            base += " blockedClass";
+        } 
+        return base;
+    };
+
+    const addEnrollmentsToStudent = async () => {
+        try {
+            const requests = [];
+            for (let i = 0; i < selectedClasses.length; i++) {
+                const cls = classes.find(c => c.header === selectedClasses[i]);
+                if (cls) {
+                    const enrollmentDTO = {
+                        student_id: selectedStudentId,
+                        mountClass_id: cls.class_id,
+                        status: 1,
+                        grade:'A',
+                        enrollment_date:new Date()
+                    };
+                    requests.push(
+                        axios.post(`http://localhost:8080/test/add/enrollment?id=${selectedStudentId}`, enrollmentDTO)
+                    );
+                }
+            }
+            await Promise.all(requests);
+            setSelectedClasses([]);
+            setUpdateHappenedSwitch(prev => !prev);
+        } catch (error) {
+            console.error("Failed to add enrollments:", error);
+        }
+    };
+
+    const deleteAllStudentEnrollments = async () => {
+        try {
+            const response = await axios.delete(
+                `http://localhost:8080/test/delete/student/enrollment?id=${selectedStudentId}`
+            );
+            if (response.status === 200) {
+                setUpdateHappenedSwitch(prev => !prev)
+            }
+        } catch (error) {
+            console.error("Failed to delete enrollments:", error);
+        }
+    };
 
     return(
-        <div className= {selectedStudentId?"update-student-panel-out":isBeginning?"update-student-panel":"update-student-panel-hidden"}>
-            <img className="close-img-two" src={close} onClick={()=>{setSelectedStudentId(null)}}></img>
+        <div className={selectedStudentId ? "update-enrollment-panel-out" : isBeginning ? "update-enrollment-panel" : "update-enrollment-panel-hidden"}>
+            <img className="close-img-two" src={close} onClick={()=>{setSelectedStudentId(null)}} />
 
             <p className="student-panel-title">Update Enrollment Panel</p>
 
-            {classes.map((item)=>{
-                const isEnrolled = 
-                    selectedStudentId &&
-                    studentEnrollmentMap[selectedStudentId] &&
-                    studentEnrollmentMap[selectedStudentId].some(enrollment => enrollment.classHeader === item.header);;
+            {classes.map((item) => {
+                const status = codeClasses(item);
+                const isSelected = selectedClasses.includes(item.header);
 
-                return(
-                    <button className={isEnrolled ? "class-pool completedClass" : "class-pool"}>
+                return (
+                    <button
+                        key={item.class_id}
+                        className={buildClassName(status, isSelected)}
+                        onClick={() => toggleClassSelection(item.header, status)}
+                        disabled={status !== "class-available"}
+                    >
                         {item.header}
                     </button>
-                )
+                );
             })}
+            <div className="enrollment-btns">
+                <button className="panel-button" onClick={addEnrollmentsToStudent}>Confirm Enrollment</button>
+                <button className="panel-button" onClick={deleteAllStudentEnrollments}>Reset Student Enrollment</button>
+            </div>
 
-            <button className="panel-button">Confirm</button>
         </div>
     )
 }
+
+
 
 function StudentList({setIsBeginning, studentSearchList,selectedStudentId ,setSelectedStudentId}){
 

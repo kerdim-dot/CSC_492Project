@@ -187,14 +187,24 @@ function SideBar() {
                                     </NavLink>
                                 </li>
 
-                                {isSupervisor && (
+                                {/* {isSupervisor && (
                                     <li>
                                         <NavLink to="/admin/manager" className="sidebar_link">
                                             <img src={edit_admin} alt="" />
                                             <span>Manage Admins</span>
                                         </NavLink>
                                     </li>
+                                )} */}
+
+                                {isSupervisor && (
+                                    <li>
+                                        <NavLink to="/schedule/manager" className="sidebar_link">
+                                            <img src={edit_admin} alt="" />
+                                            <span>Manage Utilites</span>
+                                        </NavLink>
+                                    </li>
                                 )}
+
                             </ul>
                         </li>
                     </>

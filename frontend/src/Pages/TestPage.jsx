@@ -3,7 +3,7 @@ import Testing from "../Components/Testing";
 function TestPage(){
     return(
         <>
-            <Testing/>
+             <Testing/>
         </>
     )
 }
