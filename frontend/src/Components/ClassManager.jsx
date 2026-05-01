@@ -60,6 +60,8 @@ function ClassManager(){
 
 
     const [toasts, setToasts] = useState([]);
+    
+    const [refreshSwitch, setRefreshSwitch] = useState(false);
 
     const addToast = (message, type = "warning") => {
         const id = Date.now() + Math.random();
@@ -83,7 +85,7 @@ function ClassManager(){
         setPrerequisiteMapping(prereqData.data);
         };
         fetchData();
-    }, []);
+    }, [refreshSwitch]);
 
     //   const [requiredClasses, setRequiredClasses ]= useState ([
     //     {classId:1, title:	"Programming Problem Solving I",header:"CSC-120", credits: 4, isActive: true}, 
@@ -190,7 +192,7 @@ function ClassManager(){
           addIsRequiredComputerScienceMajor={addIsRequiredComputerScienceMajor} addIsRequiredComputerScienceMinor={addIsRequiredComputerScienceMinor} 
           addIsRequiredMultiPlatformMajor={addIsRequiredMultiPlatformMajor} setAddClassTitle={setAddClassTitle} setAddClassHeader={setAddClassHeader}
           setAddClassDescription={setAddClassDescription} setAddClassCredits={setAddClassCredits} setAddIsRequiredComputerScienceMajor={setAddIsRequiredComputerScienceMajor} 
-          setAddIsRequiredComputerScienceMinor={setAddIsRequiredComputerScienceMinor} setAddIsRequiredMultiPlatformMajor={setAddIsRequiredMultiPlatformMajor} addToast={addToast}/>
+          setAddIsRequiredComputerScienceMinor={setAddIsRequiredComputerScienceMinor} setAddIsRequiredMultiPlatformMajor={setAddIsRequiredMultiPlatformMajor} addToast={addToast} setRefreshSwitch = {setRefreshSwitch}/>
           
         </div>
       );
@@ -251,7 +253,7 @@ function ClassManager(){
     }
 
 
-    function UpdateBlock({isBeginning, classUpdateEntry, setClassUpdateEntry, updateClassTitle, setUpdateClassTitle, updateClassHeader,setUpdateClassHeader, updateClassDescription, setUpdateClassDescription, updateClassCredits, setUpdateClassCredits, updateIsRequiredComputerScienceMajor, setUpdateIsRequiredComputerScienceMajor, updateIsRequiredComputerScienceMinor, setUpdateIsRequiredComputerScienceMinor, updateIsRequiredMultiPlatformMajor, setUpdateIsRequiredMultiPlatformMajor,  addToast}){
+    function UpdateBlock({isBeginning, classUpdateEntry, setClassUpdateEntry, updateClassTitle, setUpdateClassTitle, updateClassHeader,setUpdateClassHeader, updateClassDescription, setUpdateClassDescription, updateClassCredits, setUpdateClassCredits, updateIsRequiredComputerScienceMajor, setUpdateIsRequiredComputerScienceMajor, updateIsRequiredComputerScienceMinor, setUpdateIsRequiredComputerScienceMinor, updateIsRequiredMultiPlatformMajor, setUpdateIsRequiredMultiPlatformMajor,  addToast, setRefreshSwitch}){
       
         const [processingClassUpate, setProcessingClassUpdate] = useState(false);
 
@@ -310,6 +312,7 @@ function ClassManager(){
             }
 
             setProcessingClassUpdate(false);
+            setRefreshSwitch(prev => !prev);
         };
 
         return(
@@ -502,7 +505,7 @@ function ClassManager(){
         updateIsRequiredComputerScienceMinor, setUpdateIsRequiredComputerScienceMinor, updateIsRequiredMultiPlatformMajor, setUpdateIsRequiredMultiPlatformMajor, 
         selectedEntry, setSelectedEntry,prerequisiteMapping, addClassTitle, addClassHeader, addClassDescription,addClassCredits, addIsRequiredComputerScienceMinor,
         addIsRequiredComputerScienceMajor, addIsRequiredMultiPlatformMajor, setAddClassTitle, setAddClassHeader, setAddClassDescription, setAddClassCredits,
-        setAddIsRequiredComputerScienceMajor, setAddIsRequiredComputerScienceMinor, setAddIsRequiredMultiPlatformMajor, addToast}){
+        setAddIsRequiredComputerScienceMajor, setAddIsRequiredComputerScienceMinor, setAddIsRequiredMultiPlatformMajor, addToast, setRefreshSwitch}){
        
         const [warning, setWarning] = useState(null);
         const [classPool, setClassPool] = useState(null);
@@ -609,6 +612,7 @@ function ClassManager(){
                     setAddIsRequiredComputerScienceMinor(false);
                     setAddIsRequiredMultiPlatformMajor(false);
                     addToast("Class added successfully", "success");
+                    setRefreshSwitch(prev => !prev)
                 }
             } catch (error) {
                 console.error("Failed to add class:", error);
@@ -715,7 +719,7 @@ function ClassManager(){
                             })}
                             
                         </div>
-                            <UpdateBlock isBeginning={isBeginning} setIsBeginning={setIsBeginning} classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassDescription={updateClassDescription} setUpdateClassDescription={setUpdateClassDescription} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} updateIsRequiredComputerScienceMajor={updateIsRequiredComputerScienceMajor} setUpdateIsRequiredComputerScienceMajor={setUpdateIsRequiredMultiPlatformMajor} updateIsRequiredComputerScienceMinor = {updateIsRequiredComputerScienceMinor} setUpdateIsRequiredComputerScienceMinor={setUpdateIsRequiredComputerScienceMinor} updateIsRequiredMultiPlatformMajor={updateIsRequiredMultiPlatformMajor} setUpdateIsRequiredMultiPlatformMajor={setUpdateIsRequiredMultiPlatformMajor}  addToast={addToast}/>
+                            <UpdateBlock isBeginning={isBeginning} setIsBeginning={setIsBeginning} classUpdateEntry = {classUpdateEntry} setClassUpdateEntry = {setClassUpdateEntry} updateClassTitle={updateClassTitle} setUpdateClassTitle={setUpdateClassTitle} updateClassHeader={updateClassHeader} setUpdateClassHeader={setUpdateClassHeader} updateClassDescription={updateClassDescription} setUpdateClassDescription={setUpdateClassDescription} updateClassCredits={updateClassCredits} setUpdateClassCredits = {setUpdateClassCredits} updateIsRequiredComputerScienceMajor={updateIsRequiredComputerScienceMajor} setUpdateIsRequiredComputerScienceMajor={setUpdateIsRequiredMultiPlatformMajor} updateIsRequiredComputerScienceMinor = {updateIsRequiredComputerScienceMinor} setUpdateIsRequiredComputerScienceMinor={setUpdateIsRequiredComputerScienceMinor} updateIsRequiredMultiPlatformMajor={updateIsRequiredMultiPlatformMajor} setUpdateIsRequiredMultiPlatformMajor={setUpdateIsRequiredMultiPlatformMajor}  addToast={addToast} setRefreshSwitch={setRefreshSwitch}/>
                     </div>}
                 {activeTab === "delete" && 
                     <div className="placeholder">

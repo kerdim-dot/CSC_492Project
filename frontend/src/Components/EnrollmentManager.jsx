@@ -270,7 +270,7 @@ function UpdateBlock({isBeginning, classes, enrollment, selectedStudentId, setSe
     };
 
     return(
-        <div className={selectedStudentId ? "update-student-panel-out" : isBeginning ? "update-student-panel" : "update-student-panel-hidden"}>
+        <div className={selectedStudentId ? "update-enrollment-panel-out" : isBeginning ? "update-enrollment-panel" : "update-enrollment-panel-hidden"}>
             <img className="close-img-two" src={close} onClick={()=>{setSelectedStudentId(null)}} />
 
             <p className="student-panel-title">Update Enrollment Panel</p>
@@ -290,7 +290,7 @@ function UpdateBlock({isBeginning, classes, enrollment, selectedStudentId, setSe
                     </button>
                 );
             })}
-            <div>
+            <div className="enrollment-btns">
                 <button className="panel-button" onClick={addEnrollmentsToStudent}>Confirm Enrollment</button>
                 <button className="panel-button" onClick={deleteAllStudentEnrollments}>Reset Student Enrollment</button>
             </div>

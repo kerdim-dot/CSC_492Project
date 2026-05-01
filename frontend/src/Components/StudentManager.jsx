@@ -681,48 +681,193 @@ function BodyPanel({isBeginning, setIsBeginning, activeTab, studentSearchList, s
         setDeleteConfirmationScreen(true);
     }
 
-    const structureStudentData = (text) =>{
-        // csv data
-        if(csvIsSelected){
-            const studentEntries = text.split("\n");
-            //const studentList = [];
-            console.log(studentEntries)
-            for (var i = 0; i<studentEntries.length; i++){
-                const values = studentEntries[i].split(",");
-                if(studentEntries[i].split() == "" || values.length != 4){
+
+    const parseBool = (v) => {
+        if (v === true || v === false) return v;
+        if (typeof v !== "string") return null;
+        const s = v.trim().toLowerCase();
+        if (s === "true" || s === "1" || s === "yes" || s === "y") return true;
+        if (s === "false" || s === "0" || s === "no" || s === "n") return false;
+        return null;
+    };
+
+
+    const validateStudent = (raw) => {
+        const firstName = typeof raw.firstName === "string" ? raw.firstName.trim() : "";
+        const lastName  = typeof raw.lastName  === "string" ? raw.lastName.trim()  : "";
+        const graduationDate = typeof raw.graduationDate === "string" ? raw.graduationDate.trim() : "";
+
+        const isCSMajor = parseBool(raw.isComputerScienceMajor);
+        const isCSMinor = parseBool(raw.isComputerScienceMinor);
+        const isMPMajor = parseBool(raw.isMultiPlatformMajor);
+
+        if (!firstName)       return { ok: false, reason: "missing first name" };
+        if (!lastName)        return { ok: false, reason: "missing last name" };
+        if (!graduationDate)  return { ok: false, reason: "missing graduation date" };
+        if (isCSMajor === null) return { ok: false, reason: "invalid isComputerScienceMajor" };
+        if (isCSMinor === null) return { ok: false, reason: "invalid isComputerScienceMinor" };
+        if (isMPMajor === null) return { ok: false, reason: "invalid isMultiPlatformMajor" };
+
+        if (isCSMajor && isCSMinor) {
+            return { ok: false, reason: "cannot be both CS major and CS minor" };
+        }
+        if (!isCSMajor && !isCSMinor && !isMPMajor) {
+            return { ok: false, reason: "must be in the computer science program" };
+        }
+
+        return {
+            ok: true,
+            student: {
+                firstName,
+                lastName,
+                graduationDate,
+                isComputerScienceMajor: isCSMajor,
+                isComputerScienceMinor: isCSMinor,
+                isMultiPlatformMajor: isMPMajor,
+            },
+        };
+    };
+
+
+    const splitCsvLine = (line) => {
+        const out = [];
+        let cur = "";
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const ch = line[i];
+            if (inQuotes) {
+                if (ch === '"') {
+                    if (line[i + 1] === '"') { cur += '"'; i++; }  
+                    else { inQuotes = false; }
+                } else {
+                    cur += ch;
+                }
+            } else if (ch === '"') {
+                inQuotes = true;
+            } else if (ch === ",") {
+                out.push(cur);
+                cur = "";
+            } else {
+                cur += ch;
+            }
+        }
+        out.push(cur);
+        return out;
+    };
+
+
+    const structureStudentData = async (text) => {
+        if (!text || !text.trim()) {
+            addToast("No data to import", "warning");
+            return;
+        }
+
+        const records = [];  
+        const errors  = [];  
+
+        if (csvIsSelected) {
+
+            const lines = text.split(/\r?\n/);
+
+            // Detect & skip a header row if present.
+            let startIdx = 0;
+            if (lines.length > 0) {
+                const first = lines[0].toLowerCase();
+                if (first.includes("firstname") || first.includes("first name")) {
+                    startIdx = 1;
+                }
+            }
+
+            for (let i = startIdx; i < lines.length; i++) {
+                const line = lines[i];
+                if (!line || !line.trim()) continue;    
+
+                const values = splitCsvLine(line);
+                if (values.length < 6) {
+                    errors.push(`Row ${i + 1}: expected 6 columns, got ${values.length}`);
                     continue;
                 }
-                else{
-                    students.push({
-                        firstName: values[0],
-                        lastName: values[1],
-                        graduation: values[2],
-                        isComputerScienceMajor: values[3],
-                        isComputerScienceMinor: values[4],
-                        isMultiPlatformMajor:values[5],
-                    })
-                }
-            }
-        }
-        // json data
-        else{
-           try {
-                const parsed = JSON.parse(text);
 
-                if (Array.isArray(parsed)) {
-                    parsed.forEach((obj, index) => {
-                        console.log("Object", index, obj);
-                        
-                        Object.entries(obj).forEach(([key, value]) => {
-                            console.log(key, value);
-                        });
-                    });
-                }
+                records.push({
+                    firstName: values[0],
+                    lastName:  values[1],
+                    graduationDate: values[2],
+                    isComputerScienceMajor: values[3],
+                    isComputerScienceMinor: values[4],
+                    isMultiPlatformMajor:   values[5],
+                });
+            }
+        } else {
+
+            let parsed;
+            try {
+                parsed = JSON.parse(text);
             } catch (err) {
-                console.error("Invalid JSON:", err.message);
+                addToast(`Invalid JSON: ${err.message}`, "error");
+                return;
+            }
+
+            const arr = Array.isArray(parsed) ? parsed : [parsed];
+            for (let i = 0; i < arr.length; i++) {
+                const obj = arr[i];
+                if (!obj || typeof obj !== "object") {
+                    errors.push(`Entry ${i + 1}: not an object`);
+                    continue;
+                }
+                records.push(obj);
             }
         }
-    }
+
+        if (records.length === 0) {
+            addToast(
+                errors.length ? `No valid rows. ${errors[0]}` : "No rows found",
+                "error"
+            );
+            return;
+        }
+
+
+        const validStudents = [];
+        for (let i = 0; i < records.length; i++) {
+            const result = validateStudent(records[i]);
+            if (result.ok) {
+                validStudents.push(result.student);
+            } else {
+                errors.push(`Entry ${i + 1}: ${result.reason}`);
+            }
+        }
+
+        if (validStudents.length === 0) {
+            addToast(`No valid students. ${errors[0] ?? ""}`, "error");
+            return;
+        }
+
+        const results = await Promise.allSettled(
+            validStudents.map((s) =>
+                axios.post("http://localhost:8080/test/add/student", s)
+            )
+        );
+
+        let added = 0;
+        let failed = 0;
+        for (let i = 0; i < results.length; i++) {
+            if (results[i].status === "fulfilled") added++;
+            else failed++;
+        }
+
+        if (added > 0) {
+            addToast(
+                `Added ${added} student${added === 1 ? "" : "s"}` +
+                (failed ? `, ${failed} failed` : "") +
+                (errors.length ? `, ${errors.length} skipped` : ""),
+                failed || errors.length ? "warning" : "success"
+            );
+            setUpdateList(prev => !prev);
+        } else {
+            addToast(`Failed to add students. ${errors[0] ?? ""}`, "error");
+        }
+    };
+
 
     const clickOnEntry = (item) =>{
         setIsBeginning(false);

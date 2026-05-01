@@ -15,7 +15,6 @@ import { formatClassUrlCode } from "../tools/classRoutes.jsx";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-/* ----------------------------- helper functions ---------------------------- */
 
 
 // const retriveClassData = async() =>{
